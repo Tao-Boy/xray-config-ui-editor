@@ -2,7 +2,9 @@ import React from 'react';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { Icon } from '../ui/Icon';
+import { Checkbox } from '../ui/Checkbox';
 import { useRemnawaveEditor } from '../../hooks/useRemnawaveEditor';
+import { RemnawaveTokenAdvice } from './remnawave/RemnawaveTokenAdvice';
 import { t } from '../../i18n';
 
 export const RemnawaveModal = ({ onClose }: { onClose: () => void }) => {
@@ -15,6 +17,8 @@ export const RemnawaveModal = ({ onClose }: { onClose: () => void }) => {
         setUrl,
         apiToken,
         setApiToken,
+        remember,
+        setRemember,
         profiles,
         handleRefreshProfiles,
         handleConnect,
@@ -84,6 +88,15 @@ export const RemnawaveModal = ({ onClose }: { onClose: () => void }) => {
                                     {account.label}
                                 </div>
                                 <div className="text-[10px] text-slate-500 font-mono truncate">{account.url}</div>
+                                {/* A panel whose token was not kept is still one tap away — it
+                                    just needs the token typed again, and saying so up front
+                                    beats a failed connection. */}
+                                {!account.token && (
+                                    <div className="text-[10px] text-amber-400/80 flex items-center gap-1 mt-0.5">
+                                        <Icon name="Key" className="text-[9px]" />
+                                        {t("token not stored — paste it again")}
+                                    </div>
+                                )}
                             </button>
                             {isActive && <Icon name="CheckCircle" weight="fill" className="text-emerald-400 shrink-0" />}
                             <button
@@ -120,14 +133,16 @@ export const RemnawaveModal = ({ onClose }: { onClose: () => void }) => {
                 {step === 'login' ? (
                     <div className="animate-in fade-in duration-300">
                         {savedPanels}
-                        <div className="bg-amber-900/20 p-4 rounded-xl border border-amber-500/30 text-[11px] text-amber-200/80 mb-6 flex gap-3">
-                            <Icon name="ShieldCheck" className="text-xl shrink-0 text-amber-400" />
+                        <div className="bg-slate-800/40 p-3 rounded-xl border border-slate-700 text-[11px] text-slate-400 mb-3 flex gap-3">
+                            <Icon name="Key" className="text-xl shrink-0 text-slate-500" />
                             <p>
-                                Password login is disabled for security reasons. 
+                                Password login is disabled for security reasons.
                                 Please use an <b>{t("API Token")}</b>
 {t("from your panel settings.")}
 </p>
                         </div>
+
+                        <RemnawaveTokenAdvice />
 
                         <div className="space-y-4">
                             <div>
@@ -143,9 +158,16 @@ export const RemnawaveModal = ({ onClose }: { onClose: () => void }) => {
                                 <input className="input-base font-mono text-xs" 
                                     type="password"
                                     placeholder={t("Paste your token here...")} 
-                                    value={apiToken} onChange={e => setApiToken(e.target.value)} 
+                                    value={apiToken} onChange={e => setApiToken(e.target.value)}
                                 />
                             </div>
+
+                            <Checkbox
+                                checked={remember}
+                                onChange={setRemember}
+                                label={t("Remember this token")}
+                                description={t("Off, the token lives only until this tab is closed — the panel stays on the list and asks for it again. On, it is written to this browser's storage as plain text, readable by anything that can reach the profile.")}
+                            />
 
                             <Button className="w-full mt-2 py-3" onClick={handleConnect} disabled={loading}>
                                 {loading ? <Icon name="Spinner" className="animate-spin" /> : "Connect & Fetch Profiles"}

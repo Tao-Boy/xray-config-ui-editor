@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'bun:test';
+import { afterEach, beforeEach, describe, expect, it } from 'bun:test';
 
 // configStore.ts wires zustand's `persist` middleware to IndexedDB
 // (src/utils/indexedDbStorage.ts) at module-load time, so IndexedDB has to
@@ -236,5 +236,141 @@ describe('more than one panel', () => {
         expect(accounts).toHaveLength(1);
         expect(connected).toBe(false);
         expect(activeAccountId).toBeNull();
+    });
+});
+
+describe('a token the user did not ask us to keep', () => {
+    // Connecting asks the panel for its profiles, and these panels are not
+    // real. Nothing here needs the answer.
+    const realFetch = globalThis.fetch;
+    beforeEach(() => {
+        globalThis.fetch = (async () => {
+            throw new Error('no network in tests');
+        }) as unknown as typeof fetch;
+    });
+    afterEach(() => {
+        globalThis.fetch = realFetch;
+    });
+
+    /**
+     * `partialize` is the whole of the promise the "remember this token"
+     * switch makes: it decides what reaches IndexedDB, which holds it in plain
+     * text. Reaching for it through zustand's own persist API tests the thing
+     * that actually runs, rather than a re-implementation of it.
+     */
+    const persisted = () => {
+        const options = useConfigStore.persist.getOptions() as any;
+        return options.partialize(useConfigStore.getState()).remnawave;
+    };
+
+    const seed = (accounts: any[], activeId: string | null) => {
+        const active = accounts.find(account => account.id === activeId);
+        useConfigStore.setState({
+            remnawave: {
+                url: active?.url ?? '',
+                token: active?.token ?? null,
+                connected: Boolean(active),
+                activeProfileUuid: null,
+                profiles: [],
+                accounts,
+                activeAccountId: activeId,
+            },
+        } as any);
+    };
+
+    const PANEL = (over: Record<string, unknown> = {}) => ({
+        id: 'a', label: 'olsg.vpn.ru', url: 'https://olsg.vpn.ru',
+        token: 'token-a', remember: false, ...over,
+    });
+
+    it('is not what a fresh connection asks for', () => {
+        seed([], null);
+        useConfigStore.getState().connectRemnawaveToken('https://olsg.vpn.ru', 'token-b');
+        expect(useConfigStore.getState().remnawave.accounts[0]!.remember).toBe(false);
+    });
+
+    it('is kept when the connection asked for it', () => {
+        seed([], null);
+        useConfigStore.getState().connectRemnawaveToken('https://olsg.vpn.ru', 'token-b', { remember: true });
+        expect(useConfigStore.getState().remnawave.accounts[0]!.remember).toBe(true);
+    });
+
+    it('never reaches storage — not in the panel entry, not in the live connection', () => {
+        seed([PANEL()], 'a');
+        const saved = persisted();
+        expect(saved.token).toBeNull();
+        expect(saved.accounts[0].token).toBe('');
+        // The panel itself is still worth remembering; only its secret is not.
+        expect(saved.accounts[0].url).toBe('https://olsg.vpn.ru');
+        expect(saved.accounts[0].label).toBe('olsg.vpn.ru');
+    });
+
+    it('does not leave a connected session behind with nothing to connect with', () => {
+        seed([PANEL()], 'a');
+        expect(useConfigStore.getState().remnawave.connected).toBe(true);
+        expect(persisted().connected).toBe(false);
+    });
+
+    it('is stored, token and all, once the switch is on', () => {
+        seed([PANEL({ remember: true })], 'a');
+        const saved = persisted();
+        expect(saved.token).toBe('token-a');
+        expect(saved.accounts[0].token).toBe('token-a');
+        expect(saved.connected).toBe(true);
+    });
+
+    it('stops being stored the moment the switch goes off', () => {
+        seed([PANEL({ remember: true })], 'a');
+        useConfigStore.getState().setRemnawaveAccountRemember('a', false);
+
+        // The session carries on — nothing is lost until the page reloads.
+        expect(useConfigStore.getState().remnawave.token).toBe('token-a');
+        expect(useConfigStore.getState().remnawave.connected).toBe(true);
+        expect(persisted().token).toBeNull();
+    });
+
+    it('keeps one panel\'s token while dropping another\'s', () => {
+        seed([
+            PANEL({ remember: true }),
+            { id: 'b', label: 'bropines.remna.ru', url: 'https://bropines.remna.ru', token: 'token-b', remember: false },
+        ], 'a');
+        const saved = persisted();
+        expect(saved.accounts[0].token).toBe('token-a');
+        expect(saved.accounts[1].token).toBe('');
+    });
+
+    it('is asked for, not faked, when that panel is selected again', () => {
+        // What a reload leaves behind: the panel, without its token.
+        seed([PANEL({ token: '' })], null);
+        useConfigStore.getState().switchRemnawaveAccount('a');
+
+        const { url, token, connected, activeAccountId } = useConfigStore.getState().remnawave;
+        expect(url).toBe('https://olsg.vpn.ru');
+        expect(token).toBeNull();
+        expect(connected).toBe(false);
+        expect(activeAccountId).toBe('a');
+    });
+});
+
+describe('a panel saved before the switch existed', () => {
+    it('keeps the token it already had on disk', () => {
+        const options = useConfigStore.persist.getOptions() as any;
+        const merged = options.merge(
+            {
+                remnawave: {
+                    url: 'https://olsg.vpn.ru',
+                    token: 'token-a',
+                    connected: true,
+                    activeProfileUuid: null,
+                    // No `remember` — this shape predates it.
+                    accounts: [{ id: 'a', label: 'olsg.vpn.ru', url: 'https://olsg.vpn.ru', token: 'token-a' }],
+                    activeAccountId: 'a',
+                },
+            },
+            useConfigStore.getState(),
+        );
+
+        expect(merged.remnawave.accounts[0].remember).toBe(true);
+        expect(merged.remnawave.accounts[0].token).toBe('token-a');
     });
 });

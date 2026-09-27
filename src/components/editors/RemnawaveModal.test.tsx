@@ -9,7 +9,10 @@ import { __resetBackLayers } from '../../hooks/useBackToClose';
  * Two panels, and getting from one to the other without pasting a token.
  */
 
-const seed = (accounts: { id: string; label: string; url: string; token: string }[], activeId: string | null) =>
+const seed = (
+    accounts: { id: string; label: string; url: string; token: string; remember: boolean }[],
+    activeId: string | null,
+) =>
     useConfigStore.setState({
         remnawave: {
             url: accounts.find(a => a.id === activeId)?.url ?? '',
@@ -23,8 +26,8 @@ const seed = (accounts: { id: string; label: string; url: string; token: string 
     } as any);
 
 const PANELS = [
-    { id: 'a', label: 'bropines.remna.ru', url: 'https://bropines.remna.ru', token: 'token-a' },
-    { id: 'b', label: 'olsg.vpn.ru', url: 'https://olsg.vpn.ru', token: 'token-b' },
+    { id: 'a', label: 'bropines.remna.ru', url: 'https://bropines.remna.ru', token: 'token-a', remember: true },
+    { id: 'b', label: 'olsg.vpn.ru', url: 'https://olsg.vpn.ru', token: 'token-b', remember: true },
 ];
 
 // Switching asks the panel for its profiles. No test should reach for a
@@ -53,8 +56,8 @@ describe('the panel picker', () => {
 
     it('is not shown at all before there is one', () => {
         seed([], null);
-        const { container } = render(<RemnawaveModal onClose={() => {}} />);
-        expect(container.textContent).not.toContain('bropines.remna.ru');
+        render(<RemnawaveModal onClose={() => {}} />);
+        expect(document.body.textContent).not.toContain('bropines.remna.ru');
     });
 
     it('switches the connection to the panel that was clicked', () => {
@@ -88,5 +91,62 @@ describe('the panel picker', () => {
         fireEvent.keyDown(input, { key: 'Enter' });
 
         expect(useConfigStore.getState().remnawave.accounts[0]!.label).toBe('Прод');
+    });
+});
+
+describe('what happens to the token', () => {
+    it('offers to remember it, and does not assume yes', () => {
+        seed([], null);
+        render(<RemnawaveModal onClose={() => {}} />);
+        const checkbox = screen.getAllByRole('checkbox')
+            .find(box => (box as HTMLInputElement).id?.includes('remember'))
+            ?? screen.getAllByRole('checkbox')[0]!;
+        expect((checkbox as HTMLInputElement).checked).toBe(false);
+    });
+
+    it('follows the panel already selected rather than resetting it', () => {
+        seed(PANELS, 'a');
+        render(<RemnawaveModal onClose={() => {}} />);
+        // Panel 'a' is remembered, so the switch comes up on.
+        fireEvent.click(screen.getByText(/^(Change URL|Сменить URL)$/));
+        const checkbox = screen.getAllByRole('checkbox')[0] as HTMLInputElement;
+        expect(checkbox.checked).toBe(true);
+    });
+
+    it('says which saved panels will need one pasted again', () => {
+        seed([
+            { ...PANELS[0]!, token: '', remember: false },
+            PANELS[1]!,
+        ], null);
+        render(<RemnawaveModal onClose={() => {}} />);
+        expect(document.body.textContent).toMatch(/not stored|не сохранён/);
+    });
+
+    it('asks for the token instead of pretending to connect', () => {
+        seed([{ ...PANELS[0]!, token: '', remember: false }], null);
+        render(<RemnawaveModal onClose={() => {}} />);
+        fireEvent.click(screen.getByText('bropines.remna.ru'));
+
+        const { connected, url } = useConfigStore.getState().remnawave;
+        expect(connected).toBe(false);
+        expect(url).toBe('https://bropines.remna.ru');
+        // Still on the login step: the URL box is filled in, waiting for a token.
+        expect(screen.getByDisplayValue('https://bropines.remna.ru')).toBeDefined();
+    });
+});
+
+describe('the advice about token rights', () => {
+    it('names the scopes to grant, not just "be careful"', () => {
+        seed([], null);
+        render(<RemnawaveModal onClose={() => {}} />);
+        expect(document.body.textContent).toContain('config-profiles:update');
+        expect(document.body.textContent).toContain('hosts:list');
+    });
+
+    it('spells out what must never be on the token', () => {
+        seed([], null);
+        render(<RemnawaveModal onClose={() => {}} />);
+        expect(document.body.textContent).toContain('users:*');
+        expect(document.body.textContent).toContain('api-tokens:*');
     });
 });

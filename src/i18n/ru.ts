@@ -56,6 +56,33 @@ export const ru: Record<string, string> = {
     'Forget this panel': 'Забыть эту панель',
     'switch': 'сменить',
     'Switched to {panel}': 'Переключено на {panel}',
+    'Paste the token for {panel}': 'Вставьте токен для {panel}',
+    'Remember this token': 'Запомнить этот токен',
+    "Off, the token lives only until this tab is closed — the panel stays on the list and asks for it again. On, it is written to this browser's storage as plain text, readable by anything that can reach the profile.":
+        'Выключено — токен живёт только до закрытия вкладки: панель остаётся в списке и попросит токен снова. Включено — он пишется в хранилище браузера открытым текстом, и его прочитает всё, у чего есть доступ к профилю.',
+    'token not stored — paste it again': 'токен не сохранён — вставьте заново',
+
+    // ── Token scopes: what to grant a panel token ───────────────────────────
+    'Which rights this token needs': 'Какие права нужны этому токену',
+    "Your panel can issue a token limited to a list of scopes. This editor calls four resources and nothing else — a token scoped to them cannot read a subscriber, reach a node's shell or mint another token, even if it leaks out of this browser.":
+        'Панель умеет выдавать токен, ограниченный списком scope. Этот редактор обращается ровно к четырём ресурсам и ни к чему больше — токен, урезанный до них, не прочитает подписчика, не зайдёт в шелл ноды и не создаст новый токен, даже если утечёт из браузера.',
+    'Read a profile and write the edited config back. Without the write half this editor is a viewer.':
+        'Прочитать профиль и записать изменённый конфиг обратно. Без права на запись редактор превращается в просмотрщик.',
+    'Read a host to mirror it into a client outbound. The balancer builder also creates, edits and removes hosts.':
+        'Прочитать хост, чтобы собрать из него клиентский outbound. Конструктор балансировщика ещё создаёт, правит и удаляет хосты.',
+    "Read and write the XRAY JSON a subscriber's client receives.":
+        'Читать и писать XRAY JSON, который получает клиент подписчика.',
+    'Read snippet bodies, and write or sync one when you ask for it.':
+        'Читать тела сниппетов и записывать или синхронизировать их по вашей команде.',
+    'Only importing configs to look at them? The plain scopes above are read-only; leave out every amber one and nothing on the panel can be changed.':
+        'Собираетесь только смотреть конфиги? Серые scope выше — это чтение; уберите все жёлтые, и на панели ничего изменить нельзя.',
+    'Never on a token for this app:': 'Никогда не давайте этому приложению:',
+    'Give it a short expiry as well. On a panel too old for scoped tokens, every token can call everything — there the expiry is the only limit you have.':
+        'И задайте короткий срок жизни. На панели, которая ещё не умеет ограниченные токены, любой токен может всё — там срок жизни остаётся единственным ограничением.',
+    'Copy read-only': 'Скопировать только чтение',
+    'Read-only scopes copied': 'Scope только для чтения скопированы',
+    'Copy all {count}': 'Скопировать все {count}',
+    'Scopes copied': 'Scope скопированы',
 
     // ── Local balancer / template builder ───────────────────────────────────
     'Label — also the grouping key when splitting by location':

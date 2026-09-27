@@ -75,6 +75,15 @@ export interface RemnawaveAccount {
     label: string;
     url: string;
     token: string;
+    /**
+     * Whether this token may be written to the browser's storage.
+     *
+     * Off by default: IndexedDB is plain text, so a token left there outlives
+     * the session and anything with access to the profile can read it. Off
+     * means the panel is still remembered — label and URL — and only the token
+     * has to be pasted again next time, which is the trade the switch offers.
+     */
+    remember: boolean;
 }
 
 interface RemnawaveState {
@@ -88,8 +97,14 @@ interface RemnawaveState {
     activeAccountId: string | null;
 }
 
-/** Trailing slashes and case are not a different panel. */
-const panelKey = (url: string): string => url.trim().replace(/\/+$/, '').toLowerCase();
+/**
+ * Trailing slashes and case are not a different panel.
+ *
+ * Exported because the login form has to answer the same question — whether
+ * what is typed is still the panel that is connected — and two copies of this
+ * rule would drift.
+ */
+export const panelKey = (url: string): string => url.trim().replace(/\/+$/, '').toLowerCase();
 
 const generateId = (): string => `panel-${Math.random().toString(36).substring(2, 9)}`;
 
@@ -109,6 +124,17 @@ const clearPanelSession = (state: any) => {
     state.snippetLibrary.fetchedAt = null;
     state.snippetLibrary.supported = null;
     state.snippetLibrary.error = null;
+};
+
+/**
+ * The live token, but only if the panel it belongs to said it may be stored.
+ *
+ * A connection with no saved panel behind it cannot have been asked, so it
+ * counts as "do not store" — the conservative direction for a secret.
+ */
+const rememberedToken = (remnawave: RemnawaveState): string | null => {
+    const active = remnawave.accounts.find(account => account.id === remnawave.activeAccountId);
+    return active?.remember ? remnawave.token : null;
 };
 
 /** The host, for a list that has to be read at a glance. */
@@ -217,7 +243,7 @@ interface ConfigState {
     // Remnawave Actions
 
     remnawave: RemnawaveState;
-    connectRemnawaveToken: (url: string, token: string) => void; 
+    connectRemnawaveToken: (url: string, token: string, options?: { remember?: boolean }) => void;
     fetchRemnawaveProfiles: () => Promise<RemnawaveProfile[]>;
     loadRemnawaveProfile: (uuid: string) => Promise<void>;
     saveToRemnawave: () => Promise<void>;
@@ -228,6 +254,13 @@ interface ConfigState {
     forgetRemnawaveAccount: (id: string) => void;
     /** Give a saved panel a name of its own. */
     renameRemnawaveAccount: (id: string, label: string) => void;
+    /**
+     * Let this panel's token be stored, or stop storing it.
+     *
+     * Turning it off drops the token from storage on the next write while
+     * leaving the session connected — nothing is lost until the page reloads.
+     */
+    setRemnawaveAccountRemember: (id: string, remember: boolean) => void;
     
     // Standard CRUD Actions
     updateSection: (section: keyof XrayConfig, data: any, rawText?: string) => void;
@@ -686,11 +719,12 @@ export const useConfigStore = create(
                 toast.info(t("Remnawave connection closed"));
             })),
 
-            connectRemnawaveToken: (url, token) => {
+            connectRemnawaveToken: (url, token, options) => {
                 if (!url || !token) {
                     toast.error(t("URL and Token are required"));
                     return;
                 }
+                const remember = options?.remember ?? false;
                 set(produce((state) => {
                     state.remnawave.url = url;
                     state.remnawave.token = token;
@@ -706,6 +740,7 @@ export const useConfigStore = create(
                     if (existing) {
                         existing.url = url;
                         existing.token = token;
+                        existing.remember = remember;
                         state.remnawave.activeAccountId = existing.id;
                     } else {
                         const account: RemnawaveAccount = {
@@ -713,6 +748,7 @@ export const useConfigStore = create(
                             label: panelLabel(url),
                             url,
                             token,
+                            remember,
                         };
                         state.remnawave.accounts.push(account);
                         state.remnawave.activeAccountId = account.id;
@@ -728,14 +764,29 @@ export const useConfigStore = create(
                 if (!account) return;
                 if (get().remnawave.activeAccountId === id && get().remnawave.connected) return;
 
+                /**
+                 * A panel whose token was never stored comes back from a
+                 * reload with the label and the URL and nothing to
+                 * authenticate with. Selecting it points the app at it and
+                 * stops there — connected stays false, so the UI asks for the
+                 * token instead of firing requests that would all answer 401.
+                 */
+                const hasToken = account.token.length > 0;
+
                 set(produce((state) => {
                     state.remnawave.url = account.url;
-                    state.remnawave.token = account.token;
-                    state.remnawave.connected = true;
+                    state.remnawave.token = hasToken ? account.token : null;
+                    state.remnawave.connected = hasToken;
                     state.remnawave.activeAccountId = account.id;
                     // Everything below came from the panel we are leaving.
                     clearPanelSession(state);
                 }));
+
+                if (!hasToken) {
+                    toast.info(t("Paste the token for {panel}", { panel: account.label }));
+                    return;
+                }
+
                 toast.success(t("Switched to {panel}", { panel: account.label }));
                 get().fetchRemnawaveProfiles().catch(() => {});
                 get().fetchSnippets({ silent: true }).catch(() => {});
@@ -760,6 +811,14 @@ export const useConfigStore = create(
                 );
                 if (!account) return;
                 account.label = label.trim() || panelLabel(account.url);
+            })),
+
+            setRemnawaveAccountRemember: (id, remember) => set(produce((state) => {
+                const account = state.remnawave.accounts.find(
+                    (entry: RemnawaveAccount) => entry.id === id,
+                );
+                if (!account) return;
+                account.remember = remember;
             })),
 
             fetchRemnawaveProfiles: async () => {
@@ -1642,10 +1701,19 @@ export const useConfigStore = create(
              */
             merge: (persisted, current) => {
                 const saved = (persisted ?? {}) as Partial<ConfigState>;
+                const remnawave = { ...current.remnawave, ...(saved.remnawave ?? {}) };
+                // A panel saved before `remember` existed had its token written
+                // to disk already; it arrives without the flag and keeps the
+                // behaviour it was saved with rather than losing the token on
+                // the next write.
+                remnawave.accounts = (remnawave.accounts ?? []).map(account => ({
+                    ...account,
+                    remember: account.remember ?? true,
+                }));
                 return {
                     ...current,
                     ...saved,
-                    remnawave: { ...current.remnawave, ...(saved.remnawave ?? {}) },
+                    remnawave,
                     snippetLibrary: { ...current.snippetLibrary, ...(saved.snippetLibrary ?? {}) },
                 } as ConfigState;
             },
@@ -1657,14 +1725,27 @@ export const useConfigStore = create(
                 // A list gathered from a real site is work; it should not be
                 // lost on reload the way a generated path can be.
                 spiderPaths: state.spiderPaths,
-                remnawave: { 
-                    url: state.remnawave.url, 
-                    token: state.remnawave.token, 
-                    connected: state.remnawave.connected,
+                /**
+                 * The panels survive a reload; their tokens only do when asked.
+                 *
+                 * IndexedDB holds this as plain text, so a token written here
+                 * is readable by anything that can reach the browser profile.
+                 * `remember` is the user's answer per panel, and it is honoured
+                 * in both places a token lives — the entry in `accounts` and
+                 * the live connection — because writing one and not the other
+                 * would store the very token the switch was turned off for.
+                 */
+                remnawave: {
+                    url: state.remnawave.url,
+                    token: rememberedToken(state.remnawave),
+                    // A stored session with no token to resume is not a
+                    // session: it would come back "connected" and 401 on the
+                    // first request.
+                    connected: state.remnawave.connected && rememberedToken(state.remnawave) !== null,
                     activeProfileUuid: state.remnawave.activeProfileUuid,
-                    // The saved panels survive a reload; without them a switch
-                    // would mean pasting a token again every session.
-                    accounts: state.remnawave.accounts,
+                    accounts: state.remnawave.accounts.map(account => (
+                        account.remember ? account : { ...account, token: '' }
+                    )),
                     activeAccountId: state.remnawave.activeAccountId,
                 },
                 profiles: state.profiles,

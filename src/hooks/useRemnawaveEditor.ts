@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useConfigStore } from '../store/configStore';
+import { panelKey, useConfigStore } from '../store/configStore';
 import { RemnawaveClient, type RemnawaveProfile } from '../utils/remnawave-client';
 import { toast } from 'sonner';
 import { t } from '../i18n';
@@ -14,15 +14,27 @@ export const useRemnawaveEditor = (onClose: () => void) => {
         switchRemnawaveAccount,
         forgetRemnawaveAccount,
         renameRemnawaveAccount,
+        setRemnawaveAccountRemember,
     } = useConfigStore();
-    
+
     const [step, setStep] = useState<'login' | 'select'>('login');
     const [loading, setLoading] = useState(false);
 
     // Form State
     const [url, setUrl] = useState(remnawave.url || "");
     const [apiToken, setApiToken] = useState(remnawave.token || "");
-    
+    /**
+     * Whether the token may be written to this browser's storage.
+     *
+     * Follows the panel already selected, so re-connecting one that was set to
+     * be remembered does not quietly stop remembering it. A panel nobody has
+     * chosen yet starts at "no": storage here is plain text.
+     */
+    const [remember, setRemember] = useState(() => {
+        const active = remnawave.accounts.find(account => account.id === remnawave.activeAccountId);
+        return active?.remember ?? false;
+    });
+
     // Profiles
     const [profiles, setProfiles] = useState<RemnawaveProfile[]>([]);
 
@@ -61,7 +73,7 @@ export const useRemnawaveEditor = (onClose: () => void) => {
             const loadedProfiles = await client.getConfigProfiles();
             
             // Если профили загрузились — токен валидный
-            connectRemnawaveToken(url, apiToken);
+            connectRemnawaveToken(url, apiToken, { remember });
             setProfiles(loadedProfiles);
             setStep('select');
         } catch (e: any) {
@@ -70,13 +82,17 @@ export const useRemnawaveEditor = (onClose: () => void) => {
         } finally {
             setLoading(false);
         }
-    }, [url, apiToken, connectRemnawaveToken]);
+    }, [url, apiToken, remember, connectRemnawaveToken]);
 
     /**
      * Move to another saved panel.
      *
      * The effect above refreshes when the connection comes up, which a switch
      * never does — it was up already — so the profile list is asked for here.
+     *
+     * A panel whose token was not kept has its URL filled in and stays on the
+     * login step: everything is ready except the one thing we deliberately did
+     * not store.
      */
     const handleSwitchAccount = useCallback((id: string) => {
         const account = remnawave.accounts.find(entry => entry.id === id);
@@ -84,6 +100,11 @@ export const useRemnawaveEditor = (onClose: () => void) => {
         switchRemnawaveAccount(id);
         setUrl(account.url);
         setApiToken(account.token);
+        setRemember(account.remember);
+        if (!account.token) {
+            setStep('login');
+            return;
+        }
         setStep('select');
         handleRefreshProfiles();
     }, [remnawave.accounts, switchRemnawaveAccount, handleRefreshProfiles]);
@@ -113,6 +134,24 @@ export const useRemnawaveEditor = (onClose: () => void) => {
         setUrl,
         apiToken,
         setApiToken,
+        remember,
+        /**
+         * Flipped on the form before connecting, and on a panel already
+         * connected — where it also has to reach the saved entry, or the token
+         * would go on being stored under a switch that says it is not.
+         */
+        setRemember: useCallback((next: boolean) => {
+            setRemember(next);
+            const active = remnawave.accounts.find(
+                account => account.id === remnawave.activeAccountId,
+            );
+            // Only the panel the form is still pointing at: with a URL typed
+            // over, the flag belongs to the panel being connected to, and gets
+            // there through connectRemnawaveToken.
+            if (active && panelKey(active.url) === panelKey(url)) {
+                setRemnawaveAccountRemember(active.id, next);
+            }
+        }, [remnawave.accounts, remnawave.activeAccountId, url, setRemnawaveAccountRemember]),
         profiles,
         handleRefreshProfiles,
         handleConnect,

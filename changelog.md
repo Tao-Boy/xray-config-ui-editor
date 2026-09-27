@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.21.0] - 2026-09-27
+
+### Added
+- **A panel token is no longer stored unless you ask it to be.** The connect screen has a *Remember this token* switch, off by default. Left off, the token lives in memory until the tab is closed: the panel stays on the saved list with its name and URL, and the row says *token not stored — paste it again*, so selecting it fills in the address and waits for the token instead of firing requests that would all answer 401. Turned on, the token is written to this browser's IndexedDB — where it is plain text, readable by anything that can reach the profile, which is what the switch's description now says out loud.
+  - The switch follows the panel: turning it off on a panel already connected stops the token being written from the next save onward, and the session carries on until the page reloads. A panel saved before the switch existed keeps the token it already had on disk rather than losing it silently.
+  - Both places a token lives are covered — the entry in the saved list and the live connection — and a session with no token to resume is no longer persisted as "connected".
+- **Which rights to put on that token, named one by one.** Remnawave can issue a token limited to a list of scopes, so the connect screen now lists the exact set this editor uses: three on `config-profiles`, four on `hosts`, five on `subscription-template`, five on `snippets` — each with the request it unlocks, writes marked in amber. A token scoped to them cannot read a subscriber, reach a node's shell or mint another token. There is a copy button for the full set and one for the read-only half (browse and import, change nothing), the scopes that must never be on it are spelled out (`*`, `api-tokens:*`, `users:*`, `nodes:*`, `node-ssh:*`, `system:*`, `infra-billing:*`, `remnawave-settings:*`), and a note that on a panel too old for scoped tokens a short expiry is the only limit there is.
+  - The list is checked against the API client's own source, so it cannot quietly become advice that no longer matches what the app does: a new endpoint fails the build until its scope is listed, and a scope for a request the app never makes fails it too.
+
 ## [1.20.0] - 2026-09-27
 
 ### Added
