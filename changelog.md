@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.21.2] - 2026-09-27
+
+### Fixed
+- **The copied scopes were in a format the panel rejects.** Both copy buttons produced one scope per line, which reads correctly and does not paste: the panel's scopes field takes a JSON array of strings — `["users:create", "users:update"]`. They copy exactly that now, and a line under the buttons says so. A test parses what would be copied rather than counting its lines, so the shape cannot drift back.
+
 ## [1.21.1] - 2026-09-27
 
 ### Changed

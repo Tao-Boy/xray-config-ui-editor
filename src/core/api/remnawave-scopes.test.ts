@@ -2,7 +2,7 @@ import { describe, expect, it } from 'bun:test';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import {
-    formatScopeList,
+    formatScopesForPanel,
     OVERREACHING_SCOPES,
     readScopes,
     REMNAWAVE_SCOPES,
@@ -105,10 +105,22 @@ describe('the list as the hint shows it', () => {
         ]);
     });
 
-    it('formats one scope per line, ready to paste', () => {
-        const lines = formatScopeList(REMNAWAVE_SCOPES).split('\n');
-        expect(lines).toHaveLength(REMNAWAVE_SCOPES.length);
-        expect(lines[0]).toBe('config-profiles:list');
+    it('formats them as the JSON array the panel field takes', () => {
+        // The panel's own example: ["users:create", "users:update", …].
+        // Anything else — one per line, comma separated — is rejected there,
+        // which is a thing a copy button has no way to report.
+        const copied = formatScopesForPanel(REMNAWAVE_SCOPES);
+        const parsed = JSON.parse(copied);
+        expect(Array.isArray(parsed)).toBe(true);
+        expect(parsed).toEqual(REMNAWAVE_SCOPES.map(entry => entry.scope));
+        expect(parsed.every((entry: unknown) => typeof entry === 'string')).toBe(true);
+        expect(copied.startsWith('[')).toBe(true);
+    });
+
+    it('formats the read-only half the same way', () => {
+        expect(JSON.parse(formatScopesForPanel(readScopes()))).toEqual(
+            readScopes().map(entry => entry.scope),
+        );
     });
 
     it('warns about scopes that reach past this app, and about none it needs', () => {

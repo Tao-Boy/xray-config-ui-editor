@@ -79,6 +79,8 @@ export const ru: Record<string, string> = {
     'Never on a token for this app:': 'Никогда не давайте этому приложению:',
     'Give it a short expiry as well. On a panel too old for scoped tokens, every token can call everything — there the expiry is the only limit you have.':
         'И задайте короткий срок жизни. На панели, которая ещё не умеет ограниченные токены, любой токен может всё — там срок жизни остаётся единственным ограничением.',
+    'Copies a JSON array, which is what the scopes field wants when you create the token.':
+        'Копируется JSON-массив — именно его ждёт поле scopes при создании токена.',
     'Copy read-only': 'Скопировать только чтение',
     'Read-only scopes copied': 'Scope только для чтения скопированы',
     'Copy all {count}': 'Скопировать все {count}',

@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
 import { Icon } from '../../ui/Icon';
 import {
-    formatScopeList,
+    formatScopesForPanel,
     OVERREACHING_SCOPES,
     readScopes,
     REMNAWAVE_SCOPES,
@@ -153,10 +153,14 @@ export const RemnawaveTokenAdvice = () => {
                         </span>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row gap-2 pt-1">
+                    <p className="text-[10px] text-slate-500 leading-relaxed pt-1">
+                        {t("Copies a JSON array, which is what the scopes field wants when you create the token.")}
+                    </p>
+
+                    <div className="flex flex-col sm:flex-row gap-2">
                         <button
                             type="button"
-                            onClick={() => copy(formatScopeList(readScopes()), t("Read-only scopes copied"))}
+                            onClick={() => copy(formatScopesForPanel(readScopes()), t("Read-only scopes copied"))}
                             className="flex-1 flex items-center justify-center gap-1.5 h-9 rounded-lg border border-slate-700 bg-slate-900 text-[11px] font-bold text-slate-300 hover:border-slate-500 transition-colors"
                         >
                             <Icon name="Copy" />
@@ -164,7 +168,7 @@ export const RemnawaveTokenAdvice = () => {
                         </button>
                         <button
                             type="button"
-                            onClick={() => copy(formatScopeList(REMNAWAVE_SCOPES), t("Scopes copied"))}
+                            onClick={() => copy(formatScopesForPanel(REMNAWAVE_SCOPES), t("Scopes copied"))}
                             className="flex-1 flex items-center justify-center gap-1.5 h-9 rounded-lg border border-amber-500/40 bg-amber-500/10 text-[11px] font-bold text-amber-200 hover:border-amber-400 transition-colors"
                         >
                             <Icon name="Copy" />

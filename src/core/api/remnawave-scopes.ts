@@ -105,9 +105,13 @@ export const scopesByResource = (
     return groups;
 };
 
-/** One scope per line, for pasting into the panel. */
-export const formatScopeList = (scopes: RemnawaveScope[]): string =>
-    scopes.map(entry => entry.scope).join('\n');
+/**
+ * The scopes in the shape the panel's token form takes them: a JSON array of
+ * strings. A list separated by newlines looks the same to a reader and is
+ * rejected by the field, which is the only opinion that counts here.
+ */
+export const formatScopesForPanel = (scopes: RemnawaveScope[]): string =>
+    JSON.stringify(scopes.map(entry => entry.scope), null, 2);
 
 /**
  * Scopes that must never be on a token pasted in here.
