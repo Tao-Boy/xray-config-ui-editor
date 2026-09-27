@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.21.1] - 2026-09-27
+
+### Changed
+- **The *Remember this token* switch is on by default.** Off was the safer setting and the wrong default: a panel you re-authenticate to every session is a panel nobody switches between, and switching is what the saved list is for. Off remains one tap away, per panel, and a panel already set that way stays that way.
+
+### Fixed
+- **A connection saved before the panel list existed would have lost its token.** A store written by 1.19.x and earlier held one token and no `accounts` at all, so after 1.21.0 that token belonged to no entry — nothing said it could be kept, and the next save dropped it. Such a connection is adopted as a saved panel on load, with its name taken from the host and its token kept. A panel already on the list is not adopted a second time, trailing slash or not.
+
 ## [1.21.0] - 2026-09-27
 
 ### Added

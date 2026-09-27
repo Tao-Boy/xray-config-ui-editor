@@ -95,13 +95,19 @@ describe('the panel picker', () => {
 });
 
 describe('what happens to the token', () => {
-    it('offers to remember it, and does not assume yes', () => {
+    it('comes up ready to remember it, since that is what the list is for', () => {
         seed([], null);
         render(<RemnawaveModal onClose={() => {}} />);
-        const checkbox = screen.getAllByRole('checkbox')
-            .find(box => (box as HTMLInputElement).id?.includes('remember'))
-            ?? screen.getAllByRole('checkbox')[0]!;
-        expect((checkbox as HTMLInputElement).checked).toBe(false);
+        const checkbox = screen.getAllByRole('checkbox')[0] as HTMLInputElement;
+        expect(checkbox.checked).toBe(true);
+    });
+
+    it('stays off for a panel that was set not to be remembered', () => {
+        seed([{ ...PANELS[0]!, remember: false }], 'a');
+        render(<RemnawaveModal onClose={() => {}} />);
+        fireEvent.click(screen.getByText(/^(Change URL|Сменить URL)$/));
+        const checkbox = screen.getAllByRole('checkbox')[0] as HTMLInputElement;
+        expect(checkbox.checked).toBe(false);
     });
 
     it('follows the panel already selected rather than resetting it', () => {

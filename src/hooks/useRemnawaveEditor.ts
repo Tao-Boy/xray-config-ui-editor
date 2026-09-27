@@ -26,13 +26,13 @@ export const useRemnawaveEditor = (onClose: () => void) => {
     /**
      * Whether the token may be written to this browser's storage.
      *
-     * Follows the panel already selected, so re-connecting one that was set to
-     * be remembered does not quietly stop remembering it. A panel nobody has
-     * chosen yet starts at "no": storage here is plain text.
+     * Follows the panel already selected, so one that was set not to be
+     * remembered does not quietly start being remembered again. A panel nobody
+     * has chosen yet starts at "yes", matching the store's own default.
      */
     const [remember, setRemember] = useState(() => {
         const active = remnawave.accounts.find(account => account.id === remnawave.activeAccountId);
-        return active?.remember ?? false;
+        return active?.remember ?? true;
     });
 
     // Profiles

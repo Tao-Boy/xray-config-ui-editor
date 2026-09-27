@@ -283,16 +283,16 @@ describe('a token the user did not ask us to keep', () => {
         token: 'token-a', remember: false, ...over,
     });
 
-    it('is not what a fresh connection asks for', () => {
+    it('is what a connection gets unless it says otherwise', () => {
         seed([], null);
         useConfigStore.getState().connectRemnawaveToken('https://olsg.vpn.ru', 'token-b');
-        expect(useConfigStore.getState().remnawave.accounts[0]!.remember).toBe(false);
+        expect(useConfigStore.getState().remnawave.accounts[0]!.remember).toBe(true);
     });
 
-    it('is kept when the connection asked for it', () => {
+    it('is dropped when the connection asked for that', () => {
         seed([], null);
-        useConfigStore.getState().connectRemnawaveToken('https://olsg.vpn.ru', 'token-b', { remember: true });
-        expect(useConfigStore.getState().remnawave.accounts[0]!.remember).toBe(true);
+        useConfigStore.getState().connectRemnawaveToken('https://olsg.vpn.ru', 'token-b', { remember: false });
+        expect(useConfigStore.getState().remnawave.accounts[0]!.remember).toBe(false);
     });
 
     it('never reaches storage — not in the panel entry, not in the live connection', () => {
@@ -353,6 +353,19 @@ describe('a token the user did not ask us to keep', () => {
 });
 
 describe('a panel saved before the switch existed', () => {
+    // `merge` is handed the store as it is the moment IndexedDB answers —
+    // defaults, nothing else. Tests above leave panels behind, and merging
+    // against those would answer a question nobody asks in a real session.
+    beforeEach(() => {
+        useConfigStore.setState({
+            remnawave: {
+                url: '', token: null, connected: false,
+                activeProfileUuid: null, profiles: [],
+                accounts: [], activeAccountId: null,
+            },
+        } as any);
+    });
+
     it('keeps the token it already had on disk', () => {
         const options = useConfigStore.persist.getOptions() as any;
         const merged = options.merge(
@@ -372,5 +385,54 @@ describe('a panel saved before the switch existed', () => {
 
         expect(merged.remnawave.accounts[0].remember).toBe(true);
         expect(merged.remnawave.accounts[0].token).toBe('token-a');
+    });
+
+    it('becomes a saved panel when it predates the list itself', () => {
+        const options = useConfigStore.persist.getOptions() as any;
+        const merged = options.merge(
+            {
+                // One connection, no `accounts` key at all — the shape before
+                // there was more than one panel.
+                remnawave: {
+                    url: 'https://olsg.vpn.ru',
+                    token: 'token-a',
+                    connected: true,
+                    activeProfileUuid: null,
+                },
+            },
+            useConfigStore.getState(),
+        );
+
+        expect(merged.remnawave.accounts).toHaveLength(1);
+        expect(merged.remnawave.accounts[0].url).toBe('https://olsg.vpn.ru');
+        expect(merged.remnawave.accounts[0].token).toBe('token-a');
+        expect(merged.remnawave.accounts[0].remember).toBe(true);
+        expect(merged.remnawave.activeAccountId).toBe(merged.remnawave.accounts[0].id);
+
+        // And so it survives the next save, rather than belonging to no entry
+        // and being dropped as a token nobody said could be kept.
+        useConfigStore.setState({ remnawave: merged.remnawave } as any);
+        expect(options.partialize(useConfigStore.getState()).remnawave.token).toBe('token-a');
+    });
+
+    it('is not adopted twice when the list already has that panel', () => {
+        const options = useConfigStore.persist.getOptions() as any;
+        const merged = options.merge(
+            {
+                remnawave: {
+                    // A trailing slash is not a second panel.
+                    url: 'https://olsg.vpn.ru/',
+                    token: 'token-a',
+                    connected: true,
+                    activeProfileUuid: null,
+                    accounts: [{ id: 'a', label: 'olsg.vpn.ru', url: 'https://olsg.vpn.ru', token: 'token-a' }],
+                    activeAccountId: 'a',
+                },
+            },
+            useConfigStore.getState(),
+        );
+
+        expect(merged.remnawave.accounts).toHaveLength(1);
+        expect(merged.remnawave.activeAccountId).toBe('a');
     });
 });
