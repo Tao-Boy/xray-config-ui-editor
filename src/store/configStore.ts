@@ -62,13 +62,63 @@ export interface ConfigHistorySnapshot {
     deletions?: number;
 }
 
+/**
+ * A panel this browser has connected to before.
+ *
+ * Kept beside the live connection rather than replacing it: every screen that
+ * reads `remnawave.url` or `remnawave.token` is reading the panel in use, and
+ * none of them had to learn about the list.
+ */
+export interface RemnawaveAccount {
+    id: string;
+    /** What the picker calls it — the host, unless renamed. */
+    label: string;
+    url: string;
+    token: string;
+}
+
 interface RemnawaveState {
     url: string;
     token: string | null;
     connected: boolean;
     activeProfileUuid: string | null;
     profiles: RemnawaveProfile[];
+    /** Every panel remembered here, so switching is not retyping a token. */
+    accounts: RemnawaveAccount[];
+    activeAccountId: string | null;
 }
+
+/** Trailing slashes and case are not a different panel. */
+const panelKey = (url: string): string => url.trim().replace(/\/+$/, '').toLowerCase();
+
+const generateId = (): string => `panel-${Math.random().toString(36).substring(2, 9)}`;
+
+/**
+ * Everything the panel we are leaving put there.
+ *
+ * Profiles, the host catalog, subscription templates and the panel half of
+ * the snippet library all belong to one panel; carrying them across a switch
+ * would show another panel's hosts under this one's name.
+ */
+const clearPanelSession = (state: any) => {
+    state.remnawave.profiles = [];
+    state.remnawave.activeProfileUuid = null;
+    state.panelCatalog = { hosts: [], inbounds: {}, loading: false, error: null, fetchedAt: null };
+    state.panelTemplates = { items: [], loading: false, error: null };
+    state.snippetLibrary.panel = [];
+    state.snippetLibrary.fetchedAt = null;
+    state.snippetLibrary.supported = null;
+    state.snippetLibrary.error = null;
+};
+
+/** The host, for a list that has to be read at a glance. */
+const panelLabel = (url: string): string => {
+    try {
+        return new URL(url).host || url;
+    } catch {
+        return url.replace(/^https?:\/\//, '').replace(/\/.*$/, '') || url;
+    }
+};
 
 /**
  * Snippet / template library.
@@ -172,6 +222,12 @@ interface ConfigState {
     loadRemnawaveProfile: (uuid: string) => Promise<void>;
     saveToRemnawave: () => Promise<void>;
     disconnectRemnawave: () => void;
+    /** Connect to a panel already on the list. */
+    switchRemnawaveAccount: (id: string) => void;
+    /** Drop a saved panel; disconnects if it was the one in use. */
+    forgetRemnawaveAccount: (id: string) => void;
+    /** Give a saved panel a name of its own. */
+    renameRemnawaveAccount: (id: string, label: string) => void;
     
     // Standard CRUD Actions
     updateSection: (section: keyof XrayConfig, data: any, rawText?: string) => void;
@@ -275,7 +331,7 @@ type PersistedConfig =
         | 'profiles' | 'activeProfileId' | 'baselineConfigJson' | 'histories'
         | 'historyLimit' | 'autoSave'>
     & {
-        remnawave: Pick<ConfigState['remnawave'], 'url' | 'token' | 'connected' | 'activeProfileUuid'>;
+        remnawave: Pick<ConfigState['remnawave'], 'url' | 'token' | 'connected' | 'activeProfileUuid' | 'accounts' | 'activeAccountId'>;
         snippetLibrary: ConfigState['snippetLibrary'];
     };
 
@@ -617,14 +673,16 @@ export const useConfigStore = create(
                 token: null,
                 connected: false,
                 activeProfileUuid: null,
-                profiles: []
+                profiles: [],
+                accounts: [],
+                activeAccountId: null,
             },
 
             disconnectRemnawave: () => set(produce((state) => {
                 state.remnawave.token = null;
                 state.remnawave.connected = false;
-                state.remnawave.activeProfileUuid = null;
-                state.remnawave.profiles = [];
+                state.remnawave.activeAccountId = null;
+                clearPanelSession(state);
                 toast.info(t("Remnawave connection closed"));
             })),
 
@@ -637,11 +695,72 @@ export const useConfigStore = create(
                     state.remnawave.url = url;
                     state.remnawave.token = token;
                     state.remnawave.connected = true;
+
+                    // Connecting to a panel is how it gets on the list; the
+                    // same panel with a fresh token updates the entry rather
+                    // than becoming a second one.
+                    const key = panelKey(url);
+                    const existing = state.remnawave.accounts.find(
+                        (account: RemnawaveAccount) => panelKey(account.url) === key,
+                    );
+                    if (existing) {
+                        existing.url = url;
+                        existing.token = token;
+                        state.remnawave.activeAccountId = existing.id;
+                    } else {
+                        const account: RemnawaveAccount = {
+                            id: generateId(),
+                            label: panelLabel(url),
+                            url,
+                            token,
+                        };
+                        state.remnawave.accounts.push(account);
+                        state.remnawave.activeAccountId = account.id;
+                    }
                 }));
                 toast.success(t("Linked to Remnawave via Token"));
                 get().fetchRemnawaveProfiles().catch(() => {});
                 get().fetchSnippets({ silent: true }).catch(() => {});
             },
+
+            switchRemnawaveAccount: (id) => {
+                const account = get().remnawave.accounts.find(entry => entry.id === id);
+                if (!account) return;
+                if (get().remnawave.activeAccountId === id && get().remnawave.connected) return;
+
+                set(produce((state) => {
+                    state.remnawave.url = account.url;
+                    state.remnawave.token = account.token;
+                    state.remnawave.connected = true;
+                    state.remnawave.activeAccountId = account.id;
+                    // Everything below came from the panel we are leaving.
+                    clearPanelSession(state);
+                }));
+                toast.success(t("Switched to {panel}", { panel: account.label }));
+                get().fetchRemnawaveProfiles().catch(() => {});
+                get().fetchSnippets({ silent: true }).catch(() => {});
+            },
+
+            forgetRemnawaveAccount: (id) => set(produce((state) => {
+                state.remnawave.accounts = state.remnawave.accounts.filter(
+                    (account: RemnawaveAccount) => account.id !== id,
+                );
+                if (state.remnawave.activeAccountId !== id) return;
+                // The panel in use was the one dropped, so the session goes
+                // with it rather than lingering with a token nothing names.
+                state.remnawave.token = null;
+                state.remnawave.connected = false;
+                state.remnawave.activeAccountId = null;
+                clearPanelSession(state);
+            })),
+
+            renameRemnawaveAccount: (id, label) => set(produce((state) => {
+                const account = state.remnawave.accounts.find(
+                    (entry: RemnawaveAccount) => entry.id === id,
+                );
+                if (!account) return;
+                account.label = label.trim() || panelLabel(account.url);
+            })),
 
             fetchRemnawaveProfiles: async () => {
                 const { url, token } = get().remnawave;
@@ -1511,6 +1630,25 @@ export const useConfigStore = create(
         {
             name: 'xray-config-storage',
             storage: createJSONStorage(() => idbStorage),
+            /**
+             * A store written before a field existed must not arrive without
+             * it.
+             *
+             * zustand replaces each persisted key wholesale, so a nested
+             * object saved by an older version comes back missing anything
+             * added since — `remnawave.accounts` would be `undefined`, and the
+             * first switch would throw. The two objects that are persisted in
+             * part are merged key by key against the defaults instead.
+             */
+            merge: (persisted, current) => {
+                const saved = (persisted ?? {}) as Partial<ConfigState>;
+                return {
+                    ...current,
+                    ...saved,
+                    remnawave: { ...current.remnawave, ...(saved.remnawave ?? {}) },
+                    snippetLibrary: { ...current.snippetLibrary, ...(saved.snippetLibrary ?? {}) },
+                } as ConfigState;
+            },
             partialize: (state) => ({ 
                 config: state.config,
                 rawConfigText: state.rawConfigText,
@@ -1523,7 +1661,11 @@ export const useConfigStore = create(
                     url: state.remnawave.url, 
                     token: state.remnawave.token, 
                     connected: state.remnawave.connected,
-                    activeProfileUuid: state.remnawave.activeProfileUuid 
+                    activeProfileUuid: state.remnawave.activeProfileUuid,
+                    // The saved panels survive a reload; without them a switch
+                    // would mean pasting a token again every session.
+                    accounts: state.remnawave.accounts,
+                    activeAccountId: state.remnawave.activeAccountId,
                 },
                 profiles: state.profiles,
                 activeProfileId: state.activeProfileId,

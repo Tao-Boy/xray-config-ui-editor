@@ -19,8 +19,95 @@ export const RemnawaveModal = ({ onClose }: { onClose: () => void }) => {
         handleRefreshProfiles,
         handleConnect,
         handleSelectProfile,
-        disconnectRemnawave
+        disconnectRemnawave,
+        accounts,
+        activeAccountId,
+        handleSwitchAccount,
+        handleForgetAccount,
+        renameRemnawaveAccount,
     } = useRemnawaveEditor(onClose);
+
+    // Which saved panel is having its name changed, if any.
+    const [renaming, setRenaming] = React.useState<string | null>(null);
+    const [draftLabel, setDraftLabel] = React.useState('');
+
+    const activePanel = accounts.find(account => account.id === activeAccountId);
+
+    const savedPanels = accounts.length > 0 && (
+        <div className="mb-6">
+            <h3 className="label-xs mb-2">{t("Saved panels")}</h3>
+            <div className="space-y-1.5">
+                {accounts.map(account => {
+                    const isActive = account.id === activeAccountId;
+                    if (renaming === account.id) {
+                        return (
+                            <div key={account.id} className="flex items-center gap-2">
+                                <input
+                                    autoFocus
+                                    className="input-base text-xs"
+                                    value={draftLabel}
+                                    onChange={e => setDraftLabel(e.target.value)}
+                                    onKeyDown={e => {
+                                        if (e.key === 'Enter') {
+                                            renameRemnawaveAccount(account.id, draftLabel);
+                                            setRenaming(null);
+                                        }
+                                        if (e.key === 'Escape') setRenaming(null);
+                                    }}
+                                />
+                                <Button
+                                    variant="secondary"
+                                    className="text-xs py-1.5 shrink-0"
+                                    onClick={() => { renameRemnawaveAccount(account.id, draftLabel); setRenaming(null); }}
+                                >
+                                    {t("Save")}
+                                </Button>
+                            </div>
+                        );
+                    }
+                    return (
+                        <div
+                            key={account.id}
+                            className={`flex items-center gap-2 rounded-xl border px-3 py-2 transition-all ${
+                                isActive
+                                    ? 'bg-indigo-600/20 border-indigo-500'
+                                    : 'bg-slate-900 border-slate-800 hover:border-slate-600'
+                            }`}
+                        >
+                            <button
+                                type="button"
+                                onClick={() => handleSwitchAccount(account.id)}
+                                className="flex-1 min-w-0 text-left"
+                                title={account.url}
+                            >
+                                <div className={`text-sm truncate ${isActive ? 'text-white font-bold' : 'text-slate-300'}`}>
+                                    {account.label}
+                                </div>
+                                <div className="text-[10px] text-slate-500 font-mono truncate">{account.url}</div>
+                            </button>
+                            {isActive && <Icon name="CheckCircle" weight="fill" className="text-emerald-400 shrink-0" />}
+                            <button
+                                type="button"
+                                onClick={() => { setRenaming(account.id); setDraftLabel(account.label); }}
+                                title={t("Rename")}
+                                className="p-2 rounded-lg text-slate-600 hover:text-indigo-300 hover:bg-slate-800/60 shrink-0 transition-colors"
+                            >
+                                <Icon name="PencilSimple" className="text-sm" />
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => handleForgetAccount(account.id)}
+                                title={t("Forget this panel")}
+                                className="p-2 rounded-lg text-slate-600 hover:text-rose-400 hover:bg-slate-800/60 shrink-0 transition-colors"
+                            >
+                                <Icon name="Trash" className="text-sm" />
+                            </button>
+                        </div>
+                    );
+                })}
+            </div>
+        </div>
+    );
 
     return (
         <Modal 
@@ -32,6 +119,7 @@ export const RemnawaveModal = ({ onClose }: { onClose: () => void }) => {
             <div className="space-y-5">
                 {step === 'login' ? (
                     <div className="animate-in fade-in duration-300">
+                        {savedPanels}
                         <div className="bg-amber-900/20 p-4 rounded-xl border border-amber-500/30 text-[11px] text-amber-200/80 mb-6 flex gap-3">
                             <Icon name="ShieldCheck" className="text-xl shrink-0 text-amber-400" />
                             <p>
@@ -66,6 +154,22 @@ export const RemnawaveModal = ({ onClose }: { onClose: () => void }) => {
                     </div>
                 ) : (
                     <div className="animate-in slide-in-from-right-4 duration-300">
+                        {activePanel && (
+                            <div className="flex items-center gap-2 mb-4 text-[11px] text-slate-400">
+                                <Icon name="CloudCheck" weight="fill" className="text-emerald-400" />
+                                <span className="font-bold text-slate-300 truncate">{activePanel.label}</span>
+                                {accounts.length > 1 && (
+                                    <button
+                                        type="button"
+                                        onClick={() => setStep('login')}
+                                        className="text-indigo-400 hover:text-indigo-300 underline underline-offset-2 shrink-0"
+                                    >
+                                        {t("switch")}
+                                    </button>
+                                )}
+                            </div>
+                        )}
+
                         <div className="flex justify-between items-center mb-4">
                             <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">{t("Available Profiles")}</h3>
                             <button onClick={handleRefreshProfiles} className="p-1 hover:bg-slate-800 rounded transition-colors text-indigo-400">

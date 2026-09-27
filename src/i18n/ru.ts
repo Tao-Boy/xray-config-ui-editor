@@ -52,6 +52,10 @@ export const ru: Record<string, string> = {
     'Nothing to copy': 'Копировать нечего',
     'Loading your workspace…': 'Загружаем ваше рабочее пространство…',
     'Loading editor…': 'Загружаем редактор…',
+    'Saved panels': 'Сохранённые панели',
+    'Forget this panel': 'Забыть эту панель',
+    'switch': 'сменить',
+    'Switched to {panel}': 'Переключено на {panel}',
 
     // ── Local balancer / template builder ───────────────────────────────────
     'Label — also the grouping key when splitting by location':

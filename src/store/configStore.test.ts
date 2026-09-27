@@ -120,3 +120,121 @@ describe('configStore — createProfile with an explicit config', () => {
         expect(created.rawConfigText).toContain('keep-me');
     });
 });
+
+describe('more than one panel', () => {
+    const reset = () => useConfigStore.setState({
+        remnawave: {
+            url: '', token: null, connected: false,
+            activeProfileUuid: null, profiles: [],
+            accounts: [], activeAccountId: null,
+        },
+    } as any);
+
+    it('remembers a panel the moment it is connected to', () => {
+        reset();
+        useConfigStore.getState().connectRemnawaveToken('https://bropines.remna.ru/', 'token-a');
+
+        const { accounts, activeAccountId } = useConfigStore.getState().remnawave;
+        expect(accounts).toHaveLength(1);
+        expect(accounts[0]!.label).toBe('bropines.remna.ru');
+        expect(accounts[0]!.token).toBe('token-a');
+        expect(activeAccountId).toBe(accounts[0]!.id);
+    });
+
+    it('keeps a second panel beside the first', () => {
+        reset();
+        useConfigStore.getState().connectRemnawaveToken('https://bropines.remna.ru', 'token-a');
+        useConfigStore.getState().connectRemnawaveToken('https://olsg.vpn.ru', 'token-b');
+
+        const { accounts, url, token } = useConfigStore.getState().remnawave;
+        expect(accounts.map(a => a.label)).toEqual(['bropines.remna.ru', 'olsg.vpn.ru']);
+        expect(url).toBe('https://olsg.vpn.ru');
+        expect(token).toBe('token-b');
+    });
+
+    it('re-connecting the same panel updates its token instead of listing it twice', () => {
+        reset();
+        useConfigStore.getState().connectRemnawaveToken('https://bropines.remna.ru', 'old');
+        // A trailing slash is not a different panel.
+        useConfigStore.getState().connectRemnawaveToken('https://bropines.remna.ru/', 'new');
+
+        const { accounts } = useConfigStore.getState().remnawave;
+        expect(accounts).toHaveLength(1);
+        expect(accounts[0]!.token).toBe('new');
+    });
+
+    it('switching swaps the connection and drops what the last panel put there', () => {
+        reset();
+        useConfigStore.getState().connectRemnawaveToken('https://bropines.remna.ru', 'token-a');
+        const first = useConfigStore.getState().remnawave.accounts[0]!.id;
+        useConfigStore.getState().connectRemnawaveToken('https://olsg.vpn.ru', 'token-b');
+
+        // State the panel we are leaving filled in.
+        useConfigStore.setState(state => ({
+            remnawave: { ...state.remnawave, activeProfileUuid: 'profile-of-olsg' },
+            panelCatalog: { hosts: [{ uuid: 'h1' }], inbounds: {}, loading: false, error: null, fetchedAt: Date.now() },
+            snippetLibrary: { ...state.snippetLibrary, panel: [{ name: 'S', body: [] }] },
+        }) as any);
+
+        useConfigStore.getState().switchRemnawaveAccount(first);
+
+        const state = useConfigStore.getState();
+        expect(state.remnawave.url).toBe('https://bropines.remna.ru');
+        expect(state.remnawave.token).toBe('token-a');
+        expect(state.remnawave.activeAccountId).toBe(first);
+        expect(state.remnawave.activeProfileUuid).toBeNull();
+        expect(state.panelCatalog.hosts).toEqual([]);
+        expect(state.snippetLibrary.panel).toEqual([]);
+    });
+
+    it('forgetting a panel that is not in use leaves the connection alone', () => {
+        reset();
+        useConfigStore.getState().connectRemnawaveToken('https://bropines.remna.ru', 'token-a');
+        const first = useConfigStore.getState().remnawave.accounts[0]!.id;
+        useConfigStore.getState().connectRemnawaveToken('https://olsg.vpn.ru', 'token-b');
+
+        useConfigStore.getState().forgetRemnawaveAccount(first);
+
+        const { accounts, connected, token } = useConfigStore.getState().remnawave;
+        expect(accounts.map(a => a.label)).toEqual(['olsg.vpn.ru']);
+        expect(connected).toBe(true);
+        expect(token).toBe('token-b');
+    });
+
+    it('forgetting the panel in use disconnects rather than leaving a nameless token', () => {
+        reset();
+        useConfigStore.getState().connectRemnawaveToken('https://olsg.vpn.ru', 'token-b');
+        const active = useConfigStore.getState().remnawave.activeAccountId!;
+
+        useConfigStore.getState().forgetRemnawaveAccount(active);
+
+        const { accounts, connected, token, activeAccountId } = useConfigStore.getState().remnawave;
+        expect(accounts).toEqual([]);
+        expect(connected).toBe(false);
+        expect(token).toBeNull();
+        expect(activeAccountId).toBeNull();
+    });
+
+    it('can be given a name of its own, and falls back to the host when cleared', () => {
+        reset();
+        useConfigStore.getState().connectRemnawaveToken('https://olsg.vpn.ru', 'token-b');
+        const id = useConfigStore.getState().remnawave.accounts[0]!.id;
+
+        useConfigStore.getState().renameRemnawaveAccount(id, '  Прод  ');
+        expect(useConfigStore.getState().remnawave.accounts[0]!.label).toBe('Прод');
+
+        useConfigStore.getState().renameRemnawaveAccount(id, '   ');
+        expect(useConfigStore.getState().remnawave.accounts[0]!.label).toBe('olsg.vpn.ru');
+    });
+
+    it('disconnecting keeps the panels but ends the session', () => {
+        reset();
+        useConfigStore.getState().connectRemnawaveToken('https://olsg.vpn.ru', 'token-b');
+        useConfigStore.getState().disconnectRemnawave();
+
+        const { accounts, connected, activeAccountId } = useConfigStore.getState().remnawave;
+        expect(accounts).toHaveLength(1);
+        expect(connected).toBe(false);
+        expect(activeAccountId).toBeNull();
+    });
+});

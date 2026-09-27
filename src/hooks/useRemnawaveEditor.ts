@@ -10,7 +10,10 @@ export const useRemnawaveEditor = (onClose: () => void) => {
         connectRemnawaveToken, 
         fetchRemnawaveProfiles, 
         loadRemnawaveProfile,
-        disconnectRemnawave 
+        disconnectRemnawave,
+        switchRemnawaveAccount,
+        forgetRemnawaveAccount,
+        renameRemnawaveAccount,
     } = useConfigStore();
     
     const [step, setStep] = useState<'login' | 'select'>('login');
@@ -69,6 +72,31 @@ export const useRemnawaveEditor = (onClose: () => void) => {
         }
     }, [url, apiToken, connectRemnawaveToken]);
 
+    /**
+     * Move to another saved panel.
+     *
+     * The effect above refreshes when the connection comes up, which a switch
+     * never does — it was up already — so the profile list is asked for here.
+     */
+    const handleSwitchAccount = useCallback((id: string) => {
+        const account = remnawave.accounts.find(entry => entry.id === id);
+        if (!account) return;
+        switchRemnawaveAccount(id);
+        setUrl(account.url);
+        setApiToken(account.token);
+        setStep('select');
+        handleRefreshProfiles();
+    }, [remnawave.accounts, switchRemnawaveAccount, handleRefreshProfiles]);
+
+    const handleForgetAccount = useCallback((id: string) => {
+        const wasActive = remnawave.activeAccountId === id;
+        forgetRemnawaveAccount(id);
+        if (wasActive) {
+            setStep('login');
+            setApiToken('');
+        }
+    }, [remnawave.activeAccountId, forgetRemnawaveAccount]);
+
     const handleSelectProfile = useCallback(async (uuid: string) => {
         setLoading(true);
         await loadRemnawaveProfile(uuid);
@@ -89,6 +117,11 @@ export const useRemnawaveEditor = (onClose: () => void) => {
         handleRefreshProfiles,
         handleConnect,
         handleSelectProfile,
-        disconnectRemnawave
+        disconnectRemnawave,
+        accounts: remnawave.accounts,
+        activeAccountId: remnawave.activeAccountId,
+        handleSwitchAccount,
+        handleForgetAccount,
+        renameRemnawaveAccount,
     };
 };

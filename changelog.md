@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.20.0] - 2026-09-27
+
+### Added
+- **More than one Remnawave panel, switched without retyping a token.** Connecting to a panel now puts it on a list — `bropines.remna.ru`, `olsg.vpn.ru` — and the connect screen shows that list above the form: one click moves the whole app to that panel. Each entry can be renamed, which matters when two panels have similar hosts, and forgotten, which disconnects only if it was the one in use. The same panel connected again with a fresh token updates its entry instead of appearing twice; a trailing slash is not a different panel.
+  - Switching drops everything the panel being left had filled in — its config profiles, its host catalog, its subscription templates and the panel half of the snippet library — so one panel's hosts can never be shown under another's name.
+  - The live connection is still `remnawave.url` / `remnawave.token`, so every screen that reads it was untouched; the list sits beside it.
+  - Tokens are saved the way the single one already was, in this browser's IndexedDB.
+
+### Fixed
+- **A store saved before a field existed came back without it.** The persisted state replaces each key wholesale, so a nested object written by an older version arrives missing anything added since — `remnawave.accounts` would have been `undefined` and the first switch would have thrown. The two partially-persisted objects are merged against their defaults on load.
+
 ## [1.19.4] - 2026-09-22
 
 ### Changed
