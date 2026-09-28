@@ -10,6 +10,7 @@ import { HttpUpgradeTransportSchema } from './httpupgrade.transport';
 import { MkcpTransportSchema } from './mkcp.transport';
 import { XhttpTransportSchema } from './xhttp.transport';
 import { HysteriaTransportSchema } from './hysteria.transport';
+import { MasqueTransportSchema } from './masque.transport';
 import { TlsSchema } from './tls.schema';
 import { RealitySchema } from './reality.schema';
 import { SockoptSchema } from './sockopt.schema';
@@ -17,7 +18,7 @@ import { FinalMaskSchema } from './finalmask.schema';
 
 export const StreamSettingsSchema = z.object({
   // --- Transport ---
-  /** Transport type: raw, xhttp, mkcp, grpc, websocket, httpupgrade, hysteria (+ aliases) */
+  /** Transport type: raw, xhttp, mkcp, grpc, websocket, httpupgrade, hysteria, masque (+ aliases) */
   network: z.union([TransportNetworkSchema, z.string()]).optional(),
   rawSettings: RawTransportSchema.optional(),
   /** Alias: tcpSettings maps to rawSettings */
@@ -30,6 +31,8 @@ export const StreamSettingsSchema = z.object({
   wsSettings: WebSocketTransportSchema.optional(),
   httpupgradeSettings: HttpUpgradeTransportSchema.optional(),
   hysteriaSettings: HysteriaTransportSchema.optional(),
+  /** Only the masque outbound may carry this, and only this. */
+  masqueSettings: MasqueTransportSchema.optional(),
 
   // --- Security ---
   /** Transport security: none, tls, reality */

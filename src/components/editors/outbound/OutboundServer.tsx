@@ -10,7 +10,6 @@ export const OutboundServer = ({ outbound, onChange, errors = {} }: any) => {
     const isShadowsocks = outbound.protocol === 'shadowsocks' || outbound.protocol === 'shadowsocks-2022';
     const isBlackhole = outbound.protocol === 'blackhole';
     const isDns = outbound.protocol === 'dns';
-    const isFreedom = outbound.protocol === 'freedom';
     const isVnextProtocol = outbound.protocol === 'vmess' || outbound.protocol === 'vless';
     // Only these protocols expose a single ID/password field in this UI —
     // matches the previous getUserId()/updateUserId() behavior, where every
@@ -39,7 +38,6 @@ export const OutboundServer = ({ outbound, onChange, errors = {} }: any) => {
     const customResponse = useField<string | undefined>(outbound, onChange, ['settings', 'response', 'customResponseData']);
     const dnsAddress = useField<string>(outbound, onChange, ['settings', 'address']);
     const dnsPort = useField<number>(outbound, onChange, ['settings', 'port']);
-    const domainStrategy = useField<string>(outbound, onChange, ['settings', 'domainStrategy']);
 
     if (isBlackhole) {
         return (
@@ -105,32 +103,6 @@ export const OutboundServer = ({ outbound, onChange, errors = {} }: any) => {
                             onChange={e => dnsPort.onChange(parseInt(e.target.value) || 53)}
                         />
                     </FormField>
-                </div>
-            </Card>
-        );
-    }
-
-    if (isFreedom) {
-        return (
-            <Card title={t("Freedom (Direct)")} icon="ArrowSquareOut" className="mt-4">
-                <div className="p-3 bg-slate-950 border border-slate-800 rounded-lg">
-                    <p className="text-[11px] text-slate-400 leading-relaxed italic">
-                        {t("The Freedom outbound sends traffic straight to its destination with no proxy. Used for local traffic, or to keep something out of the tunnel.")}
-                    </p>
-                </div>
-                <div className="mt-4">
-                        <Select
-                            label={t("Domain Strategy")}
-                            hint={t("How to resolve domain names when connecting.")}
-                            value={domainStrategy.value || "AsIs"}
-                            onChange={val => domainStrategy.onChange(val)}
-                            options={[
-                                { value: "AsIs", label: t("As Is"), description: t("Use system DNS") },
-                                { value: "UseIP", label: t("Use IP"), description: t("Resolve via Xray DNS") },
-                                { value: "UseIPv4", label: t("Use IPv4") },
-                                { value: "UseIPv6", label: t("Use IPv6") },
-                            ]}
-                        />
                 </div>
             </Card>
         );

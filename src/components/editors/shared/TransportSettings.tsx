@@ -14,6 +14,7 @@ import { ExtendedSection } from '../../ui/ExtendedSection';
 import { useConfigStore } from '../../../store/configStore';
 import { useTransportFields } from '../../../hooks/useTransportFields';
 import { NetworkSection } from './NetworkSection';
+import { networkOptions } from './transport-networks';
 import { toast } from 'sonner';
 import { t, tn } from '../../../i18n';
 
@@ -147,18 +148,7 @@ export const TransportSettings = ({ streamSettings = {}, onChange, isClient = fa
                         hint={t("Transport protocol used to deliver data.")}
                         value={net}
                         onChange={val => network.onChange(val)}
-                        options={[
-                            { value: "tcp", label: "TCP", description: t("Standard reliable stream") },
-                            { value: "ws", label: t("WebSocket"), description: t("Standard web transport") },
-                            { value: "xhttp", label: t("XHTTP"), description: t("Next-gen HTTP transport") },
-                            { value: "splithttp", label: t("SplitHTTP"), description: t("High-performance split stream") },
-                            { value: "grpc", label: t("gRPC"), description: t("Modern RPC framework") },
-                            { value: "http", label: "HTTP", description: t("Standard HTTP proxying") },
-                            { value: "quic", label: t("QUIC"), description: t("UDP-based transport (HTTP/3)") },
-                            { value: "kcp", label: t("mKCP"), description: t("Aggressive UDP transport") },
-                            { value: "raw", label: t("RAW"), description: t("Raw socket access") },
-                            { value: "httpupgrade", label: t("HTTP Upgrade"), description: t("Modern WebSocket alternative") },
-                        ]}
+                        options={networkOptions(protocol, net)}
                     />
                     <Select
                         label={t("Security")}

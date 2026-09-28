@@ -5,6 +5,7 @@ import { Help } from '../../ui/Help';
 import { ExtendedSection } from '../../ui/ExtendedSection';
 import { useField } from '../../../hooks/useField';
 import { migrateProxySettings } from '../../../core/xray/outbound-shape';
+import { DOMAIN_STRATEGY_OPTIONS } from './domain-strategies';
 import { t } from '../../../i18n';
 
 export const OutboundProxyMux = ({ outbound, onChange, showMux = true }: any) => {
@@ -156,19 +157,7 @@ export const OutboundProxyMux = ({ outbound, onChange, showMux = true }: any) =>
                         hint={t("Resolution behavior when connecting to target domain via this outbound.")}
                         value={targetStrategy.value || "AsIs"}
                         onChange={val => targetStrategy.onChange(val === "AsIs" ? undefined : val)}
-                        options={[
-                            { value: "AsIs", label: t("AsIs (Default)"), description: t("Leave domain as is without prior resolution") },
-                            { value: "UseIP", label: t("UseIP"), description: t("Resolve and connect via IP") },
-                            { value: "UseIPv4", label: t("UseIPv4"), description: t("Resolve and prefer IPv4 only") },
-                            { value: "UseIPv6", label: t("UseIPv6"), description: t("Resolve and prefer IPv6 only") },
-                            { value: "UseIPv4v6", label: t("UseIPv4v6"), description: t("Prefer IPv4, fallback to IPv6") },
-                            { value: "UseIPv6v4", label: t("UseIPv6v4"), description: t("Prefer IPv6, fallback to IPv4") },
-                            { value: "ForceIP", label: t("ForceIP"), description: t("Enforce IP connection (fails if unresolved)") },
-                            { value: "ForceIPv4", label: t("ForceIPv4"), description: t("Enforce IPv4 connection") },
-                            { value: "ForceIPv6", label: t("ForceIPv6"), description: t("Enforce IPv6 connection") },
-                            { value: "ForceIPv4v6", label: t("ForceIPv4v6"), description: t("Enforce IPv4, fallback to IPv6") },
-                            { value: "ForceIPv6v4", label: t("ForceIPv6v4"), description: t("Enforce IPv6, fallback to IPv4") },
-                        ]}
+                        options={DOMAIN_STRATEGY_OPTIONS()}
                     />
                 </div>
             </ExtendedSection>

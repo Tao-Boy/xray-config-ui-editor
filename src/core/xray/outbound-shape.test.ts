@@ -62,9 +62,16 @@ describe('a protocol that dials', () => {
     });
 });
 
+describe('masque', () => {
+    it('is never offered mux, which the core refuses for it by name', () => {
+        // xray.go: `masque outbound does not support "mux"`
+        expect(outboundShape('masque')).toEqual({ server: true, transport: true, mux: false });
+    });
+});
+
 describe('a protocol nobody told it about', () => {
     it('is drawn in full rather than losing a field to a missing entry', () => {
-        expect(outboundShape('masque')).toEqual({ server: true, transport: true, mux: true });
+        expect(outboundShape('something-new')).toEqual({ server: true, transport: true, mux: true });
         expect(outboundShape(undefined)).toEqual({ server: true, transport: true, mux: true });
     });
 });

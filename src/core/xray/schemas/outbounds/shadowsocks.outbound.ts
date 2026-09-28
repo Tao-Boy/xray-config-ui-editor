@@ -12,8 +12,19 @@ export const ShadowsocksServerSchema = z.object({
   password: z.string().optional(),
   email: z.string().optional(),
   level: UserLevelSchema,
+  /**
+   * UDP over TCP, gone from the core.
+   *
+   * `ShadowsocksServerTarget` carried `uot` and `uotVersion` up to v25.1.30
+   * and neither survives into 26.x, where the client config is address, port,
+   * level, email, method, password and servers — nothing else. Declared so an
+   * older config still reads as understood; nothing writes them.
+   *
+   * The spelling matters: the core's tag was `uotVersion`, and this schema
+   * used to say `UoTVersion`, which matched nothing at either end.
+   */
   uot: z.boolean().optional(),
-  UoTVersion: z.number().int().optional(),
+  uotVersion: z.number().int().optional(),
 }).passthrough();
 
 export const ShadowsocksOutboundSettingsSchema = z.object({
@@ -24,7 +35,5 @@ export const ShadowsocksOutboundSettingsSchema = z.object({
   port: z.number().int().optional(),
   method: ShadowsocksMethodSchema.optional(),
   password: z.string().optional(),
-  uot: z.boolean().optional(),
-  UoTVersion: z.number().int().optional(),
   level: UserLevelSchema,
 }).passthrough();

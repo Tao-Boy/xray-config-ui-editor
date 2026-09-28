@@ -98,6 +98,8 @@ export const TransportNetworkSchema = z.enum([
   'websocket', 'ws', // ws is alias for websocket
   'httpupgrade',
   'hysteria',
+  // Only the masque outbound may use it, and it may use nothing else.
+  'masque',
 ]);
 
 // --- Transport Security ---
@@ -125,7 +127,7 @@ export const InboundProtocolSchema = z.enum([
   'vless', 'vmess', 'trojan', 'shadowsocks',
   'socks', 'http',
   'dokodemo-door', 'tunnel', // tunnel is new name for dokodemo-door
-  'hysteria', 'wireguard', 'tun',
+  'hysteria', 'masque', 'wireguard', 'tun',
 ]);
 
 // --- Outbound Protocol Names ---
@@ -135,7 +137,7 @@ export const OutboundProtocolSchema = z.enum([
   'socks', 'http',
   'freedom', 'blackhole',
   'dns', 'loopback',
-  'hysteria', 'wireguard',
+  'hysteria', 'masque', 'wireguard',
 ]);
 
 // --- Sniffing destOverride ---

@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.23.0] - 2026-09-28
+
+### Added
+- **MASQUE.** A whole protocol the core has and this editor did not: CONNECT-IP inside an HTTP/3 request, so on the wire it is ordinary QUIC web traffic. It is on both protocol lists now, with its outbound settings (`address`, `port`, `remoteDNS` — flat, not wrapped in `servers[]`), its inbound ones (`clients`/`users`, the CIDR pool in `address`, and `mtu`, held to the core's own 1280–65535), and its transport (`masqueSettings`: host, path, user, pass, headers). The editor never offers it mux, because it is the one outbound the core refuses to multiplex by name.
+- **Freedom has the rest of its fields.** It was one chooser offering four of the eleven resolution strategies, so everything else could only be reached by hand-editing JSON — on the outbound most configs send their bypass traffic through. It now has TLS fragmentation (`packets`, `length`, `interval` and `maxSplit`, which nothing could write before), noise packets as a proper list with the four types the core accepts and `applyTo`, and `redirect`, `proxyProtocol` and `userLevel` under Extended. The strategy chooser has all eleven values, and writes `targetStrategy` — or keeps `domainStrategy` when that is the key the config already uses, rather than silently rewriting an import.
+
+### Fixed
+- **The network chooser offered two transports Xray removed.** `http` and `quic` sat in the list as ordinary options; `transport_internet.go` answers `PrintRemovedFeatureError` for both, so picking either produced a config the core will not load — the same failure as the proxy-chaining card, in a chooser every inbound and outbound shows. They are gone from the list and appear only when a config already has one, labelled with what replaced them. `hysteria` was missing and is there now.
+- **A shadowsocks outbound offered a UDP-over-TCP switch the core has no field for.** `ShadowsocksClientConfig` is address, port, level, email, method, password and servers — nothing else. `uot`/`uotVersion` lived inside `servers[]` up to 25.1.30 and are gone from 26.x, and the schema spelled the second one `UoTVersion`, which matched the core's json tag at neither end. Both are documented where they used to live, spelled the way the core spelled them.
+
 ## [1.22.0] - 2026-09-28
 
 ### Changed

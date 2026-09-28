@@ -13,6 +13,8 @@ import { OutboundGeneral } from './outbound/OutboundGeneral';
 import { OutboundServer } from './outbound/OutboundServer';
 import { OutboundWireguard } from './outbound/OutboundWireguard';
 import { OutboundLoopback } from './outbound/OutboundLoopback';
+import { OutboundFreedom } from './outbound/OutboundFreedom';
+import { OutboundMasque } from './outbound/OutboundMasque';
 import { OutboundProxyMux } from './outbound/OutboundProxyMux';
 import { outboundShape } from '../../core/xray/outbound-shape';
 import { TransportSettings } from './shared/TransportSettings';
@@ -138,6 +140,14 @@ export const OutboundModal = ({ data, onSave, onClose, index }: any) => {
                             outbound={local}
                             onChange={updateField}
                             inboundTags={allInboundTags}
+                        />
+                    ) : local.protocol === 'freedom' ? (
+                        <OutboundFreedom outbound={local} onChange={updateField} />
+                    ) : local.protocol === 'masque' ? (
+                        <OutboundMasque
+                            outbound={local}
+                            onChange={updateField}
+                            errors={{ address: getError('address'), port: getError('port') }}
                         />
                     ) : (
                         <OutboundServer

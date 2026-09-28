@@ -24,7 +24,7 @@ export const UNTRANSLATED = new Set([
     // Enum values written straight into the config — translating a dropdown
     // option would stop it matching what the JSON says.
     'AsIs', 'UseIP', 'UseIPv4', 'UseIPv6', 'UseIPv4v6', 'UseIPv6v4',
-    'ForceIP', 'ForceIPv4', 'ForceIPv6', 'ForceIPv4v6', 'ForceIPv6v4',
+    'ForceIPv4', 'ForceIPv6', 'ForceIPv4v6', 'ForceIPv6v4',
     'IPIfNonMatch', 'IPOnDemand', 'vlessRoute',
     'leastLoad', 'leastPing', 'roundRobin', 'random',
     'aes-256-gcm', 'aes-128-gcm', 'chacha20-ietf-poly1305',
@@ -33,7 +33,7 @@ export const UNTRANSLATED = new Set([
     'AES-128-GCM', 'ChaCha20', 'HEX', 'RAND', 'BBR', 'Brutal', 'Reno', 'AUTO',
 
     // Transport and protocol names
-    'WebSocket', 'XHTTP', 'SplitHTTP', 'gRPC', 'QUIC', 'mKCP', 'RAW',
+    'WebSocket', 'XHTTP', 'SplitHTTP', 'gRPC', 'mKCP', 'RAW',
     'HTTP Upgrade', 'NONE', 'REALITY', 'SRTP', 'WeChat', 'DTLS', 'WireGuard',
     'TProxy', 'Redirect', 'Packet-Up', 'Stream-Up', 'Stream-One',
 

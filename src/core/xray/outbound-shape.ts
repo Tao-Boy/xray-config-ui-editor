@@ -43,6 +43,10 @@ const SHAPES: Record<string, OutboundShape> = {
     socks: { server: true, transport: true, mux: false },
     http: { server: true, transport: true, mux: false },
     hysteria: { server: true, transport: true, mux: false },
+    // The one protocol whose mux the core refuses by name: Build() answers
+    // `masque outbound does not support "mux"`. Its transport is the masque
+    // one, which nothing else may use and it may not do without.
+    masque: { server: true, transport: true, mux: false },
     // Its own device and peers rather than a server card, and its own
     // encrypted transport underneath.
     wireguard: { server: false, transport: true, mux: false },

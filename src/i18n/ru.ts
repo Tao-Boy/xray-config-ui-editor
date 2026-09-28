@@ -79,6 +79,50 @@ export const ru: Record<string, string> = {
     'Never on a token for this app:': 'Никогда не давайте этому приложению:',
     'Give it a short expiry as well. On a panel too old for scoped tokens, every token can call everything — there the expiry is the only limit you have.':
         'И задайте короткий срок жизни. На панели, которая ещё не умеет ограниченные токены, любой токен может всё — там срок жизни остаётся единственным ограничением.',
+    'Hysteria': 'Hysteria',
+    'QUIC-based, with its own congestion control': 'На QUIC, со своим контролем перегрузки',
+    'CONNECT-IP over HTTP/3 — only the masque outbound may use it':
+        'CONNECT-IP поверх HTTP/3 — доступен только outbound masque',
+    'Removed from Xray — use {replacement}': 'Удалён из Xray — используйте {replacement}',
+
+    // ── Freedom: fragment, noises and the rest of its settings ──────────────
+    'Domain Strategy (legacy key)': 'Стратегия доменов (старый ключ)',
+    'The core moves this into sockopt.domainStrategy itself and logs that it did. All eleven values are the ones it accepts.':
+        'Ядро само переносит это в sockopt.domainStrategy и пишет об этом в лог. Все одиннадцать значений — те, что оно принимает.',
+    'TLS Fragmentation': 'Фрагментация TLS',
+    'Cuts the outgoing stream into pieces so a filter cannot read the handshake in one go.':
+        'Режет исходящий поток на куски, чтобы фильтр не прочитал рукопожатие целиком.',
+    'Packets': 'Пакеты',
+    'Length (bytes)': 'Длина (байт)',
+    'Interval (ms)': 'Интервал (мс)',
+    'Max Split': 'Максимум кусков',
+    'Noise Packets': 'Шумовые пакеты',
+    'Junk sent before the real traffic, to spoil a fingerprint taken from the first packet.':
+        'Мусор, отправляемый перед настоящим трафиком, чтобы испортить отпечаток, снятый с первого пакета.',
+    'Type': 'Тип',
+    'Random bytes, packet is a length range': 'Случайные байты, в packet — диапазон длины',
+    'The text as typed': 'Текст как есть',
+    'Hex-decoded bytes': 'Байты из hex',
+    'Base64-decoded bytes': 'Байты из base64',
+    'Packet': 'Пакет',
+    'Delay (ms)': 'Задержка (мс)',
+    'Apply To': 'Применять к',
+    'Any IP': 'Любой IP',
+    'Extended Freedom Settings': 'Расширенные настройки Freedom',
+    'Redirect, PROXY protocol and policy level.': 'Перенаправление, PROXY protocol и уровень политики.',
+    'Redirect (addr:port)': 'Перенаправление (адрес:порт)',
+    'PROXY Protocol': 'PROXY Protocol',
+    'Announce the original client address to the destination.':
+        'Сообщать адрес исходного клиента получателю.',
+    'User Level': 'Уровень пользователя',
+
+    // ── MASQUE ──────────────────────────────────────────────────────────────
+    'MASQUE Server': 'Сервер MASQUE',
+    'MASQUE carries IP packets inside an HTTP/3 request, so on the wire it looks like ordinary QUIC web traffic. It uses the masque transport and nothing else, and it is the one outbound the core refuses to multiplex.':
+        'MASQUE везёт IP-пакеты внутри HTTP/3-запроса, поэтому в сети выглядит как обычный веб-трафик поверх QUIC. Он использует транспорт masque и никакой другой, и это единственный outbound, которому ядро отказывает в mux.',
+    'Resolvers reached through the tunnel. IP addresses only — the core parses each one at startup and will not run if a hostname is in the list.':
+        'Резолверы, доступные через туннель. Только IP-адреса — ядро разбирает каждый при старте и не запустится, если в списке окажется имя хоста.',
+
     // ── Outbound shape: loopback, blackhole, proxy chaining ─────────────────
     'Loopback Settings': 'Настройки loopback',
     'Traffic sent here never leaves Xray. It re-enters routing carrying the inbound tag below, so a second set of rules can decide where it really goes — which is how one rule\'s result becomes another rule\'s input.':
@@ -915,8 +959,6 @@ export const ru: Record<string, string> = {
     'The Freedom outbound sends traffic straight to its destination with no proxy. Used for local traffic, or to keep something out of the tunnel.':
         'Outbound Freedom отправляет трафик прямо в пункт назначения, без прокси. Нужен для локального трафика или чтобы что-то не заворачивать в туннель.',
     'Domain Strategy': 'Стратегия для доменов',
-    'How to resolve domain names when connecting.':
-        'Как разрешать доменные имена при подключении.',
     'Server Details': 'Данные сервера',
     'Address (IP or Domain)': 'Адрес (IP или домен)',
     'UDP over TCP (UOT)': 'UDP поверх TCP (UOT)',
@@ -1399,8 +1441,6 @@ export const ru: Record<string, string> = {
     'Next-gen HTTP transport': 'HTTP-транспорт нового поколения',
     'High-performance split stream': 'Высокопроизводительный раздельный поток',
     'Modern RPC framework': 'Современный RPC-фреймворк',
-    'Standard HTTP proxying': 'Обычное HTTP-проксирование',
-    'UDP-based transport (HTTP/3)': 'Транспорт поверх UDP (HTTP/3)',
     'Aggressive UDP transport': 'Агрессивный UDP-транспорт',
     'Raw socket access': 'Прямой доступ к сокету',
     'Modern WebSocket alternative': 'Современная альтернатива WebSocket',
@@ -1549,12 +1589,6 @@ export const ru: Record<string, string> = {
     'Enforce IPv6, fallback to IPv4': 'Только IPv6, при неудаче IPv4',
     'Silent Drop': 'Молча отбрасывать',
     'Return 403 Forbidden': 'Отвечать 403 Forbidden',
-    'As Is': 'Как есть',
-    'Use system DNS': 'Использовать системный DNS',
-    'Use IP': 'По IP',
-    'Resolve via Xray DNS': 'Разрешать через DNS-модуль Xray',
-    'Use IPv4': 'По IPv4',
-    'Use IPv6': 'По IPv6',
     'UUID / ID': 'UUID / ID',
     'Use domain as provided': 'Использовать домен как есть',
     'Resolve if no domain match': 'Разрешать имя, если по домену не совпало',

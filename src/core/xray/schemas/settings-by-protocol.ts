@@ -12,6 +12,7 @@ import { SocksInboundSettingsSchema } from './inbounds/socks.inbound';
 import { HttpInboundSettingsSchema } from './inbounds/http.inbound';
 import { TunnelInboundSettingsSchema } from './inbounds/tunnel.inbound';
 import { HysteriaInboundSettingsSchema } from './inbounds/hysteria.inbound';
+import { MasqueInboundSettingsSchema } from './inbounds/masque.inbound';
 import { WireguardInboundSettingsSchema } from './inbounds/wireguard.inbound';
 import { TunInboundSettingsSchema } from './inbounds/tun.inbound';
 
@@ -26,6 +27,7 @@ import { BlackholeOutboundSettingsSchema } from './outbounds/blackhole.outbound'
 import { DnsOutboundSettingsSchema } from './outbounds/dns.outbound';
 import { LoopbackOutboundSettingsSchema } from './outbounds/loopback.outbound';
 import { HysteriaOutboundSettingsSchema } from './outbounds/hysteria.outbound';
+import { MasqueOutboundSettingsSchema } from './outbounds/masque.outbound';
 import { WireguardOutboundSettingsSchema } from './outbounds/wireguard.outbound';
 
 /**
@@ -52,6 +54,7 @@ const INBOUND: Record<string, z.ZodTypeAny> = {
     // `tunnel` is the current name for what the docs still call dokodemo-door.
     'dokodemo-door': TunnelInboundSettingsSchema,
     hysteria: HysteriaInboundSettingsSchema,
+    masque: MasqueInboundSettingsSchema,
     wireguard: WireguardInboundSettingsSchema,
     tun: TunInboundSettingsSchema,
 };
@@ -69,6 +72,7 @@ const OUTBOUND: Record<string, z.ZodTypeAny> = {
     dns: DnsOutboundSettingsSchema,
     loopback: LoopbackOutboundSettingsSchema,
     hysteria: HysteriaOutboundSettingsSchema,
+    masque: MasqueOutboundSettingsSchema,
     wireguard: WireguardOutboundSettingsSchema,
 };
 

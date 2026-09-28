@@ -102,6 +102,7 @@ export const validateOutbound = (data: any): ValidationError[] => {
         'vless', 'vmess', 'trojan', 'shadowsocks', 'socks', 'http',
         'freedom', 'blackhole', 'dns', 'wireguard', 'loopback',
         'dokodemo-door', 'tunnel', 'tun', 'hysteria', 'hysteria2', 'shadowsocks-2022',
+        'masque',
     ];
 
     if (!VALID_PROTOCOLS.includes(data.protocol)) {
@@ -122,7 +123,9 @@ export const validateOutbound = (data: any): ValidationError[] => {
     const settings = data.settings || {};
 
     // Validate server address and port for proxy protocols
-    if (['vless', 'vmess', 'trojan', 'shadowsocks', 'shadowsocks-2022', 'socks', 'http', 'hysteria', 'hysteria2'].includes(protocol)) {
+    // masque is here because the core checks it itself: Build() refuses the
+    // config outright when `address` or `port` is missing.
+    if (['vless', 'vmess', 'trojan', 'shadowsocks', 'shadowsocks-2022', 'socks', 'http', 'hysteria', 'hysteria2', 'masque'].includes(protocol)) {
         let address = '';
         let port = 0;
 
