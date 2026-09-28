@@ -2,11 +2,12 @@ import { useXrayEditor } from './useXrayEditor';
 import { validateOutbound, validateWireguard, checkOutboundDuplication } from '../core/validators';
 import { createDefaultOutbound } from '../utils/protocol-factories';
 import { useConfigStore } from '../store/configStore';
+import { useShallow } from 'zustand/react/shallow';
 import type { Outbound } from '../store/configStore';
 import { useCallback } from 'react';
 
 export const useOutboundEditor = (data: Outbound, onSave: (data: Outbound, rawText?: string | null) => void, index: number | null) => {
-    const { config } = useConfigStore();
+    const { config } = useConfigStore(useShallow(state => ({ config: state.config })));
 
     const validate = useCallback((local: Outbound) => {
         const baseErrors = validateOutbound(local);

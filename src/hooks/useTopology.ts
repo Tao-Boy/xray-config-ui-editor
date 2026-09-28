@@ -1,12 +1,13 @@
 import { useMemo, useState } from 'react';
 import { useNodesState, useEdgesState } from '@xyflow/react';
 import { useConfigStore } from '../store/configStore';
+import { useShallow } from 'zustand/react/shallow';
 import { getLayoutedElements } from '../utils/graph-layout';
 import { getSnippetRefName, isSnippetRef } from '../core/snippets';
 import { t } from '../i18n';
 
 export const useTopology = () => {
-    const { config } = useConfigStore();
+    const { config } = useConfigStore(useShallow(state => ({ config: state.config })));
     const [hideUnused, setHideUnused] = useState(true);
     const [direction, setDirection] = useState<'TB' | 'LR'>('LR');
     const [hiddenCategories, setHiddenCategories] = useState<Set<string>>(new Set());

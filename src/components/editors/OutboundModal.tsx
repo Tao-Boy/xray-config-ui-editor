@@ -1,6 +1,7 @@
 import React from 'react';
 import { Button } from '../ui/Button';
 import { useConfigStore } from '../../store/configStore';
+import { useShallow } from 'zustand/react/shallow';
 import { toast } from 'sonner';
 import { generateXrayLink } from '../../utils/link-generator';
 import { useOutboundEditor } from '../../hooks/useOutboundEditor';
@@ -21,7 +22,7 @@ import { TransportSettings } from './shared/TransportSettings';
 import { t, tn } from '../../i18n';
 
 export const OutboundModal = ({ data, onSave, onClose, index }: any) => {
-    const { config, addItem, rawConfigText } = useConfigStore();
+    const { config, addItem, rawConfigText } = useConfigStore(useShallow(state => ({ config: state.config, addItem: state.addItem, rawConfigText: state.rawConfigText })));
     const allInboundTags = (config?.inbounds || []).map((i: any) => i.tag).filter((tag: any) => tag);
 
     const {

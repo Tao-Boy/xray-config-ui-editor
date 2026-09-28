@@ -3,6 +3,7 @@ import { Modal } from '../../ui/Modal';
 import { Button } from '../../ui/Button';
 import { Icon } from '../../ui/Icon';
 import { useConfigStore } from '../../../store/configStore';
+import { useShallow } from 'zustand/react/shallow';
 import { parseXrayLink, parseJsonSubscription } from '../../../utils/link-parser';
 import { generateXrayLink } from '../../../utils/link-generator';
 import { generateUUID } from '../../../core/generators/crypto';
@@ -13,7 +14,7 @@ import { t, tn } from '../../../i18n';
 const HWID_STORAGE_KEY = 'xray_editor_v2_hwid';
 
 export const BatchOutboundModal = ({ onClose }: { onClose: () => void }) => {
-    const { config, addOutbounds } = useConfigStore();
+    const { config, addOutbounds } = useConfigStore(useShallow(state => ({ config: state.config, addOutbounds: state.addOutbounds })));
     const [mode, setMode] = useState<'import' | 'export'>('import');
     const [text, setText] = useState("");
     

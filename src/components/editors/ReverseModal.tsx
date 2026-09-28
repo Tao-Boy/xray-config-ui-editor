@@ -45,11 +45,12 @@ export const ReverseModal = ({ onClose }: any) => {
         return (
             <Modal
                 title={t("Reverse Proxy (JSON)")}
+                className="md:h-[88vh] md:max-h-[92dvh]"
                 onClose={onClose}
                 onSave={() => onClose()}
                 extraButtons={<Button variant="secondary" className="text-xs py-1" onClick={() => setRawMode(false)} icon="Layout">{t("Form Mode")}</Button>}
             >
-                <div className="flex-1 min-h-0 md:flex-none md:h-[500px] flex flex-col gap-2">
+                <div className="flex-1 min-h-0 flex flex-col gap-2">
                     <div className="bg-slate-800/50 border border-slate-700/50 p-2 rounded text-[10px] text-slate-400 font-mono">
                         {t("This editor edits the reverse root section directly.")}
                     </div>
@@ -175,7 +176,7 @@ export const ReverseModal = ({ onClose }: any) => {
             title={t("Reverse Proxy")}
             onClose={onClose}
             onSave={() => onClose()}
-            className="md:max-w-[800px]"
+            className="md:max-w-[800px] md:h-[88vh] md:max-h-[92dvh]"
             extraButtons={
                 <div className="flex gap-2 w-full md:w-auto overflow-x-auto pb-1 md:pb-0 hide-scrollbar">
                     <div className="flex bg-slate-950 p-1 rounded-lg border border-slate-800 shrink-0">
@@ -186,7 +187,7 @@ export const ReverseModal = ({ onClose }: any) => {
                 </div>
             }
         >
-            <div className="max-w-2xl mx-auto w-full flex-1 min-h-0 md:flex-none md:h-[500px] overflow-y-auto custom-scroll p-1">
+            <div className="max-w-2xl mx-auto w-full flex-1 min-h-0 overflow-y-auto custom-scroll p-1">
                 {/* Accepted here, refused from 26.7: say so before anyone builds on it. */}
                 <div className="mb-4 p-3 bg-amber-950/20 border border-amber-500/30 rounded-xl text-[11px] text-amber-200/80 leading-relaxed flex gap-2">
                     <Icon name="Warning" weight="fill" className="text-amber-400 shrink-0 mt-0.5" />

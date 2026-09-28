@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.24.2] - 2026-09-28
+
+### Changed
+- **DNS, Reverse and Tag Details are as tall as the other big editors, and their contents fill them.** Each pinned its body to 500px and let the window shrink around it — on a 900px screen the DNS window was 712px tall, with the server list stopping at 500 and empty space below it. They take the same height as Routing, Hosts and Snippets now, and the list grows into it.
+- **General Settings keeps its tabs at the foot, like every other editor.** The shell put a desktop tab strip across the top of the content — the only modal that passed one — while DNS and Routing keep their view switch in the footer. It sits left of the footer buttons now, in the same compact style. The first tab is called General: it holds the core version, the WARP worker, SpiderX paths, log and API, and "Log & API" named half of that.
+
+### Fixed
+- **A WARP registration missing one address family wrote `undefined/128` into the WireGuard config**, which no core parses. Only the addresses the registration returned are written.
+- **Twenty-one screens re-rendered on every change anywhere in the app.** They read the store whole (`useConfigStore()`), so a panel fetch, a history entry or a toggled flag re-rendered every open editor and the dashboard. Each now subscribes to the fields it uses, compared shallowly.
+
 ## [1.24.1] - 2026-09-28
 
 ### Fixed

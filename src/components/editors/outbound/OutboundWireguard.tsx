@@ -8,6 +8,7 @@ import { FormField } from '../../ui/FormField';
 import { useCoreVersion } from '../../../hooks/useCoreVersion';
 import { generateWarpAccount } from '../../../core/generators';
 import { useConfigStore } from '../../../store/configStore';
+import { useShallow } from 'zustand/react/shallow';
 import { useField, useArrayField } from '../../../hooks/useField';
 import { WG_DOMAIN_STRATEGIES } from './wireguard-strategies';
 import { t } from '../../../i18n';
@@ -20,7 +21,7 @@ export const OutboundWireguard = ({ outbound, onChange, errors = {} as any }: an
     // stays mounted across a protocol switch (React requires the exact same
     // hooks, in the exact same order, on every render of the same instance).
     // Hooks now run unconditionally; the early return moves below them.
-    const { warpWorkerUrl } = useConfigStore();
+    const { warpWorkerUrl } = useConfigStore(useShallow(state => ({ warpWorkerUrl: state.warpWorkerUrl })));
     const settings = outbound.settings || { secretKey: "", address: ["10.0.0.1/24"], peers: [] };
     const [loading, setLoading] = useState(false);
 

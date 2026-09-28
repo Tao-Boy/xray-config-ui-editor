@@ -7,6 +7,7 @@ import { Icon } from '../../ui/Icon';
 import { FormField } from '../../ui/FormField';
 import { Switch } from '../../ui/Switch';
 import { useConfigStore } from '../../../store/configStore';
+import { useShallow } from 'zustand/react/shallow';
 import { toast } from 'sonner';
 import { t } from '../../../i18n';
 
@@ -27,7 +28,23 @@ export const EditorSettingsEditor = ({ onOpenHistory }: { onOpenHistory?: () => 
         setAutoSave,
         histories,
         clearHistory
-    } = useConfigStore();
+    } = useConfigStore(useShallow(state => ({
+        profiles: state.profiles,
+        activeProfileId: state.activeProfileId,
+        remnawave: state.remnawave,
+        createProfile: state.createProfile,
+        switchProfile: state.switchProfile,
+        renameProfile: state.renameProfile,
+        duplicateProfile: state.duplicateProfile,
+        deleteProfile: state.deleteProfile,
+        saveActiveProfile: state.saveActiveProfile,
+        historyLimit: state.historyLimit,
+        setHistoryLimit: state.setHistoryLimit,
+        autoSave: state.autoSave,
+        setAutoSave: state.setAutoSave,
+        histories: state.histories,
+        clearHistory: state.clearHistory,
+    })));
 
     // Per-profile history
     const activeKey = remnawave.activeProfileUuid

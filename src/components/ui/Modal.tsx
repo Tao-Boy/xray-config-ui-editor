@@ -142,7 +142,6 @@ export const Modal = ({
 
         {/* Content */}
         <div className={`${isFullScreen ? 'p-1' : 'p-3 md:p-6'} ${contentOverflow} overscroll-contain custom-scroll flex-1 relative flex flex-col min-h-0 @container`}>
-          {isDesktop && tabs && <div className="shrink-0 mb-3">{tabs}</div>}
           {children}
         </div>
 
@@ -161,7 +160,7 @@ export const Modal = ({
             buttons. Scrolled rather than wrapped, so it stays one line high,
             and outside the footer so a module that renders no footer still
             gets it. */}
-        {!isDesktop && tabs && (
+        {(!isDesktop || hideFooter) && tabs && (
           <div className={`flex items-center gap-2 px-3 py-2 border-t border-slate-800 bg-slate-900 shrink-0 overflow-x-auto hide-scrollbar [&>*]:shrink-0 [&_button]:whitespace-nowrap ${hideFooter ? 'pb-[max(0.5rem,env(safe-area-inset-bottom))]' : ''}`}>
             {tabs}
           </div>
@@ -177,6 +176,11 @@ export const Modal = ({
                 phone, the left half of the same row on a desktop. Scrolled
                 rather than wrapped, so the row stays one line high. */}
             <div className="flex gap-2 w-full md:w-auto justify-center md:justify-start overflow-x-auto hide-scrollbar relative z-10 [&>*]:shrink-0 [&_button]:whitespace-nowrap">
+                {/* A desktop's tab strip sits here, left of the module's own
+                    buttons — where every other editor keeps its view switch
+                    (DNS, Routing) — rather than stretched across the top of
+                    the content. A phone has its own row for it, above. */}
+                {isDesktop && tabs}
                 {extraButtons}
             </div>
             <div className="flex gap-3 w-full md:w-auto relative z-10">

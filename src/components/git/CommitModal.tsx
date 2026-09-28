@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Modal } from '../ui/Modal';
 import { Icon } from '../ui/Icon';
 import { useConfigStore } from '../../store/configStore';
+import { useShallow } from 'zustand/react/shallow';
 import { calculateConfigStats, generateShortHash } from '../../core/git/gitEngine';
 import { t } from '../../i18n';
 
@@ -11,7 +12,7 @@ interface CommitModalProps {
 }
 
 export const CommitModal: React.FC<CommitModalProps> = ({ onClose, onCommitSuccess }) => {
-    const { config, profiles, activeProfileId, saveActiveProfile, recordSnapshot } = useConfigStore();
+    const { config, profiles, activeProfileId, saveActiveProfile, recordSnapshot } = useConfigStore(useShallow(state => ({ config: state.config, profiles: state.profiles, activeProfileId: state.activeProfileId, saveActiveProfile: state.saveActiveProfile, recordSnapshot: state.recordSnapshot })));
     const activeProfile = profiles.find(p => p.id === activeProfileId);
 
     const stats = React.useMemo(() => {

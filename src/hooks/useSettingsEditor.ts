@@ -1,8 +1,9 @@
 import { useState, useCallback, useMemo } from 'react';
 import { useConfigStore } from '../store/configStore';
+import { useShallow } from 'zustand/react/shallow';
 
 export const useSettingsEditor = () => {
-    const { config, updateSection, toggleSection, coreVersion, setCoreVersion } = useConfigStore();
+    const { config, updateSection, toggleSection, coreVersion, setCoreVersion } = useConfigStore(useShallow(state => ({ config: state.config, updateSection: state.updateSection, toggleSection: state.toggleSection, coreVersion: state.coreVersion, setCoreVersion: state.setCoreVersion })));
     const [activeTab, setActiveTab] = useState<'general' | 'policy' | 'observatory'>('general');
     const [rawMode, setRawMode] = useState(false);
     const [rawText, setRawText] = useState<string | null>(null);

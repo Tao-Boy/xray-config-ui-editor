@@ -10,6 +10,7 @@ import { useField, useArrayField } from '../../../hooks/useField';
 import { useCoreVersion } from '../../../hooks/useCoreVersion';
 
 import { useConfigStore } from '../../../store/configStore';
+import { useShallow } from 'zustand/react/shallow';
 import { t } from '../../../i18n';
 
 /** What a chooser lists: the line's values, plus the current one so it is never shown blank. */
@@ -17,7 +18,7 @@ const withCurrent = (offered: string[], current: string | undefined): string[] =
     current !== undefined && !offered.includes(current) ? [...offered, current] : offered;
 
 export const InboundClients = ({ inbound, onChange, errors = {} as any }: any) => {
-    const { remnawave } = useConfigStore();
+    const { remnawave } = useConfigStore(useShallow(state => ({ remnawave: state.remnawave })));
     const { values } = useCoreVersion();
     const [ssPassLen, setSsPassLen] = React.useState(32);
     const proto = inbound.protocol;

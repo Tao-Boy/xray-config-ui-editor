@@ -3,6 +3,7 @@ import { Modal, ModalBottomBar } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { Select } from '../ui/Select';
 import { useConfigStore } from '../../store/configStore';
+import { useShallow } from 'zustand/react/shallow';
 import { Icon } from '../ui/Icon';
 
 import { RuleList } from './routing/RuleList';
@@ -17,7 +18,7 @@ import { useBackToClose } from '../../hooks/useBackToClose';
 import { t, tn } from '../../i18n';
 
 export const RoutingModal = ({ onClose, onOpenSnippets }: any) => {
-    const { config, updateSection } = useConfigStore();
+    const { config, updateSection } = useConfigStore(useShallow(state => ({ config: state.config, updateSection: state.updateSection })));
     
     const {
         rules,

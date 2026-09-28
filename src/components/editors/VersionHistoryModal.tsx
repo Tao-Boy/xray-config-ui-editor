@@ -3,11 +3,12 @@ import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { Icon } from '../ui/Icon';
 import { useConfigStore } from '../../store/configStore';
+import { useShallow } from 'zustand/react/shallow';
 import { JsonField } from '../ui/JsonField';
 import { t } from '../../i18n';
 
 export const VersionHistoryModal = ({ onClose }: { onClose: () => void }) => {
-    const { histories, activeProfileId, remnawave, restoreSnapshot, clearHistory, historyLimit } = useConfigStore();
+    const { histories, activeProfileId, remnawave, restoreSnapshot, clearHistory, historyLimit } = useConfigStore(useShallow(state => ({ histories: state.histories, activeProfileId: state.activeProfileId, remnawave: state.remnawave, restoreSnapshot: state.restoreSnapshot, clearHistory: state.clearHistory, historyLimit: state.historyLimit })));
 
     // Per-profile history
     const activeKey = remnawave.activeProfileUuid

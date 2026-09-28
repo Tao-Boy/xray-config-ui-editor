@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { useConfigStore } from '../store/configStore';
+import { useShallow } from 'zustand/react/shallow';
 import { parseRawSubscriptionText } from '../utils/link-parser';
 import { generateUUID } from '../core/generators/crypto';
 import { t } from '../i18n';
@@ -50,7 +51,7 @@ const autoDetectSystemParams = () => {
 };
 
 export function useConfigInspector(setModal: (m: any) => void) {
-    const { config: currentConfig, addOutbounds, updateSection, addItem } = useConfigStore();
+    const { config: currentConfig, addOutbounds, updateSection, addItem } = useConfigStore(useShallow(state => ({ config: state.config, addOutbounds: state.addOutbounds, updateSection: state.updateSection, addItem: state.addItem })));
 
     const [inputText, setInputText] = useState("");
     const [subUrl, setSubUrl] = useState("");

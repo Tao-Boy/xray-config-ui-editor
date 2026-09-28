@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { panelKey, useConfigStore } from '../store/configStore';
+import { useShallow } from 'zustand/react/shallow';
 import { RemnawaveClient, type RemnawaveProfile } from '../utils/remnawave-client';
 import { toast } from 'sonner';
 import { t } from '../i18n';
@@ -15,7 +16,17 @@ export const useRemnawaveEditor = (onClose: () => void) => {
         forgetRemnawaveAccount,
         renameRemnawaveAccount,
         setRemnawaveAccountRemember,
-    } = useConfigStore();
+    } = useConfigStore(useShallow(state => ({
+        remnawave: state.remnawave,
+        connectRemnawaveToken: state.connectRemnawaveToken,
+        fetchRemnawaveProfiles: state.fetchRemnawaveProfiles,
+        loadRemnawaveProfile: state.loadRemnawaveProfile,
+        disconnectRemnawave: state.disconnectRemnawave,
+        switchRemnawaveAccount: state.switchRemnawaveAccount,
+        forgetRemnawaveAccount: state.forgetRemnawaveAccount,
+        renameRemnawaveAccount: state.renameRemnawaveAccount,
+        setRemnawaveAccountRemember: state.setRemnawaveAccountRemember,
+    })));
 
     const [step, setStep] = useState<'login' | 'select'>('login');
     const [loading, setLoading] = useState(false);

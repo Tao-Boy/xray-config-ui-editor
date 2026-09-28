@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { generateWarpAccount } from '../core/generators/warp';
 import { useConfigStore } from '../store/configStore';
+import { useShallow } from 'zustand/react/shallow';
 import { getPresets } from '../core/presets';
 import { t } from '../i18n';
 
@@ -18,7 +19,7 @@ import { t } from '../i18n';
  * state and handler returned below.
  */
 export function useWarpGenerator(onGenerate: (outbound: any) => void, onClose: () => void) {
-    const { warpWorkerUrl } = useConfigStore();
+    const { warpWorkerUrl } = useConfigStore(useShallow(state => ({ warpWorkerUrl: state.warpWorkerUrl })));
     const [loading, setLoading] = useState(false);
     const [presetType, setPresetType] = useState('standard');
     const [excludeLocal, setExcludeLocal] = useState(true);
@@ -76,7 +77,13 @@ export function useWarpGenerator(onGenerate: (outbound: any) => void, onClose: (
 
             // 3. Merge data
             baseOutbound.settings.secretKey = warp.privateKey;
-            baseOutbound.settings.address = [`${warp.ipv4}/32`, `${warp.ipv6}/128`];
+            // Only the families the registration actually returned: a missing
+            // one used to be written as `undefined/128`, which no WireGuard
+            // config parses.
+            baseOutbound.settings.address = [
+                ...(warp.ipv4 ? [`${warp.ipv4}/32`] : []),
+                ...(warp.ipv6 ? [`${warp.ipv6}/128`] : []),
+            ];
             baseOutbound.settings.reserved = warp.reserved;
             baseOutbound.settings.peers[0].endpoint = warp.endpoint;
             baseOutbound.settings.peers[0].publicKey = warp.peerPublicKey;

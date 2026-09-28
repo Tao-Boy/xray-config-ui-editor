@@ -52,9 +52,10 @@ export const DnsModal = ({ onClose }: any) => {
                 title={t("DNS & FakeDNS (JSON)")}
                 onClose={onClose}
                 onSave={() => onClose()}
+                className="md:h-[88vh] md:max-h-[92dvh]"
                 extraButtons={<Button variant="secondary" className="text-xs py-1" onClick={() => setRawMode(false)} icon="Layout">{t("Form Mode")}</Button>}
             >
-                <div className="flex-1 min-h-0 md:flex-none md:h-[500px] flex flex-col gap-2">
+                <div className="flex-1 min-h-0 flex flex-col gap-2">
                     <div className="bg-slate-800/50 border border-slate-700/50 p-2 rounded text-[10px] text-slate-400">
                         {t("This editor manages the dns and fakedns root sections at the same time.")}
                     </div>
@@ -83,7 +84,10 @@ export const DnsModal = ({ onClose }: any) => {
             title={t("DNS Configuration")}
             onClose={onClose}
             onSave={() => onClose()}
-            className="md:max-w-[1000px]"
+            // As tall as the other big editors (Routing, Hosts, Snippets),
+            // with the panes below filling it: a fixed 500px pane used to
+            // leave the list short and the rest of the window empty.
+            className="md:max-w-[1000px] md:h-[88vh] md:max-h-[92dvh]"
             extraButtons={
                 <div className="flex gap-2 w-full md:w-auto overflow-x-auto pb-1 md:pb-0 hide-scrollbar">
                     <div className="flex bg-slate-950 p-1 rounded-lg border border-slate-800 shrink-0">
@@ -100,7 +104,7 @@ export const DnsModal = ({ onClose }: any) => {
                 </div>
             }
         >
-            <div className="flex-1 min-h-0 md:flex-none md:h-[500px] flex flex-col md:flex-row gap-6">
+            <div className="flex-1 min-h-0 flex flex-col md:flex-row gap-6">
 
                 {/* --- GENERAL TAB --- */}
                 {activeTab === 'general' && (

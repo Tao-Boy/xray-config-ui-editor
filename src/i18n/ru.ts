@@ -1370,7 +1370,6 @@ export const ru: Record<string, string> = {
         'Выберите теги outbound’ов или введите фильтры по префиксу (например, «vless-», «proxy-») для скрытных пакетных проверок.',
 
     // ── Core settings ───────────────────────────────────────────────────────
-    'Log & API': 'Логи и API',
     'Policy': 'Политики',
     'General Settings': 'Общие настройки',
     'Core Compatibility & Generators': 'Совместимость с ядром и генераторы',

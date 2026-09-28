@@ -3,6 +3,7 @@ import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { Icon } from '../ui/Icon';
 import { useConfigStore } from '../../store/configStore';
+import { useShallow } from 'zustand/react/shallow';
 import { GitDiffViewer } from './GitDiffViewer';
 import { computeJsonDiff } from '../../core/git/gitEngine';
 import { tallyLineChanges } from '../../core/git/bounded-diff';
@@ -18,7 +19,16 @@ export const GitHistoryModal = ({ onClose }: { onClose: () => void }) => {
         deleteSnapshot,
         clearHistory,
         deduplicateHistory,
-    } = useConfigStore();
+    } = useConfigStore(useShallow(state => ({
+        histories: state.histories,
+        activeProfileId: state.activeProfileId,
+        profiles: state.profiles,
+        remnawave: state.remnawave,
+        restoreSnapshot: state.restoreSnapshot,
+        deleteSnapshot: state.deleteSnapshot,
+        clearHistory: state.clearHistory,
+        deduplicateHistory: state.deduplicateHistory,
+    })));
 
     // Determine which history to show based on active profile
     const activeKey = remnawave.activeProfileUuid

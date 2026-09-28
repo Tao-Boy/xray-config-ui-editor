@@ -20,6 +20,7 @@
 import React from "react";
 import { toast } from "sonner";
 import { useConfigStore, type ConfigHistorySnapshot } from "../store/configStore";
+import { useShallow } from 'zustand/react/shallow';
 
 export interface ConfigDashboardGit {
   isModified: boolean;
@@ -43,7 +44,16 @@ export function useConfigDashboardGit(): ConfigDashboardGit {
     config: storeConfig,
     rawConfigText,
     recordSnapshot,
-  } = useConfigStore();
+  } = useConfigStore(useShallow(state => ({
+    profiles: state.profiles,
+    activeProfileId: state.activeProfileId,
+    saveActiveProfile: state.saveActiveProfile,
+    revertToBaseline: state.revertToBaseline,
+    baselineConfigJson: state.baselineConfigJson,
+    config: state.config,
+    rawConfigText: state.rawConfigText,
+    recordSnapshot: state.recordSnapshot,
+  })));
 
   const histories = useConfigStore((state) => state.histories);
   const remnawave = useConfigStore((state) => state.remnawave);

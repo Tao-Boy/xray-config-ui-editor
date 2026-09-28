@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { parseJsonc } from '../utils/jsonc';
 import { useConfigStore } from '../store/configStore';
+import { useShallow } from 'zustand/react/shallow';
 import { runFullDiagnostics } from '../core/diagnostics';
 import { parseJsonSubscription } from '../utils/link-parser';
 import { toast } from 'sonner';
@@ -23,7 +24,23 @@ export const useAppLogic = () => {
         disconnectRemnawave,
         initDns,
         hasHydrated
-    } = useConfigStore();
+    } = useConfigStore(useShallow(state => ({
+        config: state.config,
+        setConfig: state.setConfig,
+        loadConfig: state.loadConfig,
+        deleteItem: state.deleteItem,
+        deleteItems: state.deleteItems,
+        moveItem: state.moveItem,
+        updateItem: state.updateItem,
+        addItem: state.addItem,
+        addOutbounds: state.addOutbounds,
+        updateSection: state.updateSection,
+        remnawave: state.remnawave,
+        saveToRemnawave: state.saveToRemnawave,
+        disconnectRemnawave: state.disconnectRemnawave,
+        initDns: state.initDns,
+        hasHydrated: state.hasHydrated,
+    })));
 
     // Modal states
     const [modal, setModal] = useState<{ type: string | null, data: any, index: number | null }>({ type: null, data: null, index: null });

@@ -60,17 +60,35 @@ describe('Modal', () => {
             .toBe(Node.DOCUMENT_POSITION_PRECEDING);
     });
 
-    it('keeps a tab strip beside the content on a desktop', () => {
+    it('puts a desktop tab strip in the footer, beside the module buttons', () => {
         at(DESKTOP, (
-            <Modal title="Editor" onClose={() => {}} tabs={<button>Policy</button>}>
+            <Modal
+                title="Editor"
+                onClose={() => {}}
+                tabs={<button>Policy</button>}
+                extraButtons={<button>Export</button>}
+            >
                 <p>body</p>
             </Modal>
         ));
         const tabs = screen.getByText('Policy');
         const body = screen.getByText('body');
-        // Above the content it introduces, and inside the same scroll area.
-        expect(tabs.compareDocumentPosition(body)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
-        expect(tabs.closest('div')!.parentElement).toBe(body.parentElement);
+        // Below the content, as every other editor keeps its view switch —
+        // not stretched across the top of it.
+        expect(body.compareDocumentPosition(tabs)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+        // In the same row as the module's own buttons, left of them.
+        const exportButton = screen.getByText('Export');
+        expect(tabs.parentElement).toBe(exportButton.parentElement);
+        expect(tabs.compareDocumentPosition(exportButton)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    });
+
+    it('still shows a desktop tab strip when there is no footer to hold it', () => {
+        at(DESKTOP, (
+            <Modal title="Editor" onClose={() => {}} hideFooter tabs={<button>Policy</button>}>
+                <p>body</p>
+            </Modal>
+        ));
+        expect(screen.getByText('Policy')).toBeDefined();
     });
 
     it('moves the tab strip below the content on a phone', () => {

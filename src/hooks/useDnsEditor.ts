@@ -1,8 +1,9 @@
 import { useState, useCallback, useMemo } from 'react';
 import { useConfigStore } from '../store/configStore';
+import { useShallow } from 'zustand/react/shallow';
 
 export const useDnsEditor = () => {
-    const { config, updateSection } = useConfigStore();
+    const { config, updateSection } = useConfigStore(useShallow(state => ({ config: state.config, updateSection: state.updateSection })));
     // Memoised so the callbacks below keep their identity between renders.
     const dns = useMemo(() => config?.dns || {}, [config?.dns]);
     const fakedns = useMemo(() => config?.fakedns || [], [config?.fakedns]);

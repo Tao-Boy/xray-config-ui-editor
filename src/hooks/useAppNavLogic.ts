@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { useConfigStore } from '../store/configStore';
+import { useShallow } from 'zustand/react/shallow';
 
 export interface AppNavSelectorOption {
     value: string;
@@ -27,7 +28,15 @@ export function useAppNavLogic() {
         remnawave,
         loadRemnawaveProfile,
         config
-    } = useConfigStore();
+    } = useConfigStore(useShallow(state => ({
+        profiles: state.profiles,
+        activeProfileId: state.activeProfileId,
+        switchProfile: state.switchProfile,
+        createProfile: state.createProfile,
+        remnawave: state.remnawave,
+        loadRemnawaveProfile: state.loadRemnawaveProfile,
+        config: state.config,
+    })));
 
     // Compute selector options for cloud + local profiles
     const selectorOptions = useMemo<AppNavSelectorOption[]>(() => {

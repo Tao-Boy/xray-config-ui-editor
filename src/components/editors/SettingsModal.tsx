@@ -15,6 +15,7 @@ import { SpiderPathsEditor } from './settings/SpiderPathsEditor';
 
 import { useSettingsEditor } from '../../hooks/useSettingsEditor';
 import { useConfigStore } from '../../store/configStore';
+import { useShallow } from 'zustand/react/shallow';
 import { CORE_VERSIONS, type CoreVersion } from '../../core/xray/versions';
 import { t } from '../../i18n';
 
@@ -25,7 +26,7 @@ const VERSION_ROLE_LABELS = (): Record<CoreVersion['role'], string> => ({
 });
 
 export const SettingsModal = ({ onClose }: { onClose: () => void }) => {
-    const { warpWorkerUrl, setWarpWorkerUrl, rawConfigText } = useConfigStore();
+    const { warpWorkerUrl, setWarpWorkerUrl, rawConfigText } = useConfigStore(useShallow(state => ({ warpWorkerUrl: state.warpWorkerUrl, setWarpWorkerUrl: state.setWarpWorkerUrl, rawConfigText: state.rawConfigText })));
     const {
         coreVersion,
         setCoreVersion,
@@ -44,11 +45,24 @@ export const SettingsModal = ({ onClose }: { onClose: () => void }) => {
     } = useSettingsEditor();
 
 
+    // Same switch as DNS's footer: the tab strip is navigation, so it sits
+    // with the other controls at the foot rather than above the content.
+    const tabButton = (id: typeof activeTab, label: string) => (
+        <button
+            key={id}
+            onClick={() => setActiveTab(id)}
+            className={`px-2.5 py-1.5 text-xs font-bold rounded transition-all ${
+                activeTab === id ? 'bg-indigo-600 text-white shadow' : 'text-slate-400 hover:text-white'
+            }`}
+        >
+            {label}
+        </button>
+    );
     const tabs = (
         <div className="flex bg-slate-950 p-1 rounded-lg border border-slate-800 shrink-0">
-            <button onClick={() => setActiveTab('general')} className={`px-4 py-2.5 md:py-1.5 text-[10px] font-bold uppercase tracking-wider rounded transition-all ${activeTab === 'general' ? 'bg-indigo-600 text-white shadow' : 'text-slate-500 hover:text-slate-300'}`}>{t("Log & API")}</button>
-            <button onClick={() => setActiveTab('policy')} className={`px-4 py-2.5 md:py-1.5 text-[10px] font-bold uppercase tracking-wider rounded transition-all ${activeTab === 'policy' ? 'bg-indigo-600 text-white shadow' : 'text-slate-500 hover:text-slate-300'}`}>{t("Policy")}</button>
-            <button onClick={() => setActiveTab('observatory')} className={`px-4 py-2.5 md:py-1.5 text-[10px] font-bold uppercase tracking-wider rounded transition-all ${activeTab === 'observatory' ? 'bg-indigo-600 text-white shadow' : 'text-slate-500 hover:text-slate-300'}`}>{t("Observatory")}</button>
+            {tabButton('general', t("General"))}
+            {tabButton('policy', t("Policy"))}
+            {tabButton('observatory', t("Observatory"))}
         </div>
     );
 

@@ -1,5 +1,6 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useConfigStore } from '../store/configStore';
+import { useShallow } from 'zustand/react/shallow';
 import { getCriticalRuleErrors } from '../core/validators';
 import { createDefaultRoutingRule, createDefaultBalancer } from '../utils/protocol-factories';
 import { getSnippetRefName } from '../core/snippets';
@@ -7,7 +8,7 @@ import { toast } from 'sonner';
 import { t } from '../i18n';
 
 export const useRoutingEditor = (onClose: () => void) => {
-    const { config, updateSection, reorderRules, updateRoutingRule, updateBalancer } = useConfigStore();
+    const { config, updateSection, reorderRules, updateRoutingRule, updateBalancer } = useConfigStore(useShallow(state => ({ config: state.config, updateSection: state.updateSection, reorderRules: state.reorderRules, updateRoutingRule: state.updateRoutingRule, updateBalancer: state.updateBalancer })));
     const snippetLibrary = useConfigStore(state => state.snippetLibrary);
 
     // Panel snippets shadow same-named local templates: the panel's body is
