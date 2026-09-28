@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.22.0] - 2026-09-28
+
+### Changed
+- **An outbound is drawn with the fields its protocol actually has.** Every outbound got the same four blocks — server address, proxy chain, mux, and the whole transport stack — whatever the protocol. A loopback outbound offered a TLS fingerprint, a REALITY key and a dead UUID box; a blackhole one offered a network transport it has no connection to apply it to. Which blocks a protocol gets is now a table (`core/xray/outbound-shape.ts`), and it is not a matter of taste: an outbound handler is handed an `internet.Dialer`, and `proxy/loopback` takes it as `_` while `proxy/blackhole` never references it. Neither ever opens a connection, so neither has a transport, a `sendThrough` or anything to multiplex.
+  - Mux is offered only where the far end can demultiplex it. A plain SOCKS or HTTP proxy does not speak Mux.Cool.
+  - Freedom, DNS and WireGuard keep their transport block — they do dial — but lose the server card, which they never had a server for.
+
+### Added
+- **Loopback finally has its own fields.** `inboundTag` — the entire point of the protocol, and the only thing it needs — had nowhere to be typed: the generic server card was drawn instead, writing an address and port into a protocol that has neither. It gets a picker over the config's own inbound tags, and `sniffing` beside it, which the schema was missing too.
+- **Blackhole can answer with bytes of your own.** `response.type` offered `none` and `http`; the core also takes `custom` with a base64 `customResponseData`, which is how you return something other than a 403.
+
+### Fixed
+- **The proxy-chaining card wrote a field that stops Xray from starting.** `proxySettings` is a removed feature: `OutboundDetourConfig.Build()` answers *"this feature has been removed"* and refuses the config — not ignored the way an unknown field is. Cores up to 26.3 still accept it, so an outbound that already has one is shown rather than hidden, marked as removed, with one button to move it to `streamSettings.sockopt.dialerProxy` (keeping the rest of sockopt, and never overruling a `dialerProxy` already there) and one to drop it. Nothing offers to add a new one; the card now points at Sockopt, where chaining has lived all along.
+
 ## [1.21.2] - 2026-09-27
 
 ### Fixed

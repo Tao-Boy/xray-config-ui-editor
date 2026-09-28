@@ -79,6 +79,36 @@ export const ru: Record<string, string> = {
     'Never on a token for this app:': 'Никогда не давайте этому приложению:',
     'Give it a short expiry as well. On a panel too old for scoped tokens, every token can call everything — there the expiry is the only limit you have.':
         'И задайте короткий срок жизни. На панели, которая ещё не умеет ограниченные токены, любой токен может всё — там срок жизни остаётся единственным ограничением.',
+    // ── Outbound shape: loopback, blackhole, proxy chaining ─────────────────
+    'Loopback Settings': 'Настройки loopback',
+    'Traffic sent here never leaves Xray. It re-enters routing carrying the inbound tag below, so a second set of rules can decide where it really goes — which is how one rule\'s result becomes another rule\'s input.':
+        'Трафик, отправленный сюда, не покидает Xray. Он заново входит в маршрутизацию с указанным ниже тегом inbound, и второй набор правил решает, куда он пойдёт на самом деле — так результат одного правила становится входом для другого.',
+    'Inbound Tag (re-entry point)': 'Тег inbound (точка возврата)',
+    'Tag the traffic comes back in as...': 'Тег, с которым трафик вернётся…',
+    'Routing rules matching this tag decide where the traffic goes on its second pass. A tag no rule matches means it falls through to the first outbound.':
+        'Правила маршрутизации, совпавшие с этим тегом, решают судьбу трафика на втором проходе. Если тег не совпал ни с одним правилом, трафик уйдёт в первый outbound.',
+    'Sniffing on re-entry': 'Sniffing при возврате',
+    'Reads the destination out of the traffic itself, the same way an inbound does.':
+        'Определяет назначение из самого трафика — так же, как это делает inbound.',
+    'Route only (do not rewrite the destination)': 'Только маршрутизация (не переписывать назначение)',
+    'Send bytes of your own': 'Отправить свои байты',
+    'Custom Response (base64)': 'Свой ответ (base64)',
+    'Base64 of the exact bytes to write back. Xray decodes it at startup and will not run if it is not valid base64.':
+        'Base64 тех байтов, которые нужно отдать. Xray декодирует их при старте и не запустится, если это не корректный base64.',
+    'Proxy chaining (removed from Xray)': 'Цепочка прокси (удалена из Xray)',
+    'The core answers "this feature has been removed" and refuses to start. Older cores up to 26.3 still accept it.':
+        'Ядро отвечает «эта возможность удалена» и не стартует. Ядра до 26.3 включительно ещё принимают её.',
+    'This outbound chains through {tag} via proxySettings, which a current Xray refuses to load. The replacement is sockopt.dialerProxy and does the same job.':
+        'Этот outbound ходит через {tag} по proxySettings, а современный Xray такой конфиг не загрузит. Замена — sockopt.dialerProxy, делает то же самое.',
+    'Move it to sockopt.dialerProxy': 'Перенести в sockopt.dialerProxy',
+    'Remove it': 'Убрать',
+    "Sends this outbound's connection through another one first. Set as streamSettings.sockopt.dialerProxy, in Sockopt under Transport.":
+        'Пускает соединение этого outbound через другой. Задаётся как streamSettings.sockopt.dialerProxy — в разделе Sockopt под транспортом.',
+    'Chaining through {tag}, set in Sockopt under Transport.':
+        'Ходит через {tag} — задано в Sockopt под транспортом.',
+    'Not chained. Set a dialerProxy in Sockopt under Transport to send this outbound through another one.':
+        'Цепочки нет. Задайте dialerProxy в Sockopt под транспортом, чтобы пустить этот outbound через другой.',
+
     'Copies a JSON array, which is what the scopes field wants when you create the token.':
         'Копируется JSON-массив — именно его ждёт поле scopes при создании токена.',
     'Copy read-only': 'Скопировать только чтение',
@@ -905,7 +935,6 @@ export const ru: Record<string, string> = {
     'Obfuscator Only': 'Только обфускатор',
     'Import & Parse': 'Импортировать и разобрать',
     'Proxy Chaining (Optional)': 'Цепочка прокси (необязательно)',
-    'Direct (None)': 'Напрямую (без цепочки)',
     'When enabled, proxy chaining occurs at the transport layer instead of the application layer.':
         'Если включено, цепочка прокси строится на транспортном уровне, а не на прикладном.',
     'Mux (Multiplexing)': 'Mux (мультиплексирование)',

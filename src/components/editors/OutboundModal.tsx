@@ -12,13 +12,15 @@ import { OutboundImport } from './outbound/OutboundImport';
 import { OutboundGeneral } from './outbound/OutboundGeneral';
 import { OutboundServer } from './outbound/OutboundServer';
 import { OutboundWireguard } from './outbound/OutboundWireguard';
+import { OutboundLoopback } from './outbound/OutboundLoopback';
 import { OutboundProxyMux } from './outbound/OutboundProxyMux';
+import { outboundShape } from '../../core/xray/outbound-shape';
 import { TransportSettings } from './shared/TransportSettings';
 import { t, tn } from '../../i18n';
 
 export const OutboundModal = ({ data, onSave, onClose, index }: any) => {
     const { config, addItem, rawConfigText } = useConfigStore();
-    const allOutboundTags = (config?.outbounds || []).map((o: any) => o.tag).filter((tag: any) => tag);
+    const allInboundTags = (config?.inbounds || []).map((i: any) => i.tag).filter((tag: any) => tag);
 
     const {
         local,
@@ -33,6 +35,8 @@ export const OutboundModal = ({ data, onSave, onClose, index }: any) => {
         getError,
         wgPeerErrors
     } = useOutboundEditor(data, onSave, index);
+
+    const shape = outboundShape(local.protocol);
 
     const handleImport = (parsed: any) => {
         if (parsed.multiple && Array.isArray(parsed.outbounds)) {
@@ -112,7 +116,8 @@ export const OutboundModal = ({ data, onSave, onClose, index }: any) => {
                         outbound={local} 
                         onChange={updateField} 
                         onProtocolChange={handleProtocolChange}
-                        errors={{ tag: getError('tag') }} 
+                        errors={{ tag: getError('tag') }}
+                        showSendThrough={shape.transport}
                     />
                 </div>
                 
@@ -128,6 +133,12 @@ export const OutboundModal = ({ data, onSave, onClose, index }: any) => {
                                 ...wgPeerErrors,
                             }}
                         />
+                    ) : local.protocol === 'loopback' ? (
+                        <OutboundLoopback
+                            outbound={local}
+                            onChange={updateField}
+                            inboundTags={allInboundTags}
+                        />
                     ) : (
                         <OutboundServer
                             outbound={local}
@@ -136,22 +147,31 @@ export const OutboundModal = ({ data, onSave, onClose, index }: any) => {
                         />
                     )}
                 </div>
-                
-                {/* Mux / Proxy chain */}
-                <div className="relative z-20">
-                    <OutboundProxyMux outbound={local} onChange={updateField} allTags={allOutboundTags} />
-                </div>
+
+                {/* Mux / Proxy chain / targetStrategy. A protocol that never
+                    dials has none of these — see core/xray/outbound-shape. */}
+                {shape.transport && (
+                    <div className="relative z-20">
+                        <OutboundProxyMux
+                            outbound={local}
+                            onChange={updateField}
+                            showMux={shape.mux}
+                        />
+                    </div>
+                )}
 
                 {/* Transport / Stream Settings */}
-                <div className="relative z-10">
-                    <TransportSettings
-                        streamSettings={local.streamSettings}
-                        onChange={(s: any) => updateField('streamSettings', s)}
-                        isClient={true}
-                        errors={errors}
-                        protocol={local.protocol}
-                    />
-                </div>
+                {shape.transport && (
+                    <div className="relative z-10">
+                        <TransportSettings
+                            streamSettings={local.streamSettings}
+                            onChange={(s: any) => updateField('streamSettings', s)}
+                            isClient={true}
+                            errors={errors}
+                            protocol={local.protocol}
+                        />
+                    </div>
+                )}
             </div>
         </EditorLayout>
     );

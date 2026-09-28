@@ -1,15 +1,33 @@
 import React from 'react';
-import { TagSelector } from '../../ui/TagSelector';
 import { Switch } from '../../ui/Switch';
 import { Select } from '../../ui/Select';
 import { Help } from '../../ui/Help';
 import { ExtendedSection } from '../../ui/ExtendedSection';
 import { useField } from '../../../hooks/useField';
+import { migrateProxySettings } from '../../../core/xray/outbound-shape';
 import { t } from '../../../i18n';
 
-export const OutboundProxyMux = ({ outbound, onChange, allTags }: any) => {
-    const availableProxies = allTags.filter((tag: string) => tag !== outbound.tag);
-
+export const OutboundProxyMux = ({ outbound, onChange, showMux = true }: any) => {
+    /** Where chaining lives now; the card below reports it rather than duplicating its editor. */
+    const dialerProxy: string | undefined = outbound.streamSettings?.sockopt?.dialerProxy;
+    /**
+     * `proxySettings` is a removed feature.
+     *
+     * Xray-core stopped accepting it — `OutboundDetourConfig.Build()` answers
+     * `PrintRemovedFeatureError("outbound \"proxySettings\"",
+     * "\"streamSettings.sockopt.dialerProxy\"")`, so a config carrying it does
+     * not start at all on a current core. It still works on 26.3 and older,
+     * which is why an existing one is shown rather than hidden — but nothing
+     * offers to add a new one, and the replacement is one click away in
+     * Sockopt below.
+     */
+    const legacyProxyTag: string | undefined = outbound.proxySettings?.tag;
+    const migrateToDialerProxy = () => {
+        const migrated = migrateProxySettings(outbound);
+        if (migrated === outbound) return;
+        onChange('streamSettings', migrated.streamSettings);
+        onChange('proxySettings', undefined);
+    };
     // `outbound` is the editor's `local` state and `onChange` is its
     // `updateField(path, value)` (see OutboundModal.tsx).
     const transportLayer = useField<boolean>(outbound, onChange, ['proxySettings', 'transportLayer']);
@@ -17,18 +35,6 @@ export const OutboundProxyMux = ({ outbound, onChange, allTags }: any) => {
     const xudpConcurrency = useField<number>(outbound, onChange, ['mux', 'xudpConcurrency']);
     const xudpProxyUDP443 = useField<string>(outbound, onChange, ['mux', 'xudpProxyUDP443']);
     const targetStrategy = useField<string | undefined>(outbound, onChange, ['targetStrategy']);
-
-    // Setting the proxy tag replaces the whole `proxySettings` object (and
-    // clearing it drops `transportLayer` too), so this stays a dedicated
-    // writer rather than a single-leaf useField binding.
-    const updateProxy = (tag: string) => {
-        if (!tag) {
-            onChange('proxySettings', undefined);
-        } else {
-            onChange('proxySettings', { ...outbound.proxySettings, tag });
-        }
-    };
-
     // Enabling seeds a full set of mux defaults; disabling drops the whole
     // `mux` object rather than just flipping `enabled` to false.
     const updateMux = (enabled: boolean) => {
@@ -38,36 +44,63 @@ export const OutboundProxyMux = ({ outbound, onChange, allTags }: any) => {
             onChange('mux', { enabled: true, concurrency: 8, xudpConcurrency: 8, xudpProxyUDP443: "reject" });
         }
     };
-
     const hasExtendedValues = !!outbound.targetStrategy || !!outbound.proxySettings?.transportLayer;
-
     return (
         <div className="space-y-4 mt-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Proxy Chain */}
-                <div className="bg-slate-900/50 p-4 rounded-xl border border-slate-800 space-y-3">
-                    <h4 className="label-xs text-slate-400">{t("Proxy Chaining (Optional)")}</h4>
-                    <TagSelector
-                        availableTags={availableProxies}
-                        selected={outbound.proxySettings?.tag || ""}
-                        onChange={v => updateProxy(v as string)}
-                        placeholder={t("Direct (None)")}
-                    />
-                    {outbound.proxySettings?.tag && (
-                        <div className="pt-2 border-t border-slate-800/60 flex items-center justify-between">
-                            <span className="text-[11px] text-slate-400 flex items-center gap-1">
-                                Transport Layer Chaining
-                                <Help>{t("When enabled, proxy chaining occurs at the transport layer instead of the application layer.")}</Help>
-                            </span>
-                            <Switch
-                                checked={transportLayer.value || false}
-                                onChange={checked => transportLayer.onChange(checked)}
-                            />
-                        </div>
-                    )}
+            {legacyProxyTag && (
+                <div className="bg-rose-950/20 p-4 rounded-xl border border-rose-500/30 space-y-3">
+                    <h4 className="label-xs text-rose-300 flex items-center gap-1">
+                        {t("Proxy chaining (removed from Xray)")}
+                        <Help>{t("The core answers \"this feature has been removed\" and refuses to start. Older cores up to 26.3 still accept it.")}</Help>
+                    </h4>
+                    <p className="text-[11px] text-rose-200/70 leading-relaxed">
+                        {t("This outbound chains through {tag} via proxySettings, which a current Xray refuses to load. The replacement is sockopt.dialerProxy and does the same job.", { tag: legacyProxyTag })}
+                    </p>
+                    <div className="flex items-center justify-between gap-3 pt-2 border-t border-rose-500/20">
+                        <span className="text-[11px] text-slate-400 flex items-center gap-1">
+                            Transport Layer Chaining
+                            <Help>{t("When enabled, proxy chaining occurs at the transport layer instead of the application layer.")}</Help>
+                        </span>
+                        <Switch
+                            checked={transportLayer.value || false}
+                            onChange={checked => transportLayer.onChange(checked)}
+                        />
+                    </div>
+                    <div className="flex flex-col sm:flex-row gap-2">
+                        <button
+                            type="button"
+                            onClick={migrateToDialerProxy}
+                            className="flex-1 h-9 rounded-lg border border-emerald-500/40 bg-emerald-500/10 text-[11px] font-bold text-emerald-200 hover:border-emerald-400 transition-colors"
+                        >
+                            {t("Move it to sockopt.dialerProxy")}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => onChange('proxySettings', undefined)}
+                            className="flex-1 h-9 rounded-lg border border-slate-700 bg-slate-900 text-[11px] font-bold text-slate-300 hover:border-slate-500 transition-colors"
+                        >
+                            {t("Remove it")}
+                        </button>
+                    </div>
                 </div>
-
-                {/* Mux */}
+            )}
+            <div className={`grid grid-cols-1 gap-6 ${showMux ? 'md:grid-cols-2' : ''}`}>
+                {/* Proxy chaining, the way the core still takes it. */}
+                <div className="bg-slate-900/50 p-4 rounded-xl border border-slate-800 space-y-2">
+                    <h4 className="label-xs text-slate-400 flex items-center gap-1">
+                        {t("Proxy Chaining (Optional)")}
+                        <Help>{t("Sends this outbound's connection through another one first. Set as streamSettings.sockopt.dialerProxy, in Sockopt under Transport.")}</Help>
+                    </h4>
+                    <p className="text-[11px] text-slate-500 leading-relaxed">
+                        {dialerProxy
+                            ? t("Chaining through {tag}, set in Sockopt under Transport.", { tag: dialerProxy })
+                            : t("Not chained. Set a dialerProxy in Sockopt under Transport to send this outbound through another one.")}
+                    </p>
+                </div>
+                {/* Mux. A protocol whose far end cannot demultiplex a
+                    Mux.Cool stream — a plain SOCKS or HTTP proxy, a direct
+                    connection — is not offered it. */}
+                {showMux && (
                 <div className="bg-slate-900/50 p-4 rounded-xl border border-slate-800">
                     <div className="flex justify-between items-center mb-3">
                         <h4 className="label-xs text-slate-400">{t("Mux (Multiplexing)")}</h4>
@@ -76,7 +109,6 @@ export const OutboundProxyMux = ({ outbound, onChange, allTags }: any) => {
                             onChange={checked => updateMux(checked)}
                         />
                     </div>
-
                     {outbound.mux?.enabled && (
                         <div className="space-y-3 animate-in fade-in">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -95,7 +127,6 @@ export const OutboundProxyMux = ({ outbound, onChange, allTags }: any) => {
                                     />
                                 </div>
                             </div>
-
                             <Select
                                 label={t("UDP 443 Strategy (QUIC)")}
                                 value={xudpProxyUDP443.value || "reject"}
@@ -110,8 +141,8 @@ export const OutboundProxyMux = ({ outbound, onChange, allTags }: any) => {
                     )}
                     {!outbound.mux?.enabled && <p className="text-[10px] text-slate-500">{t("Enable to reduce handshake latency.")}</p>}
                 </div>
+                )}
             </div>
-
             {/* Extended Outbound Options */}
             <ExtendedSection
                 title={t("Extended Outbound Settings")}

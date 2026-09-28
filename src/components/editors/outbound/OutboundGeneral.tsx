@@ -4,7 +4,7 @@ import { SchemaForm } from '../../ui/SchemaForm';
 import { OutboundSchema, OutboundProtocolSchema } from '../../../core/xray/schemas';
 import { t } from '../../../i18n';
 
-export const OutboundGeneral = ({ outbound, onChange, onProtocolChange, errors = {} }: any) => {
+export const OutboundGeneral = ({ outbound, onChange, onProtocolChange, errors = {}, showSendThrough = true }: any) => {
     const handleFormChange = (newOutbound: any) => {
         if (newOutbound.protocol !== outbound.protocol) {
             onProtocolChange(newOutbound.protocol);
@@ -32,7 +32,12 @@ export const OutboundGeneral = ({ outbound, onChange, onProtocolChange, errors =
                 value={outbound}
                 onChange={handleFormChange}
                 errors={errors}
-                excludeKeys={['sendIP', 'streamSettings', 'settings', 'mux', 'proxySettings', 'targetStrategy']}
+                // `sendThrough` picks the local address a connection leaves
+                // from, so a protocol that never opens one has no use for it.
+                excludeKeys={[
+                    'sendIP', 'streamSettings', 'settings', 'mux', 'proxySettings', 'targetStrategy',
+                    ...(showSendThrough ? [] : ['sendThrough']),
+                ]}
                 fieldConfigs={{
                     protocol: {
                         label: t("Protocol"),

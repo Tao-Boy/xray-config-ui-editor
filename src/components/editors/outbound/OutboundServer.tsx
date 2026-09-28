@@ -36,6 +36,7 @@ export const OutboundServer = ({ outbound, onChange, errors = {} }: any) => {
     const userId = supportsUserId ? userIdField : { value: '', onChange: () => {} };
 
     const responseType = useField<string>(outbound, onChange, ['settings', 'response', 'type']);
+    const customResponse = useField<string | undefined>(outbound, onChange, ['settings', 'response', 'customResponseData']);
     const dnsAddress = useField<string>(outbound, onChange, ['settings', 'address']);
     const dnsPort = useField<number>(outbound, onChange, ['settings', 'port']);
     const domainStrategy = useField<string>(outbound, onChange, ['settings', 'domainStrategy']);
@@ -56,8 +57,27 @@ export const OutboundServer = ({ outbound, onChange, errors = {} }: any) => {
                     options={[
                         { value: "none", label: t("None"), description: t("Silent Drop") },
                         { value: "http", label: "HTTP", description: t("Return 403 Forbidden") },
+                        { value: "custom", label: t("Custom"), description: t("Send bytes of your own") },
                     ]}
                 />
+
+                {/* The core base64-decodes this field and refuses to start if
+                    it is not valid base64, so it is bytes, not text. */}
+                {responseType.value === 'custom' && (
+                    <div className="mt-4 animate-in fade-in">
+                        <FormField label={t("Custom Response (base64)")}>
+                            <textarea
+                                className="input-base font-mono text-xs min-h-[80px]"
+                                placeholder="SFRUUC8xLjEgNDA0IE5vdCBGb3VuZA0KDQo="
+                                value={customResponse.value || ""}
+                                onChange={e => customResponse.onChange(e.target.value || undefined)}
+                            />
+                        </FormField>
+                        <p className="text-[10px] text-slate-500 mt-1">
+                            {t("Base64 of the exact bytes to write back. Xray decodes it at startup and will not run if it is not valid base64.")}
+                        </p>
+                    </div>
+                )}
             </Card>
         );
     }
