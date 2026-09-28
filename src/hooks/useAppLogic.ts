@@ -215,7 +215,11 @@ export const useAppLogic = () => {
         () => [...snippetLibrary.local, ...snippetLibrary.panel],
         [snippetLibrary.local, snippetLibrary.panel]
     );
-    const diagnostics = useMemo(() => runFullDiagnostics(config, snippetDefs), [config, snippetDefs]);
+    const coreVersion = useConfigStore(state => state.coreVersion);
+    const diagnostics = useMemo(
+        () => runFullDiagnostics(config, snippetDefs, coreVersion),
+        [config, snippetDefs, coreVersion],
+    );
     const criticalCount = useMemo(() => diagnostics.filter(d => d.severity === 'critical').length, [diagnostics]);
     const warningCount = useMemo(() => diagnostics.filter(d => d.severity === 'warning').length, [diagnostics]);
 

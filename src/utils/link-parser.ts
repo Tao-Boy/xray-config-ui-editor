@@ -1,3 +1,20 @@
+/**
+ * An mKCP link's header type, as the finalmask mask that carries it now.
+ *
+ * `kcpSettings.header` is refused outright on 26.3 and 26.7 — any header
+ * object, even `{type: "none"}` — and ignored on 26.9 (infra/conf, KCPConfig
+ * Build). The obfuscation moved to finalmask: `mkcp-legacy` with the header's
+ * name (v26.7.28:infra/conf/transport_finalmask.go, MkcpLegacy), where the old
+ * `wechat-video` is spelled `wechat`. `none` gives nothing — whether the far
+ * end still expects the old framing cannot be told from a link.
+ */
+const kcpHeaderMask = (type: unknown): { udp: { type: string; settings: { header: string } }[] } | undefined => {
+    const name = String(type ?? '').toLowerCase();
+    const header = name === 'wechat-video' ? 'wechat' : name;
+    if (!['dns', 'dtls', 'srtp', 'utp', 'wechat', 'wireguard'].includes(header)) return undefined;
+    return { udp: [{ type: 'mkcp-legacy', settings: { header } }] };
+};
+
 export const parseWireguardConfig = (text: string, mode: 'direct' | 'chained' = 'direct'): any => {
     const lines = text.split('\n');
     const config: any = {
@@ -48,7 +65,10 @@ export const parseWireguardConfig = (text: string, mode: 'direct' | 'chained' = 
             }))
         },
         streamSettings: {
-            network: "udp",
+            // Not "udp": that is no transport name, and every supported core
+            // refuses the config with "unknown transport protocol". WireGuard
+            // dials UDP on its own; the stream is only here for finalmask.
+            network: "raw",
             security: "none"
         }
     };
@@ -181,9 +201,11 @@ export const parseXrayLink = (link: string): any => {
       }
 
       if (network === 'ws') {
+        // `host`, not `headers.Host`: the header spelling loads, and every
+        // supported core logs it as deprecated.
         outbound.streamSettings.wsSettings = {
           path: data.path || "/",
-          headers: { Host: data.host || "" }
+          ...(data.host ? { host: data.host } : {})
         };
       } else if (network === 'grpc') {
         outbound.streamSettings.grpcSettings = {
@@ -208,11 +230,9 @@ export const parseXrayLink = (link: string): any => {
           host: data.host || ""
         };
       } else if (network === 'kcp') {
-        outbound.streamSettings.kcpSettings = {
-          header: {
-            type: data.type || "none"
-          }
-        };
+        outbound.streamSettings.kcpSettings = {};
+        const mask = kcpHeaderMask(data.type);
+        if (mask) outbound.streamSettings.finalmask = mask;
       } else if (network === 'tcp' && data.type === 'http') {
         outbound.streamSettings.tcpSettings = {
           header: {
@@ -353,7 +373,9 @@ export const parseXrayLink = (link: string): any => {
           port: serverPort || parseInt(url.port) || 443,
           method: method || "aes-256-gcm",
           password: password,
-          uot: true
+          // No `uot`: an ss:// link does not carry it, 26.7 and later drop the
+          // key, and on 26.3 it switches on UDP-over-TCP, which a plain
+          // Shadowsocks server does not speak.
         }]
       };
     } else {
@@ -384,9 +406,10 @@ export const parseXrayLink = (link: string): any => {
     }
     
     if (network === 'ws') {
-      baseOutbound.streamSettings.wsSettings = { 
-          path: query.path || "/", 
-          headers: { Host: query.host || "" } 
+      // `host`, not `headers.Host`, which every supported core logs as deprecated.
+      baseOutbound.streamSettings.wsSettings = {
+          path: query.path || "/",
+          ...(query.host ? { host: query.host } : {})
       };
     }
     else if (network === 'grpc') {
@@ -414,11 +437,9 @@ export const parseXrayLink = (link: string): any => {
       };
     }
     else if (network === 'kcp') {
-      baseOutbound.streamSettings.kcpSettings = {
-        header: {
-          type: query.headerType || query.type || "none"
-        }
-      };
+      baseOutbound.streamSettings.kcpSettings = {};
+      const mask = kcpHeaderMask(query.headerType || query.type);
+      if (mask) baseOutbound.streamSettings.finalmask = mask;
     }
     else if (network === 'tcp' && (query.headerType === 'http' || query.type === 'http')) {
       baseOutbound.streamSettings.tcpSettings = {

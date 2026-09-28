@@ -6,6 +6,8 @@ import {
     snippetProvidedOutboundTags,
     type SnippetDefinition,
 } from '../snippets';
+import { versionDiagnostics } from '../xray/versions/check';
+import type { CoreVersionId } from '../xray/versions';
 
 export type DiagnosticSeverity = 'critical' | 'warning' | 'info';
 
@@ -27,7 +29,13 @@ export interface Diagnostic {
  */
 export const runFullDiagnostics = (
     config: XrayConfig | null,
-    snippets: SnippetDefinition[] = []
+    snippets: SnippetDefinition[] = [],
+    /**
+     * The core the config is meant for. Given, the result also says what that
+     * core would refuse or silently drop — see core/xray/versions. Omitted,
+     * nothing version-specific is checked.
+     */
+    version?: CoreVersionId,
 ): Diagnostic[] => {
     const diagnostics: Diagnostic[] = [];
 
@@ -242,6 +250,8 @@ export const runFullDiagnostics = (
                 : 'Open Snippets and refresh to load snippet bodies from the panel.',
         });
     });
+
+    if (version) diagnostics.push(...versionDiagnostics(config, version));
 
     return diagnostics;
 };

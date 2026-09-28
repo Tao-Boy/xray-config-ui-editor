@@ -2,14 +2,16 @@ import React from 'react';
 import { useConfigStore } from '../../store/configStore';
 import { useInboundEditor } from '../../hooks/useInboundEditor';
 import { EditorLayout } from '../ui/EditorLayout';
-import { ExtendedSection } from '../ui/ExtendedSection';
 import { InboundGeneral } from './inbound/InboundGeneral';
 import { InboundClients } from './inbound/InboundClients';
 import { InboundSniffing } from './inbound/InboundSniffing';
 import { InboundTun } from './inbound/InboundTun';
-import { InboundAllocate } from './inbound/InboundAllocate';
+import { InboundTunnel } from './inbound/InboundTunnel';
+import { InboundCoreNotes } from './inbound/InboundCoreNotes';
 import { TransportSettings } from './shared/TransportSettings';
 import { t } from '../../i18n';
+
+const TUNNEL_PROTOCOLS = ['dokodemo-door', 'tunnel'];
 
 export const InboundModal = ({ data, onSave, onClose }: any) => {
     const rawConfigText = useConfigStore(state => state.rawConfigText);
@@ -43,23 +45,28 @@ export const InboundModal = ({ data, onSave, onClose }: any) => {
             onCommitShortcut={() => useConfigStore.getState().recordSnapshot("Manual Commit (Ctrl+Shift+S)")}
         >
             <div className="space-y-8 pb-8">
+                {/* What the chosen core refuses or ignores here — read first, fixed in place. */}
+                <InboundCoreNotes inbound={local} onChange={updateField} />
+
                 <section className="relative z-40 animate-in fade-in slide-in-from-top-4 duration-500">
-                    <InboundGeneral 
-                        inbound={local} 
-                        onChange={updateField} 
+                    <InboundGeneral
+                        inbound={local}
+                        onChange={updateField}
                         onProtocolChange={handleProtocolChange}
-                        errors={{ tag: getError('tag'), port: getError('port') }} 
+                        errors={{ tag: getError('tag'), port: getError('port') }}
                     />
                 </section>
 
                 <section className="relative z-30">
                     {local.protocol === 'tun' ? (
                         <InboundTun inbound={local} onChange={updateField} errors={errors} />
+                    ) : TUNNEL_PROTOCOLS.includes(local.protocol) ? (
+                        <InboundTunnel inbound={local} onChange={updateField} />
                     ) : (
-                        <InboundClients 
-                            inbound={local} 
-                            onChange={updateField} 
-                            errors={{ clients: getError('clients') }} 
+                        <InboundClients
+                            inbound={local}
+                            onChange={updateField}
+                            errors={{ clients: getError('clients') }}
                         />
                     )}
                 </section>
@@ -82,18 +89,12 @@ export const InboundModal = ({ data, onSave, onClose }: any) => {
                         errors={errors}
                     />
                 </section>
-
-                {/* Extended Settings */}
-                <section className="relative z-0">
-                    <ExtendedSection
-                        title={t("Extended Inbound Settings")}
-                        description={t("Port hopping/rotation (allocate) and advanced listener options.")}
-                        hasActiveValues={!!local.allocate}
-                        activeCount={local.allocate ? 1 : 0}
-                    >
-                        <InboundAllocate allocate={local.allocate} onChange={updateField} />
-                    </ExtendedSection>
-                </section>
+                {/*
+                  * No "allocate" section: InboundDetourConfig has no such key on
+                  * any supported line (v26.3.27:infra/conf/xray.go:126), so the
+                  * port-rotation switches that used to live here did nothing.
+                  * An existing one is reported by InboundCoreNotes, with Remove.
+                  */}
             </div>
         </EditorLayout>
     );

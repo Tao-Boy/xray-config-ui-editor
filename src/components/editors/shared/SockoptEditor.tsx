@@ -8,12 +8,59 @@ import { Switch } from '../../ui/Switch';
 import { DurationInput } from '../../ui/DurationInput';
 import { ExtendedSection } from '../../ui/ExtendedSection';
 import { useSockoptEditor } from '../../../hooks/useSockoptEditor';
+import { useCoreVersion } from '../../../hooks/useCoreVersion';
+import { compareCoreVersions } from '../../../core/xray/versions';
+import { DOMAIN_STRATEGY_OPTIONS } from '../outbound/domain-strategies';
 import { t } from '../../../i18n';
 
-export const SockoptEditor = ({ sockopt, onChange, isClient }: { sockopt: any; onChange: (value: any) => void; isClient?: boolean }) => {
+/**
+ * Socket options for one stream.
+ *
+ * `protocol` is the protocol of the inbound or outbound this belongs to. The
+ * core treats a few keys differently per protocol — 26.9 refuses a freedom
+ * outbound that sets addressPortStrategy — and without it this editor could
+ * only offer what every protocol takes.
+ */
+export const SockoptEditor = ({ sockopt, onChange, isClient, protocol }: {
+    sockopt: any;
+    onChange: (value: any) => void;
+    isClient?: boolean;
+    protocol?: string;
+}) => {
     const { local, update, add, remove, hasExtendedValues } = useSockoptEditor(sockopt, onChange);
     const config = useConfigStore(state => state.config);
     const outboundTags = (config?.outbounds || []).map((o: any) => o.tag).filter(Boolean);
+    const { version, tag, values } = useCoreVersion();
+
+    // addressPortStrategy: what the core resolves (transport_sockopt.go:154),
+    // narrowed on a 26.9 freedom outbound to `none` (v26.9.9:infra/conf/xray.go:344).
+    // Empty strings in the value sets are for the check, not the chooser.
+    const strategiesEverywhere = values('stream.sockopt.addressPortStrategy').filter(Boolean);
+    const strategiesHere = protocol === 'freedom'
+        ? values('freedom.stream.sockopt.addressPortStrategy').filter(Boolean)
+        : strategiesEverywhere;
+    const addressPortStrategy: string | undefined = typeof local.addressPortStrategy === 'string' && local.addressPortStrategy !== ''
+        ? local.addressPortStrategy
+        : undefined;
+    const knows = (list: string[], value: string) => list.some(v => v.toLowerCase() === value.toLowerCase());
+    const strategyProblem = addressPortStrategy && !knows(strategiesHere, addressPortStrategy)
+        ? knows(strategiesEverywhere, addressPortStrategy)
+            ? t("Xray {tag} refuses addressPortStrategy on a freedom outbound — the config will not load.", { tag })
+            : t("Xray {tag} does not know this strategy — the config will not load.", { tag })
+        : undefined;
+    // Only a dialer reads it (transport/internet/dialer.go:138): offered on a
+    // client where the line takes more than `none`, shown anywhere it is set.
+    const showStrategy = (isClient && strategiesHere.length > 1) || (addressPortStrategy !== undefined && addressPortStrategy.toLowerCase() !== 'none');
+    const strategyOptions = [
+        ...strategiesHere.map(value => ({ value, label: value === 'none' ? t("None (Default)") : value })),
+        ...(addressPortStrategy && !knows(strategiesHere, addressPortStrategy)
+            ? [{ value: addressPortStrategy, label: addressPortStrategy, disabled: true }]
+            : []),
+    ];
+    // On a 26.9 freedom outbound, a non-AsIs targetStrategy or the old
+    // settings.domainStrategy is copied over this one with a warning
+    // (v26.9.9:infra/conf/xray.go:349-362).
+    const freedomOverwritesStrategy = protocol === 'freedom' && compareCoreVersions(version, '26.9') >= 0;
 
     if (!sockopt) {
         return (
@@ -116,18 +163,14 @@ export const SockoptEditor = ({ sockopt, onChange, isClient }: { sockopt: any; o
                                     placeholder={t("Select outbound...")}
                                 />
                             </div>
-                                <Select 
+                                <Select
                                     label={t("Domain Strategy")}
+                                    help={freedomOverwritesStrategy
+                                        ? t("On a freedom outbound Xray {tag} replaces this with a non-AsIs targetStrategy or settings.domainStrategy, and logs that it did.", { tag })
+                                        : undefined}
                                     value={local.domainStrategy || "AsIs"}
                                     onChange={val => update('domainStrategy', val)}
-                                    options={[
-                                        { value: "AsIs", label: t("AsIs") },
-                                        { value: "UseIP", label: t("UseIP") },
-                                        { value: "UseIPv4", label: t("UseIPv4") },
-                                        { value: "UseIPv6", label: t("UseIPv6") },
-                                        { value: "UseIPv4v6", label: t("UseIPv4v6") },
-                                        { value: "UseIPv6v4", label: t("UseIPv6v4") },
-                                    ]}
+                                    options={DOMAIN_STRATEGY_OPTIONS()}
                                 />
                         </>
                     )}
@@ -163,17 +206,16 @@ export const SockoptEditor = ({ sockopt, onChange, isClient }: { sockopt: any; o
                 >
                     <div className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <Select
-                                label={t("Address Port Strategy")}
-                                value={local.addressPortStrategy || "none"}
-                                onChange={val => update('addressPortStrategy', val === "none" ? undefined : val)}
-                                options={[
-                                    { value: "none", label: t("None (Default)") },
-                                    { value: "same", label: t("Same (Reuse)") },
-                                    { value: "different", label: t("Different") },
-                                    { value: "random", label: t("Random") },
-                                ]}
-                            />
+                            {showStrategy && (
+                                <Select
+                                    label={t("Address Port Strategy")}
+                                    help={t("Look the destination up in DNS SRV or TXT records and dial the address and/or port found there.")}
+                                    value={addressPortStrategy ?? "none"}
+                                    onChange={val => update('addressPortStrategy', val === "none" ? undefined : val)}
+                                    options={strategyOptions}
+                                    error={strategyProblem}
+                                />
+                            )}
 
                             <div className="flex items-center justify-between bg-slate-900/60 p-3 rounded-xl border border-slate-800">
                                 <div>
@@ -241,7 +283,9 @@ export const SockoptEditor = ({ sockopt, onChange, isClient }: { sockopt: any; o
                                     <div className="flex flex-col justify-center">
                                         <label className="label-xs text-[10px] mb-1.5">{t("Prioritize IPv6")}</label>
                                         <Switch
-                                            checked={local.happyEyeballs.prioritizeIPv6 ?? true}
+                                            // The core default is false (v26.7.28:infra/conf/transport_sockopt.go:34); showing
+                                            // true for an absent key claimed a setting the config does not have.
+                                            checked={local.happyEyeballs.prioritizeIPv6 ?? false}
                                             onChange={checked => update('happyEyeballs', { ...local.happyEyeballs, prioritizeIPv6: checked })}
                                         />
                                     </div>

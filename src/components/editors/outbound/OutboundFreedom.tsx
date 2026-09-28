@@ -7,6 +7,7 @@ import { Icon } from '../../ui/Icon';
 import { ExtendedSection } from '../../ui/ExtendedSection';
 import { useField } from '../../../hooks/useField';
 import { DOMAIN_STRATEGY_OPTIONS } from './domain-strategies';
+import { useCoreVersion } from '../../../hooks/useCoreVersion';
 import { t } from '../../../i18n';
 
 /**
@@ -31,6 +32,13 @@ export const OutboundFreedom = ({ outbound, onChange }: any) => {
         outbound, onChange,
         ['settings', legacyKey ? 'domainStrategy' : 'targetStrategy'],
     );
+
+    // On 26.9 both spellings are deprecated: the core copies the value into
+    // sockopt.domainStrategy — overwriting whatever is set there — and logs
+    // that it did (infra/conf/xray.go, v26.9.9).
+    const { statusAt, tag: coreTag } = useCoreVersion();
+    const strategyDeprecated = statusAt('outbound', 'settings.targetStrategy', 'freedom') === 'deprecated'
+        || statusAt('outbound', 'settings.domainStrategy', 'freedom') === 'deprecated';
 
     const redirect = useField<string | undefined>(outbound, onChange, ['settings', 'redirect']);
     const userLevel = useField<number | undefined>(outbound, onChange, ['settings', 'userLevel']);
@@ -67,7 +75,9 @@ export const OutboundFreedom = ({ outbound, onChange }: any) => {
             <div className="mt-4">
                 <Select
                     label={legacyKey ? t("Domain Strategy (legacy key)") : t("Domain Strategy")}
-                    hint={t("The core moves this into sockopt.domainStrategy itself and logs that it did. All eleven values are the ones it accepts.")}
+                    hint={strategyDeprecated
+                        ? t("Deprecated on {tag}: the core copies this into sockopt.domainStrategy, overwriting what is set there, and logs a warning. Set it in Sockopt under Transport instead.", { tag: coreTag })
+                        : t("How a target domain is resolved before connecting. All eleven values are the ones the core accepts.")}
                     value={strategy.value || "AsIs"}
                     onChange={val => strategy.onChange(val === "AsIs" ? undefined : val)}
                     options={DOMAIN_STRATEGY_OPTIONS()}

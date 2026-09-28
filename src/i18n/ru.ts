@@ -85,10 +85,321 @@ export const ru: Record<string, string> = {
         'CONNECT-IP поверх HTTP/3 — доступен только outbound masque',
     'Removed from Xray — use {replacement}': 'Удалён из Xray — используйте {replacement}',
 
+    // ── Core versions ──
+    'What the editors offer and what diagnostics call refused or silently ignored both follow this.':
+        'От этого зависит, что предлагают редакторы и что диагностика считает отвергнутым или молча проигнорированным.',
+    'Oldest supported release':
+        'Самый старый поддерживаемый релиз',
+    'What Remnawave nodes run':
+        'То, что стоит на нодах Remnawave',
+    'Newest release':
+        'Самый новый релиз',
+    '{what} is refused by Xray {tag} — the config will not load.':
+        '{what} отвергается Xray {tag} — конфиг не загрузится.',
+    '{what} does not exist in Xray {tag}, which drops it silently — it does nothing there.':
+        '{what} нет в Xray {tag}: ядро молча его выбрасывает, так что там оно ничего не делает.',
+    '{what} is deprecated in Xray {tag}. It still works, and the log will ask you to move off it.':
+        '{what} устарело в Xray {tag}. Пока работает, но в логе попросят с него уйти.',
+    'Use {replacement} instead.':
+        'Используйте {replacement}.',
+
+    'Checked against Xray {tag}': 'Проверено против Xray {tag}',
+
+    'Proxy chaining (refused by Xray {tag})':
+        'Цепочка прокси (отвергается Xray {tag})',
+    'Proxy chaining (removed in Xray 26.9)':
+        'Цепочка прокси (удалена в Xray 26.9)',
+    '26.9 answers "this feature has been removed" and refuses to start. 26.3 and 26.7 still run it.':
+        '26.9 отвечает «эта возможность удалена» и не стартует. 26.3 и 26.7 её ещё выполняют.',
+    'This outbound chains through {tag} via proxySettings. It works on {core}, and stops the config from loading on 26.9 — sockopt.dialerProxy does the same job on every supported version.':
+        'Этот outbound ходит через {tag} по proxySettings. На {core} это работает, а на 26.9 конфиг не загрузится — sockopt.dialerProxy делает то же самое на всех поддерживаемых версиях.',
+
+    'Xray {tag} takes: {values}.':
+        'Xray {tag} принимает: {values}.',
+
+    'A {protocol} outbound without TLS or REALITY to the public address {address} is refused by Xray {tag} — the config will not load.':
+        '{protocol}-outbound без TLS или REALITY на публичный адрес {address} отвергается Xray {tag} — конфиг не загрузится.',
+    'Set security to tls or reality. Private and LAN addresses are exempt.':
+        'Поставьте security tls или reality. На приватные и локальные адреса это правило не распространяется.',
+    'A blackhole response without a type is refused by Xray {tag} — the config will not load.':
+        'Ответ blackhole без типа отвергается Xray {tag} — конфиг не загрузится.',
+    'Set the type to none or http, or remove the response.':
+        'Укажите тип none или http либо уберите response.',
+    '{what} "{value}" is used twice; Xray {tag} refuses to start with a duplicate.':
+        '{what} «{value}» встречается дважды; с таким повтором Xray {tag} не стартует.',
+    'A hysteria outbound needs version 2; Xray {tag} refuses anything else.':
+        'Hysteria-outbound нужна version 2; всё остальное Xray {tag} отвергает.',
+    'Set settings.version to 2.':
+        'Поставьте settings.version = 2.',
+    'A hysteria outbound takes its server as settings.address; without it Xray {tag} does not start.':
+        'Hysteria-outbound берёт сервер из settings.address; без него Xray {tag} не стартует.',
+    'Move the address out of servers[] into settings.address and settings.port.':
+        'Перенесите адрес из servers[] в settings.address и settings.port.',
+    'A hysteria inbound needs version 2; Xray {tag} refuses it missing or different.':
+        'Hysteria-inbound нужна version 2; без неё или с другой Xray {tag} его отвергает.',
+    'This rule sets domainStrategy "{value}", which no supported Xray core reads on a rule. Set it on routing instead.':
+        'У правила задан domainStrategy «{value}», а у правила его не читает ни одно поддерживаемое ядро Xray. Задайте его в routing.',
+    'Local OS (26.9+)':
+        'ОС узла (26.9+)',
+    'Matches the OS the Xray process runs on (e.g. windows, linux, darwin). Read from Xray 26.9; older cores drop the key, and a rule left with no other condition then fails to load.':
+        'Совпадает с ОС, на которой запущен Xray (windows, linux, darwin). Читается с Xray 26.9; старые ядра выбрасывают ключ, и правило без других условий тогда не загрузится.',
+    'Deprecated on {tag}: the core copies this into sockopt.domainStrategy, overwriting what is set there, and logs a warning. Set it in Sockopt under Transport instead.':
+        'Устарело на {tag}: ядро копирует это в sockopt.domainStrategy, перезаписывая то, что там стоит, и пишет предупреждение. Задайте в Sockopt под транспортом.',
+    'How a target domain is resolved before connecting. All eleven values are the ones the core accepts.':
+        'Как разрешается домен назначения перед подключением. Все одиннадцать значений — те, что принимает ядро.',
+    'Only Xray 26.3 reads this; {tag} drops it, so it does nothing here.':
+        'Это читает только Xray 26.3; {tag} выбрасывает ключ, так что здесь он ничего не делает.',
+    'Arrived in Xray 26.9; {tag} drops it, so it does nothing here.':
+        'Появилось в Xray 26.9; {tag} выбрасывает ключ, так что здесь он ничего не делает.',
+
+    'Obfuscation layers wrapped around the transport, and the QUIC parameters for hysteria and XHTTP. What is offered here follows the Xray version set in Settings: {tag}.':
+        'Слои обфускации поверх транспорта и параметры QUIC для hysteria и XHTTP. Что здесь предлагается, зависит от версии Xray, выбранной в настройках: {tag}.',
+    'Add finalmask':
+        'Добавить finalmask',
+    'Remove finalmask':
+        'Убрать finalmask',
+    'refused by Xray {tag}':
+        'отвергается Xray {tag}',
+    'Xray {tag} does not know {type} as a {list} mask, so the config will not load.':
+        'Xray {tag} не знает {type} как {list}-маску, поэтому конфиг не загрузится.',
+    'Convert to mkcp-legacy':
+        'Перевести на mkcp-legacy',
+    'Move up':
+        'Переместить выше',
+    'Move down':
+        'Переместить ниже',
+    'Remove layer':
+        'Удалить слой',
+    'QUIC Parameters':
+        'Параметры QUIC',
+    'Read by the hysteria and XHTTP (HTTP/3) transports only. An empty field is left out of the config, so the core uses its default.':
+        'Их читают только транспорты hysteria и XHTTP (HTTP/3). Пустое поле в конфиг не попадает — ядро берёт своё значение по умолчанию.',
+    'Domains this server answers for, one per line: example.com or example.com:txt.':
+        'Домены, за которые отвечает этот сервер, по одному в строке: example.com или example.com:txt.',
+    'Resolvers the client queries through, one per line: example.com+udp://1.1.1.1:53.':
+        'Резолверы, через которые клиент шлёт запросы, по одному в строке: example.com+udp://1.1.1.1:53.',
+    'Seconds between hops, at least 5: 10 or 5-30.':
+        'Секунд между прыжками, не меньше 5: 10 или 5-30.',
+    'Switches salamander to gecko framing (1-2048), which plain salamander and 26.3 cannot talk to.':
+        'Переключает salamander на кадрирование gecko (1-2048), с которым обычный salamander и 26.3 не договорятся.',
+    'One range per line; overrides length when set.':
+        'По диапазону в строке; если задано, заменяет length.',
+    'One range per line; overrides delay when set.':
+        'По диапазону в строке; если задано, заменяет delay.',
+    'Seconds, 4-120.':
+        'Секунды, 4-120.',
+    'Seconds, 2-60.':
+        'Секунды, 2-60.',
+    '(server)':
+        '(сервер)',
+    '(client)':
+        '(клиент)',
+    'Default':
+        'По умолчанию',
+    'not a value this version takes':
+        'эта версия такого значения не принимает',
+    'Not valid JSON yet — the config keeps the last valid value.':
+        'Пока не валидный JSON — в конфиге остаётся последнее верное значение.',
+    'Remove noise packet':
+        'Удалить noise-пакет',
+    'Add Noise Packet':
+        'Добавить noise-пакет',
+    'refused by Xray {tag} — the config will not load':
+        'отвергается Xray {tag} — конфиг не загрузится',
+    'ignored by Xray {tag}':
+        'игнорируется в Xray {tag}',
+    'deprecated in Xray {tag}':
+        'устарело в Xray {tag}',
+    'only the server side reads this':
+        'это читает только серверная сторона',
+    'only the client side reads this':
+        'это читает только клиентская сторона',
+    'older spelling, still read':
+        'старое написание, пока читается',
+    'Xray {tag} applies the first {list} mask nearest the socket; 26.7 and later apply the last one there. A peer on 26.7 or later needs this list in reverse order.':
+        'Xray {tag} ставит ближе всего к сокету первую {list}-маску, а 26.7 и новее — последнюю. Пиру на 26.7 и новее нужен этот список в обратном порядке.',
+    'Xray {tag} applies the last {list} mask nearest the socket; 26.3 applied the first one there. A peer on 26.3 needs this list in reverse order.':
+        'Xray {tag} ставит ближе всего к сокету последнюю {list}-маску, а 26.3 ставил первую. Пиру на 26.3 нужен этот список в обратном порядке.',
+    '{type} has to be the first UDP mask on Xray {tag}. Anywhere else the core stops with "requires being at the outermost level" when it sets the connection up.':
+        'На Xray {tag} {type} должна быть первой UDP-маской. В любом другом месте ядро при установке соединения остановится с «requires being at the outermost level».',
+    '{type} has to be the last UDP mask on Xray {tag}. Anywhere else the core stops with "requires being at the outermost level" when it sets the connection up.':
+        'На Xray {tag} {type} должна быть последней UDP-маской. В любом другом месте ядро при установке соединения остановится с «requires being at the outermost level».',
+    'A UDP sudoku mask has to be the first in the list on Xray {tag}. Anywhere else the core stops with "must be the innermost mask in chain".':
+        'На Xray {tag} UDP-маска sudoku должна стоять в списке первой. В любом другом месте ядро остановится с «must be the innermost mask in chain».',
+    'A UDP sudoku mask has to be the last in the list on Xray {tag}. Anywhere else the core stops with "must be the innermost mask in chain".':
+        'На Xray {tag} UDP-маска sudoku должна стоять в списке последней. В любом другом месте ядро остановится с «must be the innermost mask in chain».',
+    '{type} cannot run over quicParams.udpHop on Xray {tag}: with hop ports set, every dial fails with "requires being at the outermost level".':
+        'На Xray {tag} {type} не работает поверх quicParams.udpHop: когда заданы порты для прыжков, каждое подключение падает с «requires being at the outermost level».',
+    'xdns needs a domain on Xray {tag}; without one the config does not load ("empty domain").':
+        'На Xray {tag} xdns нужен domain; без него конфиг не загрузится («empty domain»).',
+    'xdns needs domains (server) or resolvers (client) on Xray {tag}; with neither the config does not load.':
+        'На Xray {tag} xdns нужны domains (сервер) или resolvers (клиент); без обоих конфиг не загрузится.',
+    'Resolver "{value}" has no "+udp://" part, so Xray {tag} refuses the config. The form is domain+udp://IP:port.':
+        'В резолвере «{value}» нет части «+udp://», поэтому Xray {tag} отвергает конфиг. Формат: domain+udp://IP:port.',
+    'An xdns server answers for its domains, and this one has none: the inbound fails to start ("empty domains").':
+        'Сервер xdns отвечает за свои domains, а здесь их нет: inbound не запустится («empty domains»).',
+    'An xdns client sends through its resolvers, and this one has none: every connection fails ("empty resolvers").':
+        'Клиент xdns шлёт запросы через свои resolvers, а здесь их нет: каждое подключение упадёт («empty resolvers»).',
+    'udphop only works on the client side; on an inbound Xray {tag} fails to start ("udphop: client only").':
+        'udphop работает только на стороне клиента; с ним на inbound Xray {tag} не стартует («udphop: client only»).',
+    'udphop needs a mode on Xray {tag}: intervalLocal, intervalRemote or perConnRemote, comma-separated. Without one the config does not load.':
+        'На Xray {tag} udphop нужен mode: intervalLocal, intervalRemote или perConnRemote через запятую. Без него конфиг не загрузится.',
+    '"{value}" is not a udphop mode, so Xray {tag} refuses the config. It takes intervalLocal, intervalRemote and perConnRemote, comma-separated without spaces.':
+        '«{value}» — не режим udphop, поэтому Xray {tag} отвергает конфиг. Принимаются intervalLocal, intervalRemote и perConnRemote через запятую без пробелов.',
+    'udphop needs an interval of at least 5 seconds at both ends (10, or "5-30"); otherwise every connection fails ("invalid interval").':
+        'udphop нужен interval не меньше 5 секунд с обоих концов (10 или «5-30»); иначе каждое подключение упадёт («invalid interval»).',
+
+    "Each user signs in with its auth string. Bandwidth is not set here: it belongs to the transport's finalmask (quicParams brutalUp / brutalDown).":
+        'Каждый пользователь входит по своей строке auth. Скорость здесь не задаётся: она живёт в finalmask транспорта (quicParams brutalUp / brutalDown).',
+    'Auth':
+        'Auth (пароль)',
+    'A plain entry matches every domain that contains it; full: matches one exact domain, and domain:, keyword:, regexp: and geosite: work as in routing rules. A bad regexp or an unknown geosite stops the config from loading. 26.3 read a plain entry as an exact domain.':
+        'Запись без префикса совпадает с любым доменом, который её содержит; full: — ровно с одним доменом, а domain:, keyword:, regexp: и geosite: работают как в правилах маршрутизации. Кривой regexp или неизвестный geosite не дадут конфигу загрузиться. 26.3 читал запись без префикса как точный домен.',
+    'A plain entry matches that exact domain, and regexp: is understood. From 26.7 a plain entry matches as a substring instead — regexp:^name$ stays exact on every version.':
+        'Запись без префикса совпадает ровно с этим доменом, ещё понимается regexp:. С 26.7 такая запись совпадает как подстрока — точным на всех версиях остаётся только regexp:^name$.',
+    '"auto" picks the interface outbound traffic leaves by, a name pins one, and an empty value turns it off. With routing-table entries set and this left out, the core uses "auto".':
+        '"auto" сам выбирает интерфейс, через который уходит исходящий трафик, имя закрепляет конкретный, пустое значение выключает. Если записи таблицы маршрутизации заданы, а это поле пропущено, ядро берёт "auto".',
+    'Forwarding Target':
+        'Куда перенаправлять',
+    'Where every connection arriving here is sent. Left empty, the original destination is kept — which is what transparent proxying with Follow Redirect needs.':
+        'Куда отправляется каждое пришедшее сюда соединение. Если пусто, остаётся исходное назначение — это и нужно прозрачному проксированию с Follow Redirect.',
+    'Left empty, the original port is kept.':
+        'Если пусто, остаётся исходный порт.',
+    'Which traffic this inbound accepts. Left out, only TCP.':
+        'Какой трафик принимает этот inbound. Если не указано — только TCP.',
+    'Follow Redirect':
+        'Follow Redirect',
+    'Send redirected (TPROXY / REDIRECT) traffic to its original destination instead of the address above.':
+        'Отправлять перенаправленный (TPROXY / REDIRECT) трафик по его исходному назначению, а не на адрес выше.',
+    '{key} and {alias} are both set. Every supported Xray reads {key}, so {alias} does nothing.':
+        'Заданы и {key}, и {alias}. Все поддерживаемые версии Xray читают {key}, так что {alias} ничего не делает.',
+    '{key} is empty, which leaves this inbound with no users on any supported Xray.':
+        '{key} пуст — значит, на любой поддерживаемой версии Xray у этого inbound нет пользователей.',
+    'Use {alias} instead':
+        'Взять {alias}',
+    'Remove {alias}':
+        'Убрать {alias}',
+    '{what} is not read by any supported Xray version — it does nothing.':
+        '{what} не читает ни одна поддерживаемая версия Xray — оно ничего не делает.',
+    'Rename to {key}':
+        'Переименовать в {key}',
+    'Remove the reverse section':
+        'Убрать секцию reverse',
+    'Legacy reverse is refused by Xray {tag}':
+        'Старый reverse отвергается Xray {tag}',
+    "Bridges and portals were removed in 26.7. Any reverse section — even an empty one — stops the config from loading, and the core's error points at VLESS reverse proxy.":
+        'Мосты и порталы удалены в 26.7. Любая секция reverse — даже пустая — не даёт конфигу загрузиться, а ошибка ядра отсылает к VLESS reverse proxy.',
+    'VLESS reverse proxy replaces it: the server gives a VLESS client a reverse tag, and the far end dials in with a VLESS outbound carrying settings.reverse. This editor does not build that yet.':
+        "На смену пришёл VLESS reverse proxy: сервер даёт VLESS-клиенту тег reverse, а другая сторона подключается VLESS outbound'ом с settings.reverse. Этот редактор пока такое не собирает.",
+    'What this config has':
+        'Что есть в этом конфиге',
+    'Removing the section is what lets this config load on {tag}. To keep editing it instead, set the target Xray version to 26.3 in Settings.':
+        'Только без этой секции конфиг загрузится на {tag}. Чтобы продолжить её редактировать, выберите в настройках целевую версию Xray 26.3.',
+    'This config has no reverse section, and nothing here will add one.':
+        'Секции reverse в этом конфиге нет, и отсюда её не добавить.',
+    'Works on 26.3 only. From 26.7 any reverse section stops the config from loading — VLESS reverse proxy replaces it.':
+        'Работает только на 26.3. С 26.7 любая секция reverse не даёт конфигу загрузиться — её заменяет VLESS reverse proxy.',
+
+    'This transport was removed from Xray, so there is nothing here to edit. Pick another network above.':
+        'Этот транспорт удалён из Xray, редактировать здесь нечего. Выберите другую сеть выше.',
+    'mKCP obfuscation is a Finalmask UDP mask now. On Xray {tag}: {masks}. Add one under Finalmask below.':
+        'Обфускация mKCP теперь делается UDP-маской Finalmask. В Xray {tag}: {masks}. Добавьте её в Finalmask ниже.',
+    'Max Sending Window (bytes)':
+        'Макс. окно отправки (байт)',
+    'Replaced writeBufferSize in Xray 26.7. Must be at least the MTU.':
+        'Заменило writeBufferSize в Xray 26.7. Должно быть не меньше MTU.',
+    'Congestion Window Multiplier':
+        'Множитель окна перегрузки',
+    '404 Not Found (default)':
+        '404 Not Found (по умолчанию)',
+    'Files from a directory':
+        'Файлы из каталога',
+    'Reverse proxy':
+        'Обратный прокси',
+    'Fixed response':
+        'Фиксированный ответ',
+    'Hysteria Settings':
+        'Настройки Hysteria',
+    'hysteriaSettings.version must be 2 — Xray {tag} refuses anything else, including no version at all.':
+        'hysteriaSettings.version должен быть 2 — любое другое значение, как и его отсутствие, Xray {tag} отвергает.',
+    'Set version 2':
+        'Указать версию 2',
+    'Checked only when this inbound has no users of its own.':
+        'Проверяется, только если у этого inbound нет своих пользователей.',
+    'The password this client sends to the server.':
+        'Пароль, который клиент отправляет серверу.',
+    'UDP Idle Timeout (s)':
+        'Таймаут простоя UDP (с)',
+    'Masquerade':
+        'Маскировка',
+    'What the server shows to anything that is not a Hysteria client.':
+        'Что сервер показывает всем, кто не является клиентом Hysteria.',
+    'Xray {tag} does not know this masquerade — the inbound will not start.':
+        'Xray {tag} не знает такую маскировку — inbound не запустится.',
+    'Directory':
+        'Каталог',
+    'Upstream URL':
+        'URL апстрима',
+    'Rewrite Host header':
+        'Переписывать заголовок Host',
+    'Skip upstream certificate check':
+        'Не проверять сертификат апстрима',
+    'Add X-Forwarded-* headers':
+        'Добавлять заголовки X-Forwarded-*',
+    'Response Body':
+        'Тело ответа',
+    'Status Code':
+        'Код ответа',
+    'Protocol version 2 is written for you — it is the only one Xray takes. Congestion control, bandwidth and port hopping are set under Finalmask.':
+        'Версия протокола 2 записывается автоматически — другую Xray не принимает. Контроль перегрузки, полоса и смена портов настраиваются в Finalmask.',
+    'ECH Force Query':
+        'Принудительный запрос ECH',
+    'How hard to insist on fetching the ECH config over DNS: none, half or full. Only Xray 26.3 reads it.':
+        'Насколько настойчиво запрашивать конфиг ECH через DNS: none, half или full. Читает только Xray 26.3.',
+    'This config also sets method = "{method}", the alias of network that Xray {tag} reads first — so {method} is the transport that runs, whatever network says.':
+        'В конфиге ещё задан method = "{method}" — синоним network, который Xray {tag} читает первым. Поэтому работает транспорт {method}, что бы ни было в network.',
+    'Move it to network':
+        'Перенести в network',
+    '{keys} belong to another transport. Xray builds them anyway, so one that no longer loads stops the whole config.':
+        '{keys} относятся к другому транспорту. Xray всё равно их собирает, так что если один из них не загружается, не загрузится и весь конфиг.',
+    'Remove them':
+        'Удалить их',
+    'It turned off certificate checks. Pin the server certificate by its SHA-256, or name the certificate you expect, instead.':
+        'Он отключал проверку сертификата. Вместо этого закрепите сертификат сервера по SHA-256 или укажите, какой сертификат ожидается.',
+    'A hysteria proxy runs only on the hysteria transport — Xray {tag} refuses to start it on anything else.':
+        'Прокси hysteria работает только на транспорте hysteria — на любом другом Xray {tag} его не запустит.',
+    'The hysteria transport runs only with TLS: without it an inbound does not start and an outbound cannot connect.':
+        'Транспорт hysteria работает только с TLS: без него inbound не запустится, а outbound не сможет подключиться.',
+    'REALITY runs only over RAW, XHTTP or gRPC — Xray {tag} refuses it over {network}.':
+        'REALITY работает только поверх RAW, XHTTP или gRPC — поверх {network} Xray {tag} его отвергает.',
+    'Xray {tag} takes {min}–{max} ms.':
+        'Xray {tag} принимает {min}–{max} мс.',
+    'Xray {tag} refuses an MTU below {min}.':
+        'Xray {tag} отвергает MTU меньше {min}.',
+    'Xray {tag} refuses a value below {min}.':
+        'Xray {tag} отвергает значение меньше {min}.',
+    'Xray {tag} refuses a window smaller than the MTU ({mtu} bytes).':
+        'Xray {tag} отвергает окно меньше MTU ({mtu} байт).',
+    'Xray {tag} takes 0 (default {fallback}) or {min}–{max} s.':
+        'Xray {tag} принимает 0 (по умолчанию {fallback}) или {min}–{max} с.',
+    'Xray {tag} refuses addressPortStrategy on a freedom outbound — the config will not load.':
+        'Xray {tag} отвергает addressPortStrategy на outbound freedom — конфиг не загрузится.',
+    'Xray {tag} does not know this strategy — the config will not load.':
+        'Xray {tag} не знает такой стратегии — конфиг не загрузится.',
+    'On a freedom outbound Xray {tag} replaces this with a non-AsIs targetStrategy or settings.domainStrategy, and logs that it did.':
+        'На outbound freedom Xray {tag} заменяет это значение на targetStrategy или settings.domainStrategy, если там не AsIs, и пишет об этом в лог.',
+    'Look the destination up in DNS SRV or TXT records and dial the address and/or port found there.':
+        'Искать адрес назначения в DNS-записях SRV или TXT и подключаться к найденным там адресу и/или порту.',
+    'Left empty, Xray {tag} uses {pool}, 600-900 requests and 1800-3000 s per connection. Set it to get the same on every core.':
+        'Если оставить пустым, Xray {tag} использует {pool}, 600-900 запросов и 1800-3000 с на соединение. Задайте явно, чтобы на всех ядрах было одинаково.',
+    'Xray {tag} refuses downloadSettings in mode stream-one — pick another mode or remove them.':
+        'Xray {tag} отвергает downloadSettings в режиме stream-one — выберите другой режим или удалите их.',
+
+    'hysteriaSettings needs version 2; Xray {tag} refuses anything else.':
+        'hysteriaSettings нужна version 2; всё остальное Xray {tag} отвергает.',
+
     // ── Freedom: fragment, noises and the rest of its settings ──────────────
     'Domain Strategy (legacy key)': 'Стратегия доменов (старый ключ)',
-    'The core moves this into sockopt.domainStrategy itself and logs that it did. All eleven values are the ones it accepts.':
-        'Ядро само переносит это в sockopt.domainStrategy и пишет об этом в лог. Все одиннадцать значений — те, что оно принимает.',
     'TLS Fragmentation': 'Фрагментация TLS',
     'Cuts the outgoing stream into pieces so a filter cannot read the handshake in one go.':
         'Режет исходящий поток на куски, чтобы фильтр не прочитал рукопожатие целиком.',
@@ -139,9 +450,6 @@ export const ru: Record<string, string> = {
     'Custom Response (base64)': 'Свой ответ (base64)',
     'Base64 of the exact bytes to write back. Xray decodes it at startup and will not run if it is not valid base64.':
         'Base64 тех байтов, которые нужно отдать. Xray декодирует их при старте и не запустится, если это не корректный base64.',
-    'Proxy chaining (removed from Xray)': 'Цепочка прокси (удалена из Xray)',
-    'The core answers "this feature has been removed" and refuses to start. Older cores up to 26.3 still accept it.':
-        'Ядро отвечает «эта возможность удалена» и не стартует. Ядра до 26.3 включительно ещё принимают её.',
     'This outbound chains through {tag} via proxySettings, which a current Xray refuses to load. The replacement is sockopt.dialerProxy and does the same job.':
         'Этот outbound ходит через {tag} по proxySettings, а современный Xray такой конфиг не загрузит. Замена — sockopt.dialerProxy, делает то же самое.',
     'Move it to sockopt.dialerProxy': 'Перенести в sockopt.dialerProxy',
@@ -277,9 +585,6 @@ export const ru: Record<string, string> = {
     'Transport protocol used to deliver data.': 'Транспортный протокол, по которому идут данные.',
     'Security': 'Шифрование',
     'Encryption layer (TLS/Reality).': 'Слой шифрования (TLS/Reality).',
-    'RAW Socket Settings': 'Настройки RAW-сокета',
-    'Used primarily with Finalmask for obfuscation.':
-        'В основном используется вместе с Finalmask для обфускации.',
     'HTTP Upgrade Configuration': 'Настройки HTTP Upgrade',
     'Host': 'Host',
     'TCP (RAW) Settings': 'Настройки TCP (RAW)',
@@ -301,16 +606,11 @@ export const ru: Record<string, string> = {
     'Initial Windows Size': 'Начальный размер окна',
     'mKCP Settings': 'Настройки mKCP',
     'Enable Congestion Control': 'Включить контроль перегрузки',
-    'Header Type': 'Тип заголовка',
-    'Seed': 'Seed',
-    'password': 'пароль',
     'TTI (ms)': 'TTI (мс)',
     'Uplink Capacity (MB/s)': 'Пропускная способность вверх (МБ/с)',
     'Downlink Capacity (MB/s)': 'Пропускная способность вниз (МБ/с)',
     'Read Buffer Size (MB)': 'Размер буфера чтения (МБ)',
     'Write Buffer Size (MB)': 'Размер буфера записи (МБ)',
-    'QUIC Settings': 'Настройки QUIC',
-    'Key': 'Ключ',
     'Reality: A TLS extension for mimicking popular websites to bypass firewalls.':
         'REALITY: расширение TLS, которое маскирует соединение под популярные сайты, обходя блокировки.',
     'Extended REALITY Settings': 'Расширенные настройки REALITY',
@@ -628,8 +928,6 @@ export const ru: Record<string, string> = {
         'Фильтрует трафик по тегу входящего соединения.',
     'Network': 'Сеть',
     'Protocol': 'Протокол',
-    'UseIP will force Xray to resolve the domain before matching.':
-        'UseIP заставит Xray сначала разрешить домен, а потом сопоставлять.',
     'Extended Rule Settings & Webhooks': 'Расширенные настройки правила и вебхуки',
     'Custom HTTP attributes, rule tagging for metrics, and webhook dispatch.':
         'Свои HTTP-атрибуты, теги правил для метрик и отправка вебхуков.',
@@ -673,14 +971,6 @@ export const ru: Record<string, string> = {
     'Encryption algorithm for Shadowsocks.': 'Алгоритм шифрования для Shadowsocks.',
     'Password / Pre-shared Key': 'Пароль / общий ключ',
     'Length:': 'Длина:',
-    'Bandwidth & Global Settings': 'Скорость и общие настройки',
-    'Maximum upload speed in Mbps for Hysteria 2 protocol.':
-        'Максимальная скорость отдачи в Мбит/с для Hysteria 2.',
-    'Maximum download speed in Mbps for Hysteria 2 protocol.':
-        'Максимальная скорость загрузки в Мбит/с для Hysteria 2.',
-    'Ignore Client Bandwidth': 'Игнорировать скорость клиента',
-    'If enabled, the server will ignore the bandwidth limits requested by the client.':
-        'Если включено, сервер не будет учитывать ограничения скорости, запрошенные клиентом.',
     'Hysteria 2 Users': 'Пользователи Hysteria 2',
     'Password': 'Пароль',
     'Auth Type': 'Тип аутентификации',
@@ -936,13 +1226,7 @@ export const ru: Record<string, string> = {
     'Layer {n}': 'Слой {n}',
     'Layer Type': 'Тип слоя',
     'Delay': 'Задержка',
-    'Listen IP (0.0.0.0)': 'IP прослушивания (0.0.0.0)',
-    'Experimental. Controls BBR/Brutal congestion and limits.':
-        'Экспериментально. Управляет контролем перегрузки BBR/Brutal и лимитами.',
-    'Max Idle Timeout': 'Макс. время простоя',
     'Handshake Timeout': 'Таймаут рукопожатия',
-    'Congestion Control': 'Контроль перегрузки',
-    'Brutal Up (Mbps)': 'Brutal вверх (Мбит/с)',
 
     // ── Outbound protocols ──────────────────────────────────────────────────
     'Blackhole Settings': 'Настройки Blackhole',
@@ -1086,8 +1370,6 @@ export const ru: Record<string, string> = {
     'General Settings': 'Общие настройки',
     'Core Compatibility & Generators': 'Совместимость с ядром и генераторы',
     'Target Xray-core Version': 'Целевая версия Xray-core',
-    'Adjusts UI fields and validation based on core features.':
-        'Подстраивает поля интерфейса и проверки под возможности этой версии ядра.',
     'WARP Worker URL': 'URL воркера WARP',
     'Optional: Your private Cloudflare Worker URL for CORS-safe registration.':
         'Необязательно: адрес вашего Cloudflare Worker для регистрации без проблем с CORS.',
@@ -1202,23 +1484,13 @@ export const ru: Record<string, string> = {
     'Template body copied': 'Тело шаблона скопировано',
 
     // ── Inbound ─────────────────────────────────────────────────────────────
-    'Rotates or dynamically allocates listen ports across a specified range for anti-censorship port hopping.':
-        'Меняет или динамически выделяет порты прослушивания в заданном диапазоне — приём против блокировок.',
-    'Dynamically open random port listeners from the port range.':
-        'Динамически открывать случайные порты из диапазона.',
     'Refresh Interval': 'Интервал обновления',
-    'Interval to rotate random ports.': 'Как часто меняются случайные порты.',
     'Concurrency': 'Параллельность',
-    'Number of concurrent random ports to listen on.':
-        'Сколько случайных портов слушать одновременно.',
     'Traffic Sniffing': 'Sniffing трафика',
     'Enable Sniffing': 'Включить sniffing',
     'Analyze traffic to determine destination domain and protocol.':
         'Разбирает трафик, чтобы определить домен назначения и протокол.',
     'Inbound Editor': 'Редактор inbound',
-    'Extended Inbound Settings': 'Расширенные настройки inbound',
-    'Port hopping/rotation (allocate) and advanced listener options.':
-        'Смена портов (allocate) и продвинутые параметры прослушивания.',
     'Inbound Connectivity': 'Подключение inbound',
     'TUN Interface Settings': 'Настройки интерфейса TUN',
 
@@ -1449,16 +1721,10 @@ export const ru: Record<string, string> = {
     'Next-gen stealth encryption': 'Скрытное шифрование нового поколения',
     'No obfuscation': 'Без обфускации',
     'Simulate HTTP request': 'Имитировать HTTP-запрос',
-    'Video call simulation': 'Имитация видеозвонка',
-    'BitTorrent simulation': 'Имитация BitTorrent',
-    'WeChat video call': 'Видеозвонок WeChat',
-    'DTLS 1.2 simulation': 'Имитация DTLS 1.2',
-    'WireGuard simulation': 'Имитация WireGuard',
 
     // ── Routing rule fields ─────────────────────────────────────────────────
     'Outbound': 'Outbound',
     'Load Balancer': 'Балансировщик',
-    'Default (Inherit)': 'По умолчанию (наследовать)',
     'Target Port': 'Порт назначения',
     'Source Port': 'Порт источника',
     'Source port or port range.': 'Порт или диапазон портов источника.',
@@ -1475,9 +1741,6 @@ export const ru: Record<string, string> = {
     'User email match list.': 'Список email пользователей для сопоставления.',
     'Process Name': 'Имя процесса',
     'Process name match list.': 'Список имён процессов для сопоставления.',
-    'Local OS (Experimental)': 'Локальная ОС (экспериментально)',
-    'Matches the OS the Xray process runs on (e.g. windows, linux, darwin). Landed on xray-core main 2026-08-12 (commit a12801c1) — not in a tagged release yet.':
-        'Сопоставляет ОС, в которой работает процесс Xray (windows, linux, darwin). Появилось в main xray-core 12.08.2026 (коммит a12801c1) — в релизах пока нет.',
     'Callback URL': 'URL обратного вызова',
     'URL to POST webhook notifications.': 'URL, на который отправляются вебхуки.',
     'Deduplication (seconds)': 'Дедупликация (секунды)',
@@ -1701,12 +1964,9 @@ export const ru: Record<string, string> = {
     // ── Sockopt / XHTTP / Finalmask options ─────────────────────────────────
     'Off': 'Выкл',
     'None (Default)': 'Нет (по умолчанию)',
-    'Same (Reuse)': 'Тот же (переиспользовать)',
-    'Different': 'Другой',
     'Highest compatibility': 'Максимальная совместимость',
     'Full duplex (Fast)': 'Полный дуплекс (быстро)',
     'Single request': 'Один запрос',
-    'Force Brutal': 'Принудительно Brutal',
 
     // ── Hosts, snippets and the rest ────────────────────────────────────────
     'Create host': 'Создать хост',
@@ -1744,12 +2004,6 @@ export const ru: Record<string, string> = {
     'Raw Text (.txt)': 'Текст (.txt)',
     'No matching domains/IPs found.': 'Подходящих доменов или IP не найдено.',
     'No items found.': 'Ничего не найдено.',
-    'Always (Fixed List)': 'Всегда (фиксированный список)',
-    'Allocates all random ports continuously':
-        'Постоянно держит открытыми все случайные порты',
-    'Random Rotation': 'Случайная смена',
-    'Randomly cycles ports on refresh interval':
-        'Случайно меняет порты с заданным интервалом',
     'Xray supports multiple protocols like VLESS, VMess, Trojan, and Shadowsocks.':
         'Xray поддерживает VLESS, VMess, Trojan, Shadowsocks и другие протоколы.',
     'Listen IP': 'IP прослушивания',
@@ -1789,9 +2043,6 @@ export const ru: Record<string, string> = {
     'IP/DNS leak checkers direct': 'Проверки утечек IP/DNS напрямую',
     'Sites like whoer.net and ipleak.net. Proxied, they report the exit node instead of your real connection.':
         'Сайты вроде whoer.net и ipleak.net. Через прокси они покажут выходную ноду, а не ваше реальное подключение.',
-    'Latest (v1.8.10+)': 'Последняя (v1.8.10+)',
-    'Stable (v1.8.0)': 'Стабильная (v1.8.0)',
-    'Legacy (v1.5.0)': 'Устаревшая (v1.5.0)',
     'Connect Remnawave': 'Подключить Remnawave',
     'Select Profile': 'Выберите профиль',
     'Click to collapse': 'Нажмите, чтобы свернуть',

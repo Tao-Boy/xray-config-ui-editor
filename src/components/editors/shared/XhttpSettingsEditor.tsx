@@ -5,6 +5,8 @@ import { Help } from '../../ui/Help';
 import { Select } from '../../ui/Select';
 import { DurationInput } from '../../ui/DurationInput';
 import { useXhttpSettingsEditor } from '../../../hooks/useXhttpSettingsEditor';
+import { useCoreVersion } from '../../../hooks/useCoreVersion';
+import { compareCoreVersions } from '../../../core/xray/versions';
 import { t } from '../../../i18n';
 
 interface XhttpSettingsEditorProps {
@@ -20,6 +22,14 @@ export const XhttpSettingsEditor = ({ xhttpSettings = {}, onChange, isClient = f
     const [showDownload, setShowDownload] = useState(false);
 
     const { update, extra, xmux } = useXhttpSettingsEditor(xhttpSettings, onChange);
+    const { version, tag } = useCoreVersion();
+    // With xmux empty the lines fall back to different pools: 26.3 to one
+    // request per connection (v26.3.27:infra/conf/transport_internet.go:395),
+    // 26.7+ to three connections (v26.7.28:infra/conf/transport_method.go:453).
+    const xmuxDefault = compareCoreVersions(version, '26.7') < 0 ? 'maxConcurrency 1' : 'maxConnections 3';
+    // downloadSettings is refused in stream-one on every line
+    // (v26.7.28:infra/conf/transport_method.go:501).
+    const downloadRefused = xhttpSettings.mode === 'stream-one' && !!extra.downloadSettings;
 
     return (
         <div className={`space-y-4 animate-in fade-in ${isDownload ? 'bg-indigo-950/20 p-4 rounded-xl border border-indigo-500/30' : ''}`}>
@@ -150,6 +160,9 @@ export const XhttpSettingsEditor = ({ xhttpSettings = {}, onChange, isClient = f
 
                             {showXmux && (
                                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4 p-4 bg-blue-900/10 rounded-xl border border-blue-500/20 animate-in slide-in-from-top-1">
+                                    <p className="col-span-full text-[10px] text-slate-400 leading-relaxed">
+                                        {t("Left empty, Xray {tag} uses {pool}, 600-900 requests and 1800-3000 s per connection. Set it to get the same on every core.", { tag, pool: xmuxDefault })}
+                                    </p>
                                     <div>
                                         <label className="label-xs flex items-center">{t("Max Concurrency")} <Help>{t("Concurrent requests per connection. e.g. \"16-32\".")}</Help></label>
                                         <input className="input-base font-mono" placeholder="16-32"
@@ -211,6 +224,11 @@ export const XhttpSettingsEditor = ({ xhttpSettings = {}, onChange, isClient = f
 
                     {showDownload && (
                         <div className="mt-4 space-y-4 animate-in slide-in-from-top-2">
+                            {downloadRefused && (
+                                <p className="text-[11px] text-rose-400 font-bold">
+                                    {t("Xray {tag} refuses downloadSettings in mode stream-one — pick another mode or remove them.", { tag })}
+                                </p>
+                            )}
                             <div className="bg-purple-900/10 border border-purple-500/20 p-4 rounded-xl space-y-4">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>

@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import { Switch } from '../../ui/Switch';
 import { Select } from '../../ui/Select';
 import { FormField } from '../../ui/FormField';
-import { ExperimentalBadge } from '../../ui/ExperimentalBadge';
+import { useCoreVersion } from '../../../hooks/useCoreVersion';
 import { generateWarpAccount } from '../../../core/generators';
 import { useConfigStore } from '../../../store/configStore';
 import { useField, useArrayField } from '../../../hooks/useField';
@@ -43,6 +43,16 @@ export const OutboundWireguard = ({ outbound, onChange, errors = {} as any }: an
         : strategies;
     const workers = useField<number>(outbound, onChange, ['settings', 'workers']);
     const remoteDNS = useField<string[]>(outbound, onChange, ['settings', 'remoteDNS']);
+
+    // `workers` is read by 26.3 only and `remoteDNS` by 26.9 only
+    // (infra/conf/wireguard.go per tag); elsewhere the decoder drops them.
+    // Each is offered where it works and shown wherever a config already has
+    // it, with a note on the lines where it does nothing.
+    const { offersAt, tag: coreTag } = useCoreVersion();
+    const workersWork = offersAt('outbound', 'settings.workers', 'wireguard');
+    const remoteDnsWorks = offersAt('outbound', 'settings.remoteDNS', 'wireguard');
+    const showWorkers = workersWork || workers.value !== undefined;
+    const showRemoteDns = remoteDnsWorks || (remoteDNS.value?.length ?? 0) > 0;
     const peers = useArrayField<any>(outbound, onChange, ['settings', 'peers']);
 
     if (outbound.protocol !== 'wireguard') return null;
@@ -212,20 +222,31 @@ export const OutboundWireguard = ({ outbound, onChange, errors = {} as any }: an
                     onChange={val => domainStrategy.onChange(val)}
                     options={domainStrategyOptions}
                 />
-                <FormField label={t("Workers")} help={t("Number of concurrent workers. Default is CPU core count.")}>
-                    <input type="number" className="input-base h-[42px]" placeholder={t("Auto")} value={workers.value || ""} onChange={e => workers.onChange(parseInt(e.target.value) || 0)} />
-                </FormField>
-                <FormField
-                    label={<span className="flex items-center gap-2">{t("Remote DNS")} <ExperimentalBadge since="main, 25 Aug 2026" commit="c7e569b0" /></span>}
-                    help={t("DNS server(s) resolved through the WireGuard tunnel itself (not Xray's DNS module) — comma-separated. Useful when the peer's network only resolves internal names.")}
-                >
-                    <input
-                        className="input-base font-mono"
-                        placeholder="1.1.1.1, 1.0.0.1"
-                        value={(remoteDNS.value || []).join(', ')}
-                        onChange={e => remoteDNS.onChange(e.target.value.split(',').map((s: string) => s.trim()).filter(Boolean))}
-                    />
-                </FormField>
+                {showWorkers && (
+                    <FormField
+                        label={t("Workers")}
+                        help={workersWork
+                            ? t("Number of concurrent workers. Default is CPU core count.")
+                            : t("Only Xray 26.3 reads this; {tag} drops it, so it does nothing here.", { tag: coreTag })}
+                    >
+                        <input type="number" className="input-base h-[42px]" placeholder={t("Auto")} value={workers.value || ""} onChange={e => workers.onChange(parseInt(e.target.value) || 0)} />
+                    </FormField>
+                )}
+                {showRemoteDns && (
+                    <FormField
+                        label={t("Remote DNS")}
+                        help={remoteDnsWorks
+                            ? t("DNS server(s) resolved through the WireGuard tunnel itself (not Xray's DNS module) — comma-separated. Useful when the peer's network only resolves internal names.")
+                            : t("Arrived in Xray 26.9; {tag} drops it, so it does nothing here.", { tag: coreTag })}
+                    >
+                        <input
+                            className="input-base font-mono"
+                            placeholder="1.1.1.1, 1.0.0.1"
+                            value={(remoteDNS.value || []).join(', ')}
+                            onChange={e => remoteDNS.onChange(e.target.value.split(',').map((s: string) => s.trim()).filter(Boolean))}
+                        />
+                    </FormField>
+                )}
             </div>
         </div>
     );

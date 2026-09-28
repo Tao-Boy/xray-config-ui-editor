@@ -15,7 +15,14 @@ import { SpiderPathsEditor } from './settings/SpiderPathsEditor';
 
 import { useSettingsEditor } from '../../hooks/useSettingsEditor';
 import { useConfigStore } from '../../store/configStore';
+import { CORE_VERSIONS, type CoreVersion } from '../../core/xray/versions';
 import { t } from '../../i18n';
+
+const VERSION_ROLE_LABELS = (): Record<CoreVersion['role'], string> => ({
+    minimum: t("Oldest supported release"),
+    remnawave: t("What Remnawave nodes run"),
+    latest: t("Newest release"),
+});
 
 export const SettingsModal = ({ onClose }: { onClose: () => void }) => {
     const { warpWorkerUrl, setWarpWorkerUrl, rawConfigText } = useConfigStore();
@@ -74,16 +81,20 @@ export const SettingsModal = ({ onClose }: { onClose: () => void }) => {
                     <>
                         <Card title={t("Core Compatibility & Generators")} icon="Cpu">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <Select 
+                                {/* The options used to be v1.8.10 / v1.8.0 / v1.5.0 and
+                                    changed nothing, because nothing read them. These are
+                                    the lines the feature table in core/xray/versions
+                                    actually describes. */}
+                                <Select
                                     label={t("Target Xray-core Version")}
-                                    hint={t("Adjusts UI fields and validation based on core features.")}
+                                    hint={t("What the editors offer and what diagnostics call refused or silently ignored both follow this.")}
                                     value={coreVersion}
                                     onChange={val => setCoreVersion(val)}
-                                    options={[
-                                        { value: "v1.8.10", label: t("Latest (v1.8.10+)") },
-                                        { value: "v1.8.0", label: t("Stable (v1.8.0)") },
-                                        { value: "v1.5.0", label: t("Legacy (v1.5.0)") },
-                                    ]}
+                                    options={CORE_VERSIONS.slice().reverse().map(version => ({
+                                        value: version.id,
+                                        label: version.tag,
+                                        description: VERSION_ROLE_LABELS()[version.role],
+                                    }))}
                                 />
                                 <FormField label={t("WARP Worker URL")} help={t("Optional: Your private Cloudflare Worker URL for CORS-safe registration.")}>
                                     <input 

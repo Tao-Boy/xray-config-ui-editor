@@ -5,13 +5,20 @@ import { Icon } from '../../ui/Icon';
 import { Help } from '../../ui/Help';
 import { Switch } from '../../ui/Switch';
 import { generateUUID, generateShortId } from '../../../core/generators';
+import { SHADOWSOCKS_METHOD_ALIASES } from '../../../core/xray/versions/features.inbound';
 import { useField, useArrayField } from '../../../hooks/useField';
+import { useCoreVersion } from '../../../hooks/useCoreVersion';
 
 import { useConfigStore } from '../../../store/configStore';
 import { t } from '../../../i18n';
 
+/** What a chooser lists: the line's values, plus the current one so it is never shown blank. */
+const withCurrent = (offered: string[], current: string | undefined): string[] =>
+    current !== undefined && !offered.includes(current) ? [...offered, current] : offered;
+
 export const InboundClients = ({ inbound, onChange, errors = {} as any }: any) => {
     const { remnawave } = useConfigStore();
+    const { values } = useCoreVersion();
     const [ssPassLen, setSsPassLen] = React.useState(32);
     const proto = inbound.protocol;
 
@@ -19,17 +26,18 @@ export const InboundClients = ({ inbound, onChange, errors = {} as any }: any) =
     // `updateField(path, value)` — see InboundModal.tsx. useField/useArrayField
     // bind directly on top of that, so every path below is the ONE place the
     // wiring to the config lives; the JSX under it can be restyled freely.
+    //
+    // Every list is written under the spelling all three supported lines
+    // read — `clients`, and `accounts` for socks/http. The 26.7 `users`
+    // alias is ignored by 26.3, and by every line once the old key exists;
+    // useInboundEditor moves a lone `users` over before this renders.
     const method = useField<string>(inbound, onChange, ['settings', 'method']);
     const password = useField<string>(inbound, onChange, ['settings', 'password']);
-    const hysteriaUsers = useArrayField<{ password?: string }>(inbound, onChange, ['settings', 'users']);
     const accounts = useArrayField<{ user?: string; pass?: string }>(inbound, onChange, ['settings', 'accounts']);
     const clients = useArrayField<Record<string, any>>(inbound, onChange, ['settings', 'clients']);
     const auth = useField<string>(inbound, onChange, ['settings', 'auth']);
     const udp = useField<boolean>(inbound, onChange, ['settings', 'udp']);
     const allowTransparent = useField<boolean>(inbound, onChange, ['settings', 'allowTransparent']);
-    const upMbps = useField<number>(inbound, onChange, ['settings', 'up_mbps']);
-    const downMbps = useField<number>(inbound, onChange, ['settings', 'down_mbps']);
-    const ignoreClientBandwidth = useField<boolean>(inbound, onChange, ['settings', 'ignore_client_bandwidth']);
 
     // Remnawave integration: Hide users if connected (only for multi-user protocols)
     if (remnawave.connected && ['vless', 'vmess', 'trojan', 'hysteria'].includes(proto)) {
@@ -49,6 +57,12 @@ export const InboundClients = ({ inbound, onChange, errors = {} as any }: any) =
     // 1. Shadowsocks / SS-2022
     if (proto === 'shadowsocks' || proto === 'shadowsocks-2022') {
         const is2022 = proto === 'shadowsocks-2022';
+        // The line's cipher list (none/plain only on 26.3), without the
+        // aead_* spellings of the same ciphers.
+        const offered = values('inbound.shadowsocks.method')
+            .filter(name => !SHADOWSOCKS_METHOD_ALIASES.has(name))
+            .filter(name => !is2022 || name.startsWith('2022-'));
+        const current = method.value || (is2022 ? "2022-blake3-aes-128-gcm" : "aes-256-gcm");
         return (
             <div className="bg-slate-900/50 p-4 rounded-xl border border-slate-800 mt-4">
                 <h4 className="text-xs font-bold text-slate-400 uppercase mb-3 flex items-center gap-2">
@@ -60,21 +74,9 @@ export const InboundClients = ({ inbound, onChange, errors = {} as any }: any) =
                         <Select
                             label={t("Method")}
                             hint={t("Encryption algorithm for Shadowsocks.")}
-                            value={method.value || (is2022 ? "2022-blake3-aes-128-gcm" : "aes-256-gcm")}
+                            value={current}
                             onChange={val => method.onChange(val)}
-                            options={!is2022 ? [
-                                { value: "aes-256-gcm", label: t("aes-256-gcm") },
-                                { value: "aes-128-gcm", label: t("aes-128-gcm") },
-                                { value: "chacha20-ietf-poly1305", label: t("chacha20-ietf-poly1305") },
-                                { value: "xchacha20-ietf-poly1305", label: t("xchacha20-ietf-poly1305") },
-                                { value: "2022-blake3-aes-128-gcm", label: t("2022-blake3-aes-128-gcm") },
-                                { value: "2022-blake3-aes-256-gcm", label: t("2022-blake3-aes-256-gcm") },
-                                { value: "2022-blake3-chacha20-poly1305", label: t("2022-blake3-chacha20-poly1305") },
-                            ] : [
-                                { value: "2022-blake3-aes-128-gcm", label: t("2022-blake3-aes-128-gcm") },
-                                { value: "2022-blake3-aes-256-gcm", label: t("2022-blake3-aes-256-gcm") },
-                                { value: "2022-blake3-chacha20-poly1305", label: t("2022-blake3-chacha20-poly1305") },
-                            ]}
+                            options={withCurrent(offered, current).map(name => ({ value: name, label: name }))}
                         />
                     <div>
                         <label className="label-xs flex items-center justify-between">
@@ -106,69 +108,59 @@ export const InboundClients = ({ inbound, onChange, errors = {} as any }: any) =
     }
 
     // 2. Hysteria 2
+    //
+    // HysteriaServerConfig is {version, clients} on 26.3 and adds a `users`
+    // alias on 26.7; each user is {auth, level, email} on every line
+    // (v26.3.27:infra/conf/hysteria.go:33). The up/down Mbps and
+    // "ignore client bandwidth" fields this card used to carry are Hysteria 1
+    // keys no supported line reads — bandwidth lives on the transport now.
     if (proto === 'hysteria') {
-        const users = hysteriaUsers.items;
+        const users = clients.items;
 
         return (
-            <div className="space-y-4 mt-4">
-                <div className="bg-slate-900/50 p-4 rounded-xl border border-slate-800">
-                    <h4 className="text-xs font-bold text-slate-400 uppercase mb-3 flex items-center gap-2">
-                        <Icon name="Gauge" />
-{t("Bandwidth & Global Settings")}
-</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <div>
-                            <label className="label-xs flex items-center">
-                                Up (Mbps)
-                                <Help>{t("Maximum upload speed in Mbps for Hysteria 2 protocol.")}</Help>
-                            </label>
-                            <input type="number" className="input-base font-mono"
-                                value={upMbps.value || ""}
-                                onChange={e => upMbps.onChange(parseInt(e.target.value))} />
-                        </div>
-                        <div>
-                            <label className="label-xs flex items-center">
-                                Down (Mbps)
-                                <Help>{t("Maximum download speed in Mbps for Hysteria 2 protocol.")}</Help>
-                            </label>
-                            <input type="number" className="input-base font-mono"
-                                value={downMbps.value || ""}
-                                onChange={e => downMbps.onChange(parseInt(e.target.value))} />
-                        </div>
-                        <div className="flex items-center gap-2 pt-6">
-                            <Switch
-                                checked={ignoreClientBandwidth.value === true}
-                                onChange={checked => ignoreClientBandwidth.onChange(checked)}
-                                label={t("Ignore Client Bandwidth")}
-                            />
-                            <Help>{t("If enabled, the server will ignore the bandwidth limits requested by the client.")}</Help>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="bg-slate-900/50 p-4 rounded-xl border border-slate-800">
-                    <div className="flex justify-between items-center mb-4">
-                        <h4 className="text-xs font-bold text-slate-400 uppercase flex items-center gap-2">
-                            <Icon name="Users" />
+            <div className="bg-slate-900/50 p-4 rounded-xl border border-slate-800 mt-4">
+                <div className="flex justify-between items-center mb-2">
+                    <h4 className="text-xs font-bold text-slate-400 uppercase flex items-center gap-2">
+                        <Icon name="Users" />
 {t("Hysteria 2 Users")}
 </h4>
-                        <Button variant="ghost" size="sm" className="!py-0.5 !px-2 !text-[10px]" onClick={() => hysteriaUsers.add({ password: generateShortId() })} icon="Plus">{t("Add")}</Button>
-                    </div>
-                    <div className="space-y-2 max-h-[200px] overflow-y-auto custom-scroll pr-1">
-                        {users.map((u, i) => (
-                            <div key={i} className="bg-slate-950 border border-slate-800 rounded-lg p-3 relative group flex items-center gap-3">
-                                <Icon name="Key" className="text-indigo-400 shrink-0" />
-                                <input className="input-base py-1.5 text-xs font-mono"
-                                    placeholder={t("Password")}
-                                    value={u.password || ""}
-                                    onChange={e => hysteriaUsers.update(i, { password: e.target.value })}
-                                />
-                                <button onClick={() => hysteriaUsers.remove(i)} className="text-slate-600 hover:text-rose-500 transition-opacity">
-                                    <Icon name="Trash" />
-                                </button>
+                    <Button variant="ghost" size="sm" className="!py-0.5 !px-2 !text-[10px]" onClick={() => clients.add({ auth: generateShortId(16) })} icon="Plus">{t("Add")}</Button>
+                </div>
+                <p className="text-[10px] text-slate-500 leading-relaxed mb-3">
+                    {t("Each user signs in with its auth string. Bandwidth is not set here: it belongs to the transport's finalmask (quicParams brutalUp / brutalDown).")}
+                </p>
+                <div className="space-y-2 max-h-[240px] overflow-y-auto custom-scroll pr-1">
+                    {users.map((u, i) => (
+                        <div key={i} className="bg-slate-950 border border-slate-800 rounded-lg p-3 relative group grid grid-cols-1 md:grid-cols-2 gap-3 pr-10">
+                            <div>
+                                <label className="label-xs">{t("Auth")}</label>
+                                <div className="flex gap-2">
+                                    <input className="input-base py-1.5 text-xs font-mono"
+                                        value={u.auth || ""}
+                                        onChange={e => clients.update(i, { auth: e.target.value })}
+                                    />
+                                    <button onClick={() => clients.update(i, { auth: generateShortId(16) })}
+                                        title={t("Generate Password")}
+                                        className="text-slate-500 hover:text-white transition-colors">
+                                        <Icon name="DiceFive" />
+                                    </button>
+                                </div>
                             </div>
-                        ))}
-                    </div>
+                            <div>
+                                <label className="label-xs">{t("Email")}</label>
+                                <input className="input-base py-1.5 text-xs"
+                                    value={u.email || ""}
+                                    onChange={e => clients.update(i, { email: e.target.value || undefined })}
+                                />
+                            </div>
+                            <button onClick={() => clients.remove(i)} className="absolute top-2 right-2 p-1 text-slate-600 hover:text-rose-500 transition-colors" title={t("Delete")}>
+                                <Icon name="Trash" />
+                            </button>
+                        </div>
+                    ))}
+                    {users.length === 0 && (
+                        <div className="text-center text-slate-600 text-xs py-4 italic">{t("No users defined. Click Add to create one.")}</div>
+                    )}
                 </div>
             </div>
         );
@@ -282,11 +274,14 @@ export const InboundClients = ({ inbound, onChange, errors = {} as any }: any) =
 
     const clientItems = clients.items;
     const idKey = proto === 'trojan' ? 'password' : 'id';
+    // "" and xtls-rprx-vision on every line; the udp443 variant is a client
+    // value that fails the load on an inbound (v26.7.28:infra/conf/vless.go:72).
+    const flows = values('inbound.vless.clients.flow');
 
     const addClient = () => {
         const newClient: any = { email: `user${clientItems.length}@xray` };
         newClient[idKey] = idKey === 'id' ? generateUUID() : generateShortId();
-        if (proto === 'vless') newClient.flow = "xtls-rprx-vision";
+        if (proto === 'vless' && flows.includes('xtls-rprx-vision')) newClient.flow = "xtls-rprx-vision";
         clients.add(newClient);
     };
 
@@ -339,10 +334,7 @@ export const InboundClients = ({ inbound, onChange, errors = {} as any }: any) =
                                         label={t("Flow")}
                                         value={c.flow || ""}
                                         onChange={val => clients.update(i, { flow: val })}
-                                        options={[
-                                            { value: "", label: t("None") },
-                                            { value: "xtls-rprx-vision", label: t("xtls-rprx-vision") },
-                                        ]}
+                                        options={withCurrent(flows, c.flow || "").map(flow => ({ value: flow, label: flow || t("None") }))}
                                     />
                             )}
                         </div>

@@ -77,7 +77,6 @@ export interface LocalBalancerOptions {
     dns: boolean;
     dnsUpstream: string[];
     queryStrategy: string;
-    domainMatcher: string;
     domainStrategy: string;
     /** Subscription label for this config. */
     remarks?: string;
@@ -112,7 +111,6 @@ export const DEFAULT_LOCAL_BALANCER_OPTIONS: LocalBalancerOptions = {
     dns: true,
     dnsUpstream: [...DEFAULT_DNS_UPSTREAM],
     queryStrategy: DEFAULT_QUERY_STRATEGY,
-    domainMatcher: 'hybrid',
     domainStrategy: 'AsIs',
     forceBalancer: false,
 };
@@ -410,7 +408,9 @@ export const buildLocalBalancerConfig = (
         }
         routing.balancers = [balancer];
     }
-    routing.domainMatcher = options.domainMatcher;
+    // No `domainMatcher`: the key is in none of the supported cores'
+    // RouterConfig (26.3, 26.7, 26.9), so writing it only made a config look
+    // tuned while the decoder dropped it.
     routing.domainStrategy = options.domainStrategy;
 
     const config: any = {};
@@ -633,7 +633,9 @@ export const parseLocalBalancer = (input: any): ParsedLocalBalancer => {
         notes.push('Custom DNS server entries were dropped — the builder writes one localhost entry plus plain upstreams');
     }
 
-    if (input.routing?.domainMatcher) options.domainMatcher = input.routing.domainMatcher;
+    if (input.routing?.domainMatcher !== undefined) {
+        notes.push('routing.domainMatcher was dropped — no supported Xray core reads it');
+    }
     if (input.routing?.domainStrategy) options.domainStrategy = input.routing.domainStrategy;
     if (typeof input.remarks === 'string') options.remarks = input.remarks;
 

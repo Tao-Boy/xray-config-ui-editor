@@ -15,15 +15,27 @@ export const SniffingSchema = z.object({
   destOverride: z.array(z.union([DestOverrideSchema, z.string()])).optional(),
   /** Only use metadata for sniffing (no deep inspection) */
   metadataOnly: z.boolean().optional(),
-  /** Excluded domains from sniffing */
+  /**
+   * Domains whose sniffed name must not replace the destination. A plain
+   * entry is an exact match on 26.3 and a substring match from 26.7, where
+   * the routing prefixes (`full:`, `domain:`, `geosite:`...) also work.
+   */
   domainsExcluded: z.array(z.string()).optional(),
-  /** Excluded IPs from sniffing */
+  /** Destination IPs sniffing must not override. 26.7+; 26.3 drops the key. */
   ipsExcluded: z.array(z.string()).optional(),
   /** Only route, don't override destination */
   routeOnly: z.boolean().optional(),
 }).passthrough();
 
 // --- Allocate ---
+/**
+ * Not a key on any supported line: InboundDetourConfig has no such field
+ * (v26.3.27:infra/conf/xray.go:126, v26.9.9:infra/conf/xray.go:127), so the
+ * core drops it without a word. Kept only because the schema index still
+ * re-exports it; nothing here declares it on an inbound any more, and the
+ * editor shows an existing one as doing nothing.
+ * @deprecated
+ */
 export const AllocateSchema = z.object({
   /** Allocation strategy: "always" or "random" */
   strategy: z.enum(['always', 'random']).optional(),
@@ -51,8 +63,6 @@ export const InboundSchema = z.object({
   streamSettings: StreamSettingsSchema.optional(),
   /** Content sniffing configuration */
   sniffing: SniffingSchema.optional(),
-  /** Port allocation settings */
-  allocate: AllocateSchema.optional(),
 }).passthrough();
 
 export type InboundConfig = z.infer<typeof InboundSchema>;

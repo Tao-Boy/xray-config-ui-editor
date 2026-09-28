@@ -78,7 +78,7 @@ describe("Link Parser & Generator", () => {
             expect(parsed.streamSettings.security).toBe("tls");
             expect(parsed.streamSettings.network).toBe("ws");
             expect(parsed.streamSettings.wsSettings.path).toBe("/chat");
-            expect(parsed.streamSettings.wsSettings.headers.Host).toBe("google.com");
+            expect(parsed.streamSettings.wsSettings.host).toBe("google.com");
         });
 
         test("should generate VMess link from object", () => {

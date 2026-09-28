@@ -3,6 +3,7 @@ import { Card } from '../../ui/Card';
 import { TagSelector } from '../../ui/TagSelector';
 import { Switch } from '../../ui/Switch';
 import { useField } from '../../../hooks/useField';
+import { useCoreVersion } from '../../../hooks/useCoreVersion';
 import { t } from '../../../i18n';
 
 /**
@@ -19,6 +20,12 @@ export const OutboundLoopback = ({ outbound, onChange, inboundTags = [] }: any) 
     const sniffingEnabled = useField<boolean | undefined>(outbound, onChange, ['settings', 'sniffing', 'enabled']);
     const destOverride = useField<string[] | undefined>(outbound, onChange, ['settings', 'sniffing', 'destOverride']);
     const routeOnly = useField<boolean | undefined>(outbound, onChange, ['settings', 'sniffing', 'routeOnly']);
+
+    // Sniffing on loopback arrived in 26.7; on 26.3 the key is dropped
+    // without a word. Offered where it works, shown where a config already
+    // has it so the value is not hidden.
+    const { offers } = useCoreVersion();
+    const showSniffing = offers('outbound.loopback.sniffing') || outbound.settings?.sniffing !== undefined;
 
     return (
         <Card title={t("Loopback Settings")} icon="ArrowCounterClockwise" className="mt-4">
@@ -41,6 +48,7 @@ export const OutboundLoopback = ({ outbound, onChange, inboundTags = [] }: any) 
                 </p>
             </div>
 
+            {showSniffing && (
             <div className="mt-5 pt-4 border-t border-slate-800 space-y-3">
                 <div className="flex items-center justify-between">
                     <div className="min-w-0">
@@ -79,6 +87,7 @@ export const OutboundLoopback = ({ outbound, onChange, inboundTags = [] }: any) 
                     </div>
                 )}
             </div>
+            )}
         </Card>
     );
 };

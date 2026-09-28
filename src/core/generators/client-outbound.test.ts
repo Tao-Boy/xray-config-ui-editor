@@ -152,7 +152,7 @@ describe('other transports', () => {
         const { outbound } = buildClientOutbound({
             host: host({ host: 'ws.example.net' }), inbound, userId: USER, tag: 'proxy',
         });
-        expect(outbound.streamSettings.wsSettings).toEqual({ path: '/ws', headers: { Host: 'ws.example.net' } });
+        expect(outbound.streamSettings.wsSettings).toEqual({ path: '/ws', host: 'ws.example.net' });
     });
 
     it('carries per-host mux and sockopt through', () => {

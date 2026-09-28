@@ -19,7 +19,16 @@ export const PortalObjectSchema = z.object({
   domain: z.string(),
 }).passthrough();
 
-/** @deprecated Legacy reverse proxy, use VLESS reverse proxy instead */
+/**
+ * Legacy bridge/portal reverse proxy.
+ *
+ * Runs on 26.3 (v26.3.27:infra/conf/reverse.go:32). From 26.7 any non-null
+ * `reverse` object — `{}` included — is a removed-feature error and the config
+ * does not load (v26.7.28:infra/conf/xray.go:607); VLESS reverse proxy
+ * replaces it. The shape is still described so a 26.3 config can be edited
+ * and a newer one can be shown before it is removed.
+ * @deprecated
+ */
 export const ReverseSchema = z.object({
   bridges: z.array(BridgeObjectSchema).optional(),
   portals: z.array(PortalObjectSchema).optional(),

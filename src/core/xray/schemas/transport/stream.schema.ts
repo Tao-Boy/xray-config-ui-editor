@@ -20,6 +20,12 @@ export const StreamSettingsSchema = z.object({
   // --- Transport ---
   /** Transport type: raw, xhttp, mkcp, grpc, websocket, httpupgrade, hysteria, masque (+ aliases) */
   network: z.union([TransportNetworkSchema, z.string()]).optional(),
+  /**
+   * 26.7's alias of network, and the one that wins when both are set
+   * (v26.7.28:infra/conf/transport_internet.go:75); 26.3 ignores it. The
+   * editor never writes it — it shows one a config has, see TransportSettings.
+   */
+  method: z.union([TransportNetworkSchema, z.string()]).optional(),
   rawSettings: RawTransportSchema.optional(),
   /** Alias: tcpSettings maps to rawSettings */
   tcpSettings: RawTransportSchema.optional(),

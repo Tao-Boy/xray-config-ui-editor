@@ -331,24 +331,25 @@ export const RuleEditor = ({
                                 onChange={v => update('protocol', v)} multi={true} />
                         </div>
 
-                        {/* Domain Strategy (Force IP) */}
-                        <div className="flex flex-col gap-1.5">
-                            <label className="label-xs flex items-center gap-1.5 text-slate-400">
-                                Domain Strategy (Force IP) <Help>{t("UseIP will force Xray to resolve the domain before matching.")}</Help>
-                            </label>
-                            <Select
-                                value={rule.domainStrategy || ""}
-                                onChange={val => update('domainStrategy', val || undefined)}
-                                options={[
-                                    { value: "", label: t("Default (Inherit)") },
-                                    { value: "AsIs", label: t("AsIs") },
-                                    { value: "UseIP", label: t("UseIP") },
-                                    { value: "UseIPv4", label: t("UseIPv4") },
-                                    { value: "UseIPv6", label: t("UseIPv6") },
-                                ]}
-                                className="w-full"
-                            />
-                        </div>
+                        {/* A rule has no domainStrategy of its own in any supported
+                            core (RawFieldRule, 26.3 / 26.7 / 26.9) — resolution is
+                            routing.domainStrategy's job. The chooser that used to
+                            sit here wrote a key the decoder dropped; one already in
+                            a config is shown so it can be removed. */}
+                        {rule.domainStrategy !== undefined && (
+                            <div className="flex flex-col gap-1.5 md:col-span-2 rounded-lg border border-amber-500/30 bg-amber-950/20 p-3">
+                                <span className="text-[11px] text-amber-200/80">
+                                    {t("This rule sets domainStrategy \"{value}\", which no supported Xray core reads on a rule. Set it on routing instead.", { value: String(rule.domainStrategy) })}
+                                </span>
+                                <button
+                                    type="button"
+                                    onClick={() => update('domainStrategy', undefined)}
+                                    className="self-start h-8 px-3 rounded-lg border border-slate-700 bg-slate-900 text-[11px] font-bold text-slate-300 hover:border-slate-500 transition-colors"
+                                >
+                                    {t("Remove it")}
+                                </button>
+                            </div>
+                        )}
 
                         <div className="md:col-span-2 pt-6 mt-2 border-t border-slate-800/50">
                             <SchemaForm
@@ -403,8 +404,8 @@ export const RuleEditor = ({
                                         placeholder: t("e.g. curl, self/")
                                     },
                                     localOS: {
-                                        label: t("Local OS (Experimental)"),
-                                        help: t("Matches the OS the Xray process runs on (e.g. windows, linux, darwin). Landed on xray-core main 2026-08-12 (commit a12801c1) — not in a tagged release yet."),
+                                        label: t("Local OS (26.9+)"),
+                                        help: t("Matches the OS the Xray process runs on (e.g. windows, linux, darwin). Read from Xray 26.9; older cores drop the key, and a rule left with no other condition then fails to load."),
                                         placeholder: t("e.g. windows, linux")
                                     }
                                 }}

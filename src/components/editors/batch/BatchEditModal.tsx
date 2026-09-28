@@ -9,6 +9,8 @@ import { NumberInput } from '../../ui/NumberInput';
 import { Badge } from '../../ui/Badge';
 import { applyBatch, isEmptyPatch, type BatchPatch } from '../../../core/batch/endpoint-batch';
 import type { EndpointDirection } from '../../../core/generators/endpoint-factory';
+import { networkOptions } from '../../../core/xray/transport-networks';
+import { useCoreVersion } from '../../../hooks/useCoreVersion';
 import { t, tn } from '../../../i18n';
 
 const UNCHANGED = '';
@@ -34,6 +36,7 @@ interface Props {
 export const BatchEditModal = ({ direction, items, initialSelection, onApply, onClose }: Props) => {
     const [selection, setSelection] = useState<Set<number>>(() => new Set(initialSelection ?? []));
     const [patch, setPatch] = useState<BatchPatch>({});
+    const { version: coreVersion } = useCoreVersion();
 
     const set = (update: Partial<BatchPatch>) => setPatch(prev => ({ ...prev, ...update }));
 
@@ -130,8 +133,11 @@ export const BatchEditModal = ({ direction, items, initialSelection, onApply, on
                             help={t("Applied to streamSettings.network. Protocols that carry no transport — WireGuard, TUN, freedom, blackhole — are skipped rather than broken.")}
                             options={[
                                 { value: UNCHANGED, label: t("Leave unchanged") },
-                                ...['tcp', 'raw', 'ws', 'grpc', 'httpupgrade', 'xhttp', 'kcp', 'quic']
-                                    .map(v => ({ value: v, label: v })),
+                                // The same list the transport editor offers, so a mass
+                                // edit cannot move thirty endpoints onto a transport the
+                                // chosen core refuses (it used to offer quic).
+                                ...networkOptions(undefined, undefined, coreVersion)
+                                    .map(option => ({ value: option.value, label: option.value, description: option.label })),
                             ]}
                         />
                         <Select

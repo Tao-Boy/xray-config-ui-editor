@@ -2,6 +2,32 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.24.0] - 2026-09-28
+
+### Added
+- **The editor knows which Xray-core it is writing for.** Three supported lines: **26.3** (v26.3.27, the oldest supported), **26.7** (v26.7.28, what Remnawave nodes run — the default) and **26.9** (v26.9.9, the newest). The version selector used to offer `v1.8.10` / `v1.8.0` / `v1.5.0` and changed nothing, because nothing read it; it now lists these three, sits in Settings and at the foot of Diagnostics, and a stored old value moves to 26.7.
+- **Diagnostics say what the chosen core would do with the config.** Four answers per key or value: works, deprecated (works, the log complains), **silently dropped** (the core has no such field and does nothing with it), and **refused** (the config does not load). Refused is critical and blocks saving to the panel; dropped is a warning. Switching the version in the Diagnostics footer reruns the check.
+  - The facts come from the three tags' source, not from the docs or `main`: 327 findings across protocols, transports, finalmask and the top level, each citing `tag:file:line`, turned into a table the app reads. Rules that depend on how fields combine are written out separately — a plaintext VLESS or Trojan outbound to a public address (refused from 26.7; on 26.9 the `vnext` form too), REALITY over anything but RAW/XHTTP/gRPC, hysteria's version and address, finalmask mask order, duplicate `ruleTag`s on 26.9, a blackhole response without a type before 26.9.
+  - The pipeline lives in `scripts/core-versions/`, so the next line is a matter of re-reading one more tag.
+- **Editors offer what the chosen line accepts, and show what a config already holds.** A value the line refuses or drops stays visible, labelled, with a remove or convert action — it is never silently deleted. Per line:
+  - **finalmask**: separate TCP and UDP type lists; the eight UDP masks 26.7 folded into `mkcp-legacy` are offered on 26.3 only, with a Convert button elsewhere; `xmc`, `realm` from 26.7, `udphop` on 26.9; per-mask settings per line (xdns `domain` vs `domains`/`resolvers`, xicmp `listenIp`/`id` vs `ips`/`dgram`); `quicParams` with its real keys.
+  - **mKCP**: `header` and `seed` are never offered — 26.3 and 26.7 refuse any header, even `{type: "none"}`; `congestion`/buffers on 26.3, `maxSendingWindow`/`cwndMultiplier` from 26.7, and the per-line limits.
+  - **Hysteria transport** has an editor at all now; a hysteria proxy is offered only the hysteria transport and TLS from 26.7.
+  - **TLS**: `allowInsecure` is not offered — refused on every line today. **REALITY** only over RAW, XHTTP and gRPC. **Sockopt**: the seven real `addressPortStrategy` values and all eleven domain strategies.
+  - **Inbounds**: sniffing `ipsExcluded` from 26.7, with the changed `domainsExcluded` meaning explained; tun fields from 26.7; shadowsocks `none`/`plain` on 26.3 only; hysteria users as `clients` + `auth`, the spelling every line reads.
+  - **Legacy reverse** (bridges/portals) works on 26.3 and is refused from 26.7 — the editor says so there and offers to remove it.
+  - Shadowsocks UDP-over-TCP (26.3 only), WireGuard `workers` (26.3 only) and `remoteDNS` (26.9), loopback sniffing (26.7+), blackhole `custom` (26.9) and protocol lists follow the line too.
+
+### Fixed
+- **Configs from the WARP generator, a WireGuard `.conf` import and every new WireGuard or Hysteria endpoint did not load on any supported core.** They carried `streamSettings.network: "udp"` — not a transport name; every core answers "unknown transport protocol". WireGuard now says `raw` (it dials UDP itself; the stream only carries finalmask), Hysteria says `hysteria`.
+- **A hysteria outbound from this editor did not start on any line.** Its address went into `settings.servers[0]`, a key the flat hysteria client config does not have, and the core dereferenced the missing address. It is written flat now, with `version: 2`, and its password lives where the core reads it (`hysteriaSettings.auth`). Hysteria inbound users were `users[{password}]` — `password` is no key, and 26.3 does not read `users` at all.
+- **An imported mKCP link did not load on 26.3 or 26.7**: the parser always wrote `kcpSettings.header`. A real header type becomes an `mkcp-legacy` mask instead.
+- **A client outbound built from a Remnawave host with insecure TLS did not load anywhere**: `allowInsecure: true` is refused by every supported core. It is left out, with a note to pin the certificate instead.
+- **The Allocate editor wrote a field no supported core has** (`allocate` appears nowhere in their config code), and the balancer builder wrote `routing.domainMatcher`, which none of them reads either. The rule editor's per-rule `domainStrategy` was the same kind of dead field. All three are gone; an existing value is shown so it can be removed.
+- **A routing rule whose only condition was `process`, `localPort`, `localIP` or `vlessRoute` was marked broken** and kept the Routing window from closing; an empty `domain: []` counted as a condition, though the core does not count it. The list of conditions is the core's now.
+- **MASQUE, added in 1.23.0, is in no supported release** — it was read from `main`. It is refused on every line and no longer offered. The same release said the shadowsocks UOT switch was removed; it was not, and it should not have been, since 26.3 reads it. It is shown per line now.
+- The WebSocket host is written as `host` rather than the deprecated `headers.Host`, by the editor, the link parser and the host-to-client builder; the link generator reads both. `localOS` and WireGuard `remoteDNS` are no longer labelled experimental — both shipped in v26.9.9.
+
 ## [1.23.0] - 2026-09-28
 
 ### Added

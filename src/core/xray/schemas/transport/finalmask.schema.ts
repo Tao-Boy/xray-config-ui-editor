@@ -1,6 +1,8 @@
 // ============================================================
 // FinalMask Schema — Source: docs/config/transports/finalmask.md
 // ============================================================
+// The union of what the supported cores decode. Which line reads which key,
+// and what each mask's settings hold, is in core/xray/versions/finalmask-rules.ts.
 import { z } from 'zod';
 import {
   TcpMaskTypeSchema, UdpMaskTypeSchema,
@@ -20,8 +22,10 @@ export const UdpMaskItemSchema = z.object({
 }).passthrough();
 
 // --- UDP Hop ---
+// 26.3 and 26.7 only; 26.9 dropped it for the udphop mask. `ports` is a
+// PortList: a number or a "20000-30000,443" string.
 export const UdpHopSchema = z.object({
-  ports: z.string().optional(),
+  ports: z.union([z.string(), z.number()]).optional(),
   interval: Int32RangeSchema.optional(),
 }).passthrough();
 
@@ -32,6 +36,7 @@ export const QuicParamsSchema = z.object({
   debug: z.boolean().optional(),
   brutalUp: z.union([z.string(), z.number()]).optional(),
   brutalDown: z.union([z.string(), z.number()]).optional(),
+  brutalDisableLossCompensation: z.boolean().optional(),
   udpHop: UdpHopSchema.optional(),
   initStreamReceiveWindow: z.number().int().optional(),
   maxStreamReceiveWindow: z.number().int().optional(),
@@ -40,7 +45,10 @@ export const QuicParamsSchema = z.object({
   maxIdleTimeout: z.number().optional(),
   keepAlivePeriod: z.number().optional(),
   disablePathMTUDiscovery: z.boolean().optional(),
+  disableChromeParrot: z.boolean().optional(),
+  disableGSO: z.boolean().optional(),
   maxIncomingStreams: z.number().int().optional(),
+  disableStatelessReset: z.boolean().optional(),
 }).passthrough();
 
 // --- FinalMask Object ---

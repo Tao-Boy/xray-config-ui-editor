@@ -6,22 +6,24 @@ import { ExtendedSection } from '../../ui/ExtendedSection';
 import { useField } from '../../../hooks/useField';
 import { migrateProxySettings } from '../../../core/xray/outbound-shape';
 import { DOMAIN_STRATEGY_OPTIONS } from './domain-strategies';
+import { useCoreVersion } from '../../../hooks/useCoreVersion';
 import { t } from '../../../i18n';
 
 export const OutboundProxyMux = ({ outbound, onChange, showMux = true }: any) => {
     /** Where chaining lives now; the card below reports it rather than duplicating its editor. */
     const dialerProxy: string | undefined = outbound.streamSettings?.sockopt?.dialerProxy;
     /**
-     * `proxySettings` is a removed feature.
+     * `proxySettings`, which 26.9 refuses.
      *
-     * Xray-core stopped accepting it — `OutboundDetourConfig.Build()` answers
-     * `PrintRemovedFeatureError("outbound \"proxySettings\"",
-     * "\"streamSettings.sockopt.dialerProxy\"")`, so a config carrying it does
-     * not start at all on a current core. It still works on 26.3 and older,
-     * which is why an existing one is shown rather than hidden — but nothing
-     * offers to add a new one, and the replacement is one click away in
-     * Sockopt below.
+     * `OutboundDetourConfig.Build()` answers `PrintRemovedFeatureError` for it
+     * on 26.9, so the config does not load there; 26.3 and 26.7 still run it.
+     * An existing one is therefore shown on every line — red where the chosen
+     * core refuses it, amber where it works but will not survive an upgrade —
+     * and nothing offers to add a new one: `sockopt.dialerProxy` does the same
+     * job on all three.
      */
+    const { status, tag: coreTag } = useCoreVersion();
+    const proxySettingsRefused = status('outbound.proxySettings') === 'rejected';
     const legacyProxyTag: string | undefined = outbound.proxySettings?.tag;
     const migrateToDialerProxy = () => {
         const migrated = migrateProxySettings(outbound);
@@ -49,15 +51,21 @@ export const OutboundProxyMux = ({ outbound, onChange, showMux = true }: any) =>
     return (
         <div className="space-y-4 mt-4">
             {legacyProxyTag && (
-                <div className="bg-rose-950/20 p-4 rounded-xl border border-rose-500/30 space-y-3">
-                    <h4 className="label-xs text-rose-300 flex items-center gap-1">
-                        {t("Proxy chaining (removed from Xray)")}
-                        <Help>{t("The core answers \"this feature has been removed\" and refuses to start. Older cores up to 26.3 still accept it.")}</Help>
+                <div className={`p-4 rounded-xl border space-y-3 ${
+                    proxySettingsRefused ? 'bg-rose-950/20 border-rose-500/30' : 'bg-amber-950/20 border-amber-500/30'
+                }`}>
+                    <h4 className={`label-xs flex items-center gap-1 ${proxySettingsRefused ? 'text-rose-300' : 'text-amber-300'}`}>
+                        {proxySettingsRefused
+                            ? t("Proxy chaining (refused by Xray {tag})", { tag: coreTag })
+                            : t("Proxy chaining (removed in Xray 26.9)")}
+                        <Help>{t("26.9 answers \"this feature has been removed\" and refuses to start. 26.3 and 26.7 still run it.")}</Help>
                     </h4>
-                    <p className="text-[11px] text-rose-200/70 leading-relaxed">
-                        {t("This outbound chains through {tag} via proxySettings, which a current Xray refuses to load. The replacement is sockopt.dialerProxy and does the same job.", { tag: legacyProxyTag })}
+                    <p className={`text-[11px] leading-relaxed ${proxySettingsRefused ? 'text-rose-200/70' : 'text-amber-200/70'}`}>
+                        {proxySettingsRefused
+                            ? t("This outbound chains through {tag} via proxySettings, which a current Xray refuses to load. The replacement is sockopt.dialerProxy and does the same job.", { tag: legacyProxyTag })
+                            : t("This outbound chains through {tag} via proxySettings. It works on {core}, and stops the config from loading on 26.9 — sockopt.dialerProxy does the same job on every supported version.", { tag: legacyProxyTag, core: coreTag })}
                     </p>
-                    <div className="flex items-center justify-between gap-3 pt-2 border-t border-rose-500/20">
+                    <div className={`flex items-center justify-between gap-3 pt-2 border-t ${proxySettingsRefused ? 'border-rose-500/20' : 'border-amber-500/20'}`}>
                         <span className="text-[11px] text-slate-400 flex items-center gap-1">
                             Transport Layer Chaining
                             <Help>{t("When enabled, proxy chaining occurs at the transport layer instead of the application layer.")}</Help>

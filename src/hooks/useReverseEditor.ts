@@ -2,7 +2,9 @@ import { useState, useCallback, useMemo } from 'react';
 import { useConfigStore } from '../store/configStore';
 
 export const useReverseEditor = () => {
-    const { config, updateSection } = useConfigStore();
+    const { config, updateSection, toggleSection } = useConfigStore();
+    /** Whether the config has a reverse section at all — `null` decodes to nil, which every line ignores. */
+    const hasReverse = config?.reverse !== undefined && config?.reverse !== null;
     // Memoised so the callbacks below keep their identity between renders.
     const reverse = useMemo(() => config?.reverse || { bridges: [], portals: [] }, [config?.reverse]);
     const [activeTab, setActiveTab] = useState<'bridges' | 'portals'>('bridges');
@@ -35,13 +37,27 @@ export const useReverseEditor = () => {
         updateSection('reverse', newReverse, rawText);
     }, [updateSection]);
 
+    /**
+     * Take the whole section out.
+     *
+     * From 26.7 any non-null `reverse`, even `{}`, stops the config loading
+     * (v26.7.28:infra/conf/xray.go:607), so emptying the lists is not enough.
+     * toggleSection deletes a section that is there; the guard keeps it from
+     * doing the other half of its job and creating one.
+     */
+    const removeReverse = useCallback(() => {
+        if (hasReverse) toggleSection('reverse', undefined);
+    }, [hasReverse, toggleSection]);
+
     return {
         reverse,
+        hasReverse,
         activeTab,
         setActiveTab,
         addItem,
         removeItem,
         updateItem,
-        updateReverse
+        updateReverse,
+        removeReverse,
     };
 };

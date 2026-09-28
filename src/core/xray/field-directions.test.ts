@@ -101,3 +101,22 @@ describe('fields already in the config', () => {
         expect(foreignFieldsIn(REALITY_FIELDS, 'inbound', { privateKey: 'k' })).toEqual([]);
     });
 });
+
+describe('retired fields', () => {
+    it('never offers allowInsecure, on either side, at either level', () => {
+        // `true` is a removed feature on every supported core; `false` means
+        // nothing. A switch for it is only a way to write a refused config.
+        for (const side of ['inbound', 'outbound'] as const) {
+            for (const level of ['basic', 'advanced'] as const) {
+                expect(hiddenKeysFor(tlsKeys, TLS_FIELDS, side, level)).toContain('allowInsecure');
+                // Not even when the config holds one — the editor's notice shows it.
+                expect(hiddenKeysFor(tlsKeys, TLS_FIELDS, side, level, { allowInsecure: true })).toContain('allowInsecure');
+            }
+        }
+    });
+
+    it('does not call a retired field foreign or unreachable', () => {
+        expect(foreignFieldsIn(TLS_FIELDS, 'inbound', { allowInsecure: true })).toEqual([]);
+        expect(auditDirections(tlsKeys, TLS_FIELDS).unreachable).not.toContain('allowInsecure');
+    });
+});

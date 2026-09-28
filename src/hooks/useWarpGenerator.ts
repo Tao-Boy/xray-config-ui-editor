@@ -44,7 +44,10 @@ export function useWarpGenerator(onGenerate: (outbound: any) => void, onClose: (
                         reserved: [0, 0, 0],
                         peers: [{ endpoint: '', publicKey: '', keepAlive: 15, allowedIPs: ['0.0.0.0/0', '::/0'] }]
                     },
-                    streamSettings: { network: 'udp' }
+                    // `udp` is not a transport name — every core refuses it with
+                    // "unknown transport protocol". `raw` is what the other
+                    // presets write, and WireGuard ignores the choice anyway.
+                    streamSettings: { network: 'raw' }
                 };
             } else {
                 const targetPresetName =

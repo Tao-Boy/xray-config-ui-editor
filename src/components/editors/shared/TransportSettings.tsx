@@ -13,8 +13,18 @@ import { SchemaForm } from '../../ui/SchemaForm';
 import { ExtendedSection } from '../../ui/ExtendedSection';
 import { useConfigStore } from '../../../store/configStore';
 import { useTransportFields } from '../../../hooks/useTransportFields';
-import { NetworkSection } from './NetworkSection';
-import { networkOptions } from './transport-networks';
+import { NetworkSection, VersionKeyNotice } from './NetworkSection';
+import {
+    effectiveNetwork,
+    keyNotices,
+    leftoverTransportSettings,
+    networkOptions,
+    networkProblem,
+    securityOptions,
+    securityProblem,
+    type KeyNotice,
+} from '../../../core/xray/transport-networks';
+import { useCoreVersion } from '../../../hooks/useCoreVersion';
 import { toast } from 'sonner';
 import { t, tn } from '../../../i18n';
 
@@ -96,6 +106,14 @@ const withFirstCertificate = (list: any[] | undefined, patch: Record<string, str
     return certificates;
 };
 
+/** Labels for TLS keys SchemaForm has no standard entry for. */
+const TLS_FIELD_CONFIGS = () => ({
+    echForceQuery: {
+        label: t("ECH Force Query"),
+        help: t("How hard to insist on fetching the ECH config over DNS: none, half or full. Only Xray 26.3 reads it."),
+    },
+});
+
 export const TransportSettings = ({ streamSettings = {}, onChange, isClient = false, errors = {}, protocol }: TransportProps) => {
     // Which security fields belong to which side is declared once, in
     // core/xray/field-directions. These used to be five hand-written
@@ -122,15 +140,47 @@ export const TransportSettings = ({ streamSettings = {}, onChange, isClient = fa
     // Every binding to `streamSettings` lives in the hook.
     const {
         update,
-        network,
+        setNetwork,
+        foldMethodIntoNetwork,
+        removeStreamKeys,
         security,
         realitySettings,
         tlsSettings,
         tlsCertificates,
+        removeTlsKeys,
     } = useTransportFields(streamSettings, onChange);
 
-    const net = network.value || "tcp";
+    // What the chosen core runs, which is not always what `network` says:
+    // 26.7+ read `method` over it. See effectiveNetwork.
+    const { version, tag, statusAt } = useCoreVersion();
+    const net = effectiveNetwork(streamSettings, version);
     const sec = security.value || "none";
+    const method: string | undefined = typeof streamSettings?.method === 'string' ? streamSettings.method : undefined;
+    const methodStatus = statusAt(side, 'streamSettings.method', protocol);
+    const leftovers = leftoverTransportSettings(streamSettings, net);
+
+    /**
+     * TLS keys the chosen line does not simply accept. `allowInsecure` is
+     * matched on its value — only `true` is refused, `false` means nothing —
+     * so it is looked up with the value its row is keyed on.
+     */
+    const tlsValue = tlsSettings.value || {};
+    const tlsNotices: KeyNotice[] = [
+        ...(tlsValue.allowInsecure === true
+            ? [{
+                key: 'allowInsecure',
+                status: statusAt(side, 'streamSettings.tlsSettings.allowInsecure', protocol, 'true'),
+                replacement: 'pinnedPeerCertSha256 / verifyPeerCertByName',
+            }]
+            : []),
+        ...keyNotices(tlsValue, ['verifyPeerCertInNames', 'echForceQuery'], { scope: side, settingsPath: 'streamSettings.tlsSettings', protocol }, version),
+    ].filter(notice => notice.status !== 'accepted');
+    // Keys the line refuses or drops stay out of the form; a held one is in
+    // the notices above it, with a remove button.
+    const tlsVersionHidden = tlsKeys.filter(key =>
+        statusAt(side, `streamSettings.tlsSettings.${key}`, protocol) !== 'accepted');
+    const tlsExclude = (level: 'basic' | 'advanced') =>
+        [...hiddenKeysFor(tlsKeys, TLS_FIELDS, side, level, tlsSettings.value), ...tlsVersionHidden];
 
     return (
         <div className="bg-slate-900/40 p-5 rounded-2xl border border-slate-800/80 space-y-6 animate-in fade-in duration-300">
@@ -147,23 +197,36 @@ export const TransportSettings = ({ streamSettings = {}, onChange, isClient = fa
                         label={t("Network")}
                         hint={t("Transport protocol used to deliver data.")}
                         value={net}
-                        onChange={val => network.onChange(val)}
-                        options={networkOptions(protocol, net)}
+                        onChange={val => setNetwork(val)}
+                        options={networkOptions(protocol, net, version)}
+                        error={networkProblem(protocol, net, version)}
                     />
                     <Select
                         label={t("Security")}
                         hint={t("Encryption layer (TLS/Reality).")}
                         value={sec}
                         onChange={val => security.onChange(val)}
-                        options={[
-                            { value: "none", label: t("NONE"), description: t("Plaintext (unsafe)") },
-                            { value: "tls", label: "TLS", description: t("Standard SSL/TLS encryption") },
-                            ...(['vless', 'vmess', 'trojan', 'shadowsocks'].includes(protocol || '') ? [
-                                { value: "reality", label: t("REALITY"), description: t("Next-gen stealth encryption") }
-                            ] : []),
-                        ]}
+                        options={securityOptions(protocol, net, sec, version)}
+                        error={securityProblem(protocol, net, sec, version)}
                     />
             </div>
+
+            {/* 26.7's alias of network. The editor never writes it; one a
+                config has decides the transport on 26.7+ and is ignored on 26.3. */}
+            {method !== undefined && (
+                <VersionKeyNotice
+                    what="method"
+                    status={methodStatus}
+                    tag={tag}
+                    message={methodStatus === 'accepted'
+                        ? t("This config also sets method = \"{method}\", the alias of network that Xray {tag} reads first — so {method} is the transport that runs, whatever network says.", { method, tag })
+                        : undefined}
+                    actions={[
+                        { label: t("Move it to network"), onClick: foldMethodIntoNetwork },
+                        { label: t("Remove it"), onClick: () => removeStreamKeys(['method']) },
+                    ]}
+                />
+            )}
 
             <div className="border-t border-slate-800/50 my-2" />
 
@@ -173,7 +236,21 @@ export const TransportSettings = ({ streamSettings = {}, onChange, isClient = fa
                 onChange={onChange}
                 net={net}
                 isClient={isClient}
+                protocol={protocol}
             />
+
+            {/* Every settings object present is built, whichever transport is
+                selected (v26.7.28:infra/conf/transport_internet.go:145), so a
+                broken leftover stops the config from loading all the same. */}
+            {leftovers.length > 0 && (
+                <VersionKeyNotice
+                    what={leftovers.join(', ')}
+                    status="accepted"
+                    tag={tag}
+                    message={t("{keys} belong to another transport. Xray builds them anyway, so one that no longer loads stops the whole config.", { keys: leftovers.join(', ') })}
+                    actions={[{ label: t("Remove them"), onClick: () => removeStreamKeys(leftovers) }]}
+                />
+            )}
 
             {/* --- SECURITY SETTINGS --- */}
 
@@ -273,26 +350,49 @@ export const TransportSettings = ({ streamSettings = {}, onChange, isClient = fa
                         side={side}
                     />
 
+                    {tlsNotices.length > 0 && (
+                        <div className="space-y-2">
+                            {tlsNotices.map(notice => (
+                                <VersionKeyNotice
+                                    key={notice.key}
+                                    what={notice.key === 'allowInsecure' ? 'allowInsecure: true' : `tlsSettings.${notice.key}`}
+                                    status={notice.status}
+                                    tag={tag}
+                                    replacement={notice.replacement}
+                                    actions={[{ label: t("Remove it"), onClick: () => removeTlsKeys([notice.key]) }]}
+                                >
+                                    {notice.key === 'allowInsecure' && (
+                                        <p className="text-slate-500">
+                                            {t("It turned off certificate checks. Pin the server certificate by its SHA-256, or name the certificate you expect, instead.")}
+                                        </p>
+                                    )}
+                                </VersionKeyNotice>
+                            ))}
+                        </div>
+                    )}
+
                     <SchemaForm
                         schema={TlsSchema}
                         value={tlsSettings.value || {}}
                         onChange={val => tlsSettings.onChange(val)}
                         errors={tlsErrors}
-                        excludeKeys={hiddenKeysFor(tlsKeys, TLS_FIELDS, side, 'basic', tlsSettings.value)}
+                        excludeKeys={tlsExclude('basic')}
+                        fieldConfigs={TLS_FIELD_CONFIGS()}
                     />
 
                     {/* TLS EXTENDED SECTION */}
                     <ExtendedSection
                         title={t("Extended TLS Settings")}
                         description={t("Cipher suites, session resumption, certificate pinning, and SSLKEYLOGFILE.")}
-                        hasActiveValues={hasAnyValue(tlsSettings.value, shownIn(tlsKeys, TLS_FIELDS, 'advanced', tlsSettings.value))}
+                        hasActiveValues={hasAnyValue(tlsSettings.value, tlsKeys.filter(key => !tlsExclude('advanced').includes(key)))}
                     >
                         <SchemaForm
                             schema={TlsSchema}
                             value={tlsSettings.value || {}}
                             onChange={val => tlsSettings.onChange(val)}
                             errors={tlsErrors}
-                            excludeKeys={hiddenKeysFor(tlsKeys, TLS_FIELDS, side, 'advanced', tlsSettings.value)}
+                            excludeKeys={tlsExclude('advanced')}
+                            fieldConfigs={TLS_FIELD_CONFIGS()}
                         />
                     </ExtendedSection>
                 </div>
@@ -301,6 +401,7 @@ export const TransportSettings = ({ streamSettings = {}, onChange, isClient = fa
             {/* FINALMASK (UDP/TCP Noise & QUIC) */}
             <FinalmaskEditor
                 finalmask={streamSettings.finalmask}
+                side={side}
                 onChange={v => {
                     if (v === null) {
                         const newSettings = { ...streamSettings };
@@ -315,6 +416,7 @@ export const TransportSettings = ({ streamSettings = {}, onChange, isClient = fa
             {/* --- SOCKOPT (Advanced) --- */}
             <SockoptEditor
                 sockopt={streamSettings.sockopt}
+                protocol={protocol}
                 onChange={v => {
                     if (v === null) {
                         const newSettings = { ...streamSettings };

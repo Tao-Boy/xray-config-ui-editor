@@ -16,9 +16,12 @@ export const TrojanInboundUserSchema = z.object({
 }).passthrough();
 
 export const TrojanInboundSettingsSchema = z.object({
-  /** List of authorized users. The documented spelling; `users` is an alias. */
+  /**
+   * Authorized users. The only spelling 26.3 reads, and on 26.7+ it wins over
+   * `users` whenever present, even empty (v26.7.28:infra/conf/trojan.go:124).
+   */
   clients: z.array(TrojanInboundUserSchema).optional(),
-  /** Alias for clients, accepted by the core. */
+  /** 26.7+ alias of `clients`; 26.3 ignores it and loads the inbound with no users. */
   users: z.array(TrojanInboundUserSchema).optional(),
   /** Fallback configurations */
   fallbacks: z.array(FallbackObjectSchema).optional(),

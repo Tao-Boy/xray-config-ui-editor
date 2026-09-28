@@ -187,24 +187,32 @@ export const HysteriaMasqueradeTypeSchema = z.enum([
 ]);
 
 // --- FinalMask TCP Mask Type ---
+// Every type any supported core registers. Which line takes which is the
+// version check's job (VALUE_SETS `finalmask.tcp.type`); the schema only
+// refuses what no supported core knows.
 export const TcpMaskTypeSchema = z.enum([
-  'header-custom', 'fragment', 'sudoku',
+  'header-custom', 'fragment', 'sudoku', 'xmc',
 ]);
 
 // --- FinalMask UDP Mask Type ---
+// The header-* and mkcp-original/aes128gcm types are 26.3's; mkcp-legacy
+// replaced them in 26.7. realm arrived in 26.7, udphop in 26.9.
 export const UdpMaskTypeSchema = z.enum([
   'header-custom', 'header-dns', 'header-dtls', 'header-srtp',
   'header-utp', 'header-wechat', 'header-wireguard',
-  'mkcp-original', 'mkcp-aes128gcm',
-  'noise', 'salamander', 'sudoku', 'xdns', 'xicmp', 'realm',
+  'mkcp-original', 'mkcp-aes128gcm', 'mkcp-legacy',
+  'noise', 'salamander', 'sudoku', 'xdns', 'xicmp', 'realm', 'udphop',
 ]);
 
 // --- FinalMask QUIC Congestion ---
+// "" is the default (brutal when both sides know their bandwidth, else BBR)
+// and loads on every line.
 export const QuicCongestionSchema = z.enum([
-  'reno', 'bbr', 'brutal', 'force-brutal',
+  '', 'reno', 'bbr', 'brutal', 'force-brutal',
 ]);
 
 // --- FinalMask BBR Profile ---
+// "" is the standard profile.
 export const BbrProfileSchema = z.enum([
-  'conservative', 'standard', 'aggressive',
+  '', 'conservative', 'standard', 'aggressive',
 ]);

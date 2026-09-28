@@ -14,8 +14,8 @@
 export const UNTRANSLATED = new Set([
     // Brands, products, protocol and config vocabulary
     'Xray GUI', 'Xray Docs', 'Xray Config Editor', 'Remnawave', 'Telegram', 'WARP',
-    'HEAD', 'RAW JSON', 'BEYOND REALITY', 'Fallback', 'Host', 'Authority', 'Seed',
-    'ASCII', 'ID', 'MTU', 'Endpoint', 'Flow', 'Email', 'GeoSite', 'GeoIP',
+    'HEAD', 'RAW JSON', 'BEYOND REALITY', 'Fallback', 'Host', 'Authority',
+    'MTU', 'Endpoint', 'Flow', 'Email', 'GeoSite', 'GeoIP',
     'Observatory', 'Burst Observatory', 'FakeDNS', 'Keep-Alive', 'Branch',
     'TCP Fast Open', 'TCP MPTCP', 'TCP User Timeout', 'gRPC API', 'Fingerprint',
     'Telegram Channel (@xcue_dev)', 'Bridge:', 'Portal:', 'Linux 5.6+',
@@ -23,18 +23,18 @@ export const UNTRANSLATED = new Set([
 
     // Enum values written straight into the config — translating a dropdown
     // option would stop it matching what the JSON says.
-    'AsIs', 'UseIP', 'UseIPv4', 'UseIPv6', 'UseIPv4v6', 'UseIPv6v4',
+    'AsIs',
     'ForceIPv4', 'ForceIPv6', 'ForceIPv4v6', 'ForceIPv6v4',
     'IPIfNonMatch', 'IPOnDemand', 'vlessRoute',
     'leastLoad', 'leastPing', 'roundRobin', 'random',
     'aes-256-gcm', 'aes-128-gcm', 'chacha20-ietf-poly1305',
     'xchacha20-ietf-poly1305', '2022-blake3-aes-128-gcm',
-    '2022-blake3-aes-256-gcm', '2022-blake3-chacha20-poly1305', 'xtls-rprx-vision',
-    'AES-128-GCM', 'ChaCha20', 'HEX', 'RAND', 'BBR', 'Brutal', 'Reno', 'AUTO',
+    '2022-blake3-aes-256-gcm', '2022-blake3-chacha20-poly1305',
+    'RAND', 'AUTO',
 
     // Transport and protocol names
     'WebSocket', 'XHTTP', 'SplitHTTP', 'gRPC', 'mKCP', 'RAW',
-    'HTTP Upgrade', 'NONE', 'REALITY', 'SRTP', 'WeChat', 'DTLS', 'WireGuard',
+    'HTTP Upgrade', 'NONE', 'REALITY',
     'TProxy', 'Redirect', 'Packet-Up', 'Stream-Up', 'Stream-One',
 
     // Client names in the emulated-client list

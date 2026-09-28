@@ -232,6 +232,19 @@ export const validateBalancer = (balancer: any): string[] => {
     return errors;
 };
 
+const RULE_CONDITIONS = [
+    'domain', 'domains', 'ip', 'port', 'sourcePort', 'localPort', 'network',
+    'source', 'sourceIP', 'localIP', 'user', 'inboundTag', 'protocol', 'attrs',
+    'process', 'vlessRoute', 'localOS',
+];
+
+const isCondition = (value: unknown): boolean => {
+    if (value === undefined || value === null || value === '') return false;
+    if (Array.isArray(value)) return value.length > 0;
+    if (typeof value === 'object') return Object.keys(value as object).length > 0;
+    return true;
+};
+
 export const getCriticalRuleErrors = (rule: any): ValidationError[] => {
     const errs: ValidationError[] = [];
 
@@ -242,10 +255,12 @@ export const getCriticalRuleErrors = (rule: any): ValidationError[] => {
     // from closing. See core/snippets.
     if (isSnippetRef(rule)) return errs;
 
-    const hasMatcher =
-        rule.domain || rule.ip || rule.port || rule.sourcePort ||
-        rule.network || rule.source || rule.user || rule.inboundTag ||
-        rule.protocol || rule.attrs;
+    // The conditions BuildCondition() counts (app/router/config.go, all
+    // three supported tags; localOS from 26.9). A rule with none of them is
+    // refused with "this rule has no effective fields" — but one with only
+    // `process`, `localPort` or `vlessRoute` is perfectly good, and an empty
+    // `domain: []` counts for nothing.
+    const hasMatcher = RULE_CONDITIONS.some(key => isCondition(rule[key]));
 
     if (!hasMatcher) errs.push({ field: 'matchers', message: 'Rule has no matchers.' });
     if (!rule.outboundTag && !rule.balancerTag) errs.push({ field: 'target', message: 'Rule must have a destination.' });

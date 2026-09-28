@@ -33,6 +33,15 @@ export interface FieldSpec {
     advanced?: boolean;
     /** Why the direction is what it is, where it is not obvious. */
     note?: string;
+    /**
+     * Never offered by a form, on either side, at any disclosure level: every
+     * supported core refuses or ignores the part of it anyone would set. A
+     * value a config already holds is not dropped silently — the editor names
+     * it in a notice beside the form, with the replacement and a way to remove
+     * it (TransportSettings) — but a form that renders it as an ordinary
+     * switch is how people keep writing it.
+     */
+    retired?: boolean;
 }
 
 /**
@@ -91,12 +100,26 @@ export const TLS_FIELDS: Record<string, FieldSpec> = {
 
     // ── Client ──────────────────────────────────────────────────────────────
     serverName: { direction: 'client' },
-    allowInsecure: { direction: 'client' },
+    allowInsecure: {
+        direction: 'client',
+        retired: true,
+        note: '`true` is a removed feature on every supported line: 26.7 and 26.9 '
+            + 'refuse it outright (v26.7.28:infra/conf/transport_security.go:362), and '
+            + '26.3 does since 2026-06-01 (v26.3.27:infra/conf/transport_internet.go:711, '
+            + 'a clock check). `false` is harmless and means nothing. Replaced by '
+            + 'pinnedPeerCertSha256 / verifyPeerCertByName.',
+    },
     fingerprint: { direction: 'client', note: 'uTLS Client Hello fingerprint.' },
     verifyPeerCertByName: { direction: 'client', advanced: true },
     pinnedPeerCertSha256: { direction: 'client', advanced: true },
     disableSystemRoot: { direction: 'client', advanced: true, note: 'Trust store is a client concern.' },
     echConfigList: { direction: 'client', advanced: true },
+    echForceQuery: {
+        direction: 'client',
+        advanced: true,
+        note: 'Only 26.3 reads it (v26.3.27:infra/conf/transport_internet.go:756); '
+            + 'the editor offers it on that line alone, via the feature table.',
+    },
 
     // ── Both ────────────────────────────────────────────────────────────────
     alpn: { direction: 'both' },
@@ -136,6 +159,10 @@ const hasValue = (value: Record<string, unknown> | undefined, key: string): bool
  *    the user unable to see it or delete it while the app keeps writing it
  *    back. Direction decides what an empty form offers, never what an existing
  *    config is allowed to show.
+ *
+ * A retired field is the one exception to the second rule, and only because
+ * it is not hidden so much as moved: the editor shows a held value in a notice
+ * with a remove button rather than as a switch that invites setting it again.
  */
 export const hiddenKeysFor = (
     schemaKeys: string[],
@@ -147,6 +174,7 @@ export const hiddenKeysFor = (
     schemaKeys.filter(key => {
         const spec = fields[key];
         if (!spec) return false;
+        if (spec.retired) return true;
         const foreign = !visibleOn(spec, side);
         // A foreign field with a value is surfaced at the basic level, where
         // the warning above the form points at it.
@@ -166,7 +194,7 @@ export const foreignFieldsIn = (
     side: Side,
     value: Record<string, unknown> | undefined,
 ): string[] =>
-    Object.keys(fields).filter(key => !visibleOn(fields[key]!, side) && hasValue(value, key));
+    Object.keys(fields).filter(key => !fields[key]!.retired && !visibleOn(fields[key]!, side) && hasValue(value, key));
 
 export interface DirectionAudit {
     /** In the schema, with no declared direction — shown on both sides. */
@@ -185,7 +213,8 @@ export const auditDirections = (
     const declared = Object.keys(fields);
     const unreachable = schemaKeys.filter(key => {
         const spec = fields[key];
-        if (!spec) return false;
+        // A retired field is unreachable on purpose; its notice is the way in.
+        if (!spec || spec.retired) return false;
         return (['inbound', 'outbound'] as Side[]).every(side =>
             (['basic', 'advanced'] as const).every(level =>
                 hiddenKeysFor([key], fields, side, level).length > 0));

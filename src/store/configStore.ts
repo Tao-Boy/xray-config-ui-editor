@@ -15,6 +15,7 @@ import {
 } from '../core/snippets';
 import { XrayConfigSchema } from '../core/xray/schemas';
 import { createDefaultDns } from '../core/presets/dns';
+import { coreVersionId, DEFAULT_CORE_VERSION, type CoreVersionId } from '../core/xray/versions';
 import { diffCounts } from '../core/git/bounded-diff';
 import { parseJsonc, stringifyJsonc } from '../utils/jsonc';
 import { idbStorage } from '../utils/indexedDbStorage';
@@ -204,7 +205,12 @@ interface ConfigState {
     rawConfigText: string | null;
     setConfig: (config: XrayConfig | null, rawText?: string | null) => void;
     loadConfig: (json: unknown, label?: string, isCloud?: boolean, rawText?: string) => void;
-    coreVersion: string;
+    /**
+     * The Xray-core line configs are written for. Decides what the editors
+     * offer and what diagnostics call refused or silently ignored — see
+     * core/xray/versions.
+     */
+    coreVersion: CoreVersionId;
     setCoreVersion: (version: string) => void;
     
     // Profiles & History State
@@ -378,8 +384,8 @@ export const useConfigStore = create(
         (set, get) => ({
             config: null,
             rawConfigText: null,
-            coreVersion: 'v1.8.10',
-            setCoreVersion: (version: string) => set({ coreVersion: version }),
+            coreVersion: DEFAULT_CORE_VERSION,
+            setCoreVersion: (version: string) => set({ coreVersion: coreVersionId(version) }),
             
             warpWorkerUrl: '',
             setWarpWorkerUrl: (url: string) => set({ warpWorkerUrl: url }),
@@ -905,7 +911,7 @@ export const useConfigStore = create(
                 // panel shows, but here they actually gate the push instead of being
                 // display-only. A cloud push is the one action where "it saved fine" must
                 // mean "the node will actually start", so critical findings block it. ---
-                const criticalIssues = runFullDiagnostics(config, get().getSnippetDefs()).filter(d => d.severity === 'critical');
+                const criticalIssues = runFullDiagnostics(config, get().getSnippetDefs(), get().coreVersion).filter(d => d.severity === 'critical');
                 const firstIssue = criticalIssues[0];
                 if (firstIssue) {
                     toast.error(t("Push Blocked!"), {
@@ -1176,7 +1182,7 @@ export const useConfigStore = create(
                 // config with critical issues (dangling routing targets, missing
                 // REALITY keys, etc.) saving silently as "success" is how those go
                 // unnoticed until someone tries to push/deploy it. Surface it here too.
-                const criticalCount = runFullDiagnostics(config).filter(d => d.severity === 'critical').length;
+                const criticalCount = runFullDiagnostics(config, [], get().coreVersion).filter(d => d.severity === 'critical').length;
                 if (criticalCount > 0) {
                     toast.warning(t("Local Profile Saved (with issues)"), {
                         description: `${criticalCount} critical diagnostic issue(s) remain — open Diagnostics before pushing this config.`,
@@ -1741,6 +1747,9 @@ export const useConfigStore = create(
                 return {
                     ...current,
                     ...saved,
+                    // Held `v1.8.10`-style values that changed nothing; those
+                    // and anything unrecognised land on a supported line.
+                    coreVersion: coreVersionId(saved.coreVersion),
                     remnawave,
                     snippetLibrary: { ...current.snippetLibrary, ...(saved.snippetLibrary ?? {}) },
                 } as ConfigState;

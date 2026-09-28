@@ -183,8 +183,14 @@ export const buildClientOutbound = ({
             serverName: host.sni || host.host || host.address,
             fingerprint,
             ...(host.alpn ? { alpn: String(host.alpn).split(',').map(a => a.trim()).filter(Boolean) } : {}),
-            ...(host.allowInsecure ? { allowInsecure: true } : {}),
         };
+        // `allowInsecure: true` is refused on every supported core — a
+        // removed feature pointing at certificate pinning (26.3 after
+        // 2026-06-01, 26.7 and 26.9 outright). Writing it would hand the
+        // subscriber a config that does not load, so it is left out and said.
+        if (host.allowInsecure) {
+            notes.push('The host allows insecure TLS; no supported Xray core accepts allowInsecure any more — pin the certificate with pinnedPeerCertSha256 instead');
+        }
     } else {
         outbound.streamSettings.security = 'none';
     }
@@ -205,7 +211,9 @@ export const buildClientOutbound = ({
         const ws = stream.wsSettings || {};
         outbound.streamSettings.wsSettings = {
             path: host.path || ws.path || '/',
-            ...(host.host ? { headers: { Host: host.host } } : {}),
+            // `host`, not `headers.Host`: the header spelling still loads but
+            // every supported core logs it as deprecated.
+            ...(host.host ? { host: host.host } : {}),
         };
     } else if (network === 'grpc') {
         const grpc = stream.grpcSettings || {};

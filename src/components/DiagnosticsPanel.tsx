@@ -2,6 +2,8 @@ import React from 'react';
 import { Icon } from './ui/Icon';
 import type { Diagnostic, DiagnosticSeverity } from '../core/diagnostics';
 import { useBackToClose } from '../hooks/useBackToClose';
+import { useConfigStore } from '../store/configStore';
+import { CORE_VERSIONS, coreVersion as coreVersionOf } from '../core/xray/versions';
 import { t } from '../i18n';
 
 interface Props {
@@ -11,6 +13,10 @@ interface Props {
 
 export const DiagnosticsPanel = ({ diagnostics, onClose }: Props) => {
     useBackToClose(true, onClose);
+    // The findings below are only true of one core. Switching it here reruns
+    // them — diagnostics are derived from the store, not passed in frozen.
+    const coreVersion = useConfigStore(state => state.coreVersion);
+    const setCoreVersion = useConfigStore(state => state.setCoreVersion);
     const criticals = diagnostics.filter(d => d.severity === 'critical');
     const warnings = diagnostics.filter(d => d.severity === 'warning');
     const infos = diagnostics.filter(d => d.severity === 'info');
@@ -113,11 +119,35 @@ export const DiagnosticsPanel = ({ diagnostics, onClose }: Props) => {
                     )}
                 </div>
 
-                {/* Footer */}
-                <div className="p-4 border-t border-slate-800 bg-slate-900/50 flex justify-end gap-3">
-                    <button onClick={onClose} className="px-6 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm transition-all shadow-lg active:scale-95">
+                {/* Footer: which core the audit is against, and the close button.
+                    Controls live down here so they are within a thumb's reach. */}
+                <div className="p-4 border-t border-slate-800 bg-slate-900/50 flex flex-col sm:flex-row sm:items-center gap-3">
+                    <div className="flex-1 min-w-0">
+                        <div className="text-[10px] uppercase font-bold tracking-wider text-slate-500 mb-1.5">
+                            {t("Checked against Xray {tag}", { tag: coreVersionOf(coreVersion).tag })}
+                        </div>
+                        <div className="flex gap-1.5" role="radiogroup" aria-label={t("Target Xray-core Version")}>
+                            {CORE_VERSIONS.map(version => (
+                                <button
+                                    key={version.id}
+                                    type="button"
+                                    role="radio"
+                                    aria-checked={version.id === coreVersion}
+                                    onClick={() => setCoreVersion(version.id)}
+                                    className={`flex-1 h-9 rounded-lg border text-[11px] font-mono font-bold transition-colors ${
+                                        version.id === coreVersion
+                                            ? 'bg-indigo-600/20 border-indigo-500 text-indigo-200'
+                                            : 'bg-slate-900 border-slate-700 text-slate-400 hover:border-slate-500'
+                                    }`}
+                                >
+                                    {version.tag}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                    <button onClick={onClose} className="h-9 px-6 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm transition-all shadow-lg active:scale-95 sm:self-end">
                         {t("Got it")}
-                        </button>
+                    </button>
                 </div>
             </div>
         </div>

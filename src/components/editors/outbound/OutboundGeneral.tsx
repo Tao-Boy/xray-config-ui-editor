@@ -2,9 +2,16 @@ import React from 'react';
 import { Card } from '../../ui/Card';
 import { SchemaForm } from '../../ui/SchemaForm';
 import { OutboundSchema, OutboundProtocolSchema } from '../../../core/xray/schemas';
+import { useCoreVersion } from '../../../hooks/useCoreVersion';
+import { protocolsFor } from '../../../core/xray/versions/protocols';
 import { t } from '../../../i18n';
 
 export const OutboundGeneral = ({ outbound, onChange, onProtocolChange, errors = {}, showSendThrough = true }: any) => {
+    // Only what the target core registers, plus whatever this outbound
+    // already is — an unknown protocol fails the whole config, not one field.
+    const { version } = useCoreVersion();
+    const protocols = protocolsFor(version, 'outbound', OutboundProtocolSchema.options, outbound.protocol);
+
     const handleFormChange = (newOutbound: any) => {
         if (newOutbound.protocol !== outbound.protocol) {
             onProtocolChange(newOutbound.protocol);
@@ -42,7 +49,7 @@ export const OutboundGeneral = ({ outbound, onChange, onProtocolChange, errors =
                     protocol: {
                         label: t("Protocol"),
                         help: t("Xray supports VLESS, VMess, Trojan, Shadowsocks, Hysteria, etc."),
-                        options: OutboundProtocolSchema.options as unknown as string[]
+                        options: protocols
                     },
                     tag: {
                         label: t("Tag"),

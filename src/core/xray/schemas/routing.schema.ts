@@ -59,12 +59,10 @@ export const RoutingRuleSchema = z.object({
   /** Process name match list */
   process: z.array(z.string()).optional(),
   /**
-   * EXPERIMENTAL — not in a tagged Xray-core release yet (landed on main
-   * 2026-08-12, commit a12801c1, "Routing: Add `localOS` that directly
-   * matches `runtime.GOOS`"). Matches the OS the Xray process itself is
-   * running on (e.g. "windows", "linux", "darwin") — useful for routing
-   * rules shared across configs deployed on mixed-OS nodes.
-   * json:"localOS" -> []string.
+   * The OS the Xray process itself runs on ("windows", "linux", "darwin"),
+   * matched case-insensitively — for one rule set shared by mixed-OS nodes.
+   * Read from v26.9.9 (infra/conf/router.go); 26.3 and 26.7 drop it. See
+   * core/xray/versions.
    */
   localOS: z.array(z.string()).optional(),
 

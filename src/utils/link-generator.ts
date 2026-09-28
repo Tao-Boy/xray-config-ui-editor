@@ -42,7 +42,10 @@ export const generateXrayLink = (item: any) => {
     if (network === 'ws') {
         const ws = stream.wsSettings || {};
         if (ws.path) params.set("path", ws.path);
-        if (ws.headers?.Host) params.set("host", ws.headers.Host);
+        // `host` is the current spelling; `headers.Host` still loads everywhere
+        // (deprecated), so an older config keeps its host in the link.
+        const wsHost = ws.host || ws.headers?.Host || ws.headers?.host;
+        if (wsHost) params.set("host", wsHost);
     } else if (network === 'grpc') {
         const grpc = stream.grpcSettings || {};
         if (grpc.serviceName) params.set("serviceName", grpc.serviceName);
@@ -57,6 +60,16 @@ export const generateXrayLink = (item: any) => {
 
     // Достаем ID / Пароль (разница структур)
     const getCredentials = () => {
+        // Hysteria keeps its password on the transport, not in settings: the
+        // client config is flat address/port/version (infra/conf/hysteria.go),
+        // and the auth is `streamSettings.hysteriaSettings.auth`.
+        if (item.protocol === 'hysteria') {
+            const auth = item.streamSettings?.hysteriaSettings?.auth
+                ?? settings?.clients?.[0]?.auth
+                ?? settings?.users?.[0]?.auth
+                ?? settings?.servers?.[0]?.password;
+            if (auth) return auth;
+        }
         // Inbound style
         if (settings?.clients?.[0]) return settings.clients[0].id || settings.clients[0].password;
         if (settings?.users?.[0]) return settings.users[0].password || settings.users[0].id || settings.users[0].auth;

@@ -4,6 +4,7 @@ import { FormField } from '../../ui/FormField';
 import { Switch } from '../../ui/Switch';
 import { Select } from '../../ui/Select';
 import { useField } from '../../../hooks/useField';
+import { useCoreVersion } from '../../../hooks/useCoreVersion';
 import { t } from '../../../i18n';
 
 export const OutboundServer = ({ outbound, onChange, errors = {} }: any) => {
@@ -11,6 +12,14 @@ export const OutboundServer = ({ outbound, onChange, errors = {} }: any) => {
     const isBlackhole = outbound.protocol === 'blackhole';
     const isDns = outbound.protocol === 'dns';
     const isVnextProtocol = outbound.protocol === 'vmess' || outbound.protocol === 'vless';
+    /**
+     * Hysteria's client config is flat — `version`, `address`, `port` and
+     * nothing else (infra/conf/hysteria.go, all three supported tags). A
+     * `servers[]` entry is dropped without a word, which leaves the address
+     * nil, and Build() dereferences it: the core does not start. Its password
+     * is the transport's `hysteriaSettings.auth`, not a setting here.
+     */
+    const isFlat = outbound.protocol === 'hysteria';
     // Only these protocols expose a single ID/password field in this UI —
     // matches the previous getUserId()/updateUserId() behavior, where every
     // other protocol (socks, http, hysteria, ...) left the field inert.
@@ -20,12 +29,19 @@ export const OutboundServer = ({ outbound, onChange, errors = {} }: any) => {
     // `updateField(path, value)` (see OutboundModal.tsx). The active server
     // entry lives at settings.vnext[0] for vmess/vless, settings.servers[0]
     // for every other protocol handled by the "Server Details" card below.
-    const basePath: (string | number)[] = isVnextProtocol ? ['settings', 'vnext', 0] : ['settings', 'servers', 0];
+    const basePath: (string | number)[] = isVnextProtocol
+        ? ['settings', 'vnext', 0]
+        : isFlat ? ['settings'] : ['settings', 'servers', 0];
 
     const address = useField<string>(outbound, onChange, [...basePath, 'address']);
     const port = useField<number>(outbound, onChange, [...basePath, 'port']);
     const method = useField<string>(outbound, onChange, [...basePath, 'method']);
     const uot = useField<boolean>(outbound, onChange, [...basePath, 'uot']);
+    // UDP over TCP exists in the shadowsocks client config on 26.3 and is
+    // gone from 26.7 on, where the key is dropped silently. Offered where it
+    // works; shown wherever a config already sets it, so it is not hidden.
+    const { offers, values } = useCoreVersion();
+    const showUot = isShadowsocks && (offers('outbound.shadowsocks.servers.uot') || uot.value !== undefined);
     // vmess/vless keep the identifier under users[0].id; trojan/shadowsocks keep it as `password`.
     const userIdField = useField<string>(
         outbound,
@@ -38,6 +54,16 @@ export const OutboundServer = ({ outbound, onChange, errors = {} }: any) => {
     const customResponse = useField<string | undefined>(outbound, onChange, ['settings', 'response', 'customResponseData']);
     const dnsAddress = useField<string>(outbound, onChange, ['settings', 'address']);
     const dnsPort = useField<number>(outbound, onChange, ['settings', 'port']);
+
+    // `custom` exists only on 26.9; earlier lines refuse it as an unknown
+    // response id. A config that already says `custom` keeps it visible.
+    const blackholeResponseOptions = [
+        { value: "none", label: t("None"), description: t("Silent Drop") },
+        { value: "http", label: "HTTP", description: t("Return 403 Forbidden") },
+        ...(values('outbound.blackhole.response.type').includes('custom') || responseType.value === 'custom'
+            ? [{ value: "custom", label: t("Custom"), description: t("Send bytes of your own") }]
+            : []),
+    ];
 
     if (isBlackhole) {
         return (
@@ -52,11 +78,7 @@ export const OutboundServer = ({ outbound, onChange, errors = {} }: any) => {
                     hint={t("Determines what the client receives when traffic is blocked.")}
                     value={responseType.value || "none"}
                     onChange={val => responseType.onChange(val)}
-                    options={[
-                        { value: "none", label: t("None"), description: t("Silent Drop") },
-                        { value: "http", label: "HTTP", description: t("Return 403 Forbidden") },
-                        { value: "custom", label: t("Custom"), description: t("Send bytes of your own") },
-                    ]}
+                    options={blackholeResponseOptions}
                 />
 
                 {/* The core base64-decodes this field and refuses to start if
@@ -159,7 +181,7 @@ export const OutboundServer = ({ outbound, onChange, errors = {} }: any) => {
                     />
                 )}
 
-                {isShadowsocks && (
+                {showUot && (
                     <div className="flex items-center gap-2 pt-6">
                         <Switch
                             checked={uot.value === true}
