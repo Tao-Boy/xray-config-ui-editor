@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.24.1] - 2026-09-28
+
+### Fixed
+- **The per-rule `domainStrategy` notice sent you to the wrong place.** A rule has no `domainStrategy` in any supported core — `RawFieldRule` is its tags plus conditions — and the notice said to set it on routing instead. But routing's `domainStrategy` takes only `AsIs`, `IPIfNonMatch` and `IPOnDemand`; `UseIPv4` there quietly means `AsIs` too. The notice now names both halves of what a `UseIPv4` on a rule was after: `IPIfNonMatch` / `IPOnDemand` at the top of Routing so IP rules match domains, and `UseIPv4` as DNS Query Strategy for the address family.
+- **A routing `domainStrategy` of anything but those three left the chooser blank** and passed without a word. It is shown, labelled as what the core does with it (AsIs), and diagnostics say so.
+- The Reverse editor subscribed to the whole store and re-rendered on every change anywhere in the app; it reads its own section now.
+
 ## [1.24.0] - 2026-09-28
 
 ### Added

@@ -194,7 +194,7 @@ const HAND_FEATURES: CoreFeature[] = [
         scope: 'rule',
         path: 'domainStrategy',
         status: s('absent', 'absent', 'absent'),
-        replacement: 'routing.domainStrategy',
+        replacement: 'routing.domainStrategy (IPIfNonMatch / IPOnDemand) and dns.queryStrategy',
         detail: 'A rule has no domainStrategy of its own; resolution is decided by routing.domainStrategy.',
         evidence: ['v26.3.27:infra/conf/router.go', 'v26.9.9:infra/conf/router.go'],
     },
@@ -401,6 +401,19 @@ const OUTBOUND_VALUE_SETS: CoreValueSet[] = [
         outside: 'rejected',
         detail: 'https and ssl mean tls; any other entry fails with "unknown protocol".',
         evidence: ['v26.7.28:infra/conf/loopback.go'],
+    },
+    {
+        // RouterConfig.getDomainStrategy (infra/conf/router.go, all three
+        // tags) lower-cases and matches ipifnonmatch / ipondemand; anything
+        // else — UseIP, UseIPv4, a typo — falls to AsIs without a word.
+        id: 'routing.domainStrategy',
+        scope: 'config',
+        path: 'routing.domainStrategy',
+        allowed: everywhere(['AsIs', 'IPIfNonMatch', 'IPOnDemand']),
+        outside: 'absent',
+        replacedBy: { useip: 'IPIfNonMatch', useipv4: 'IPIfNonMatch + dns.queryStrategy UseIPv4', useipv6: 'IPIfNonMatch + dns.queryStrategy UseIPv6' },
+        detail: 'Routing resolves domains for IP rules only with IPIfNonMatch or IPOnDemand; any other value quietly means AsIs.',
+        evidence: ['v26.3.27:infra/conf/router.go:83', 'v26.7.28:infra/conf/router.go:77', 'v26.9.9:infra/conf/router.go:77'],
     },
     {
         // Diagnostics only; the WireGuard chooser already offers exactly these.

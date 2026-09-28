@@ -339,7 +339,7 @@ export const RuleEditor = ({
                         {rule.domainStrategy !== undefined && (
                             <div className="flex flex-col gap-1.5 md:col-span-2 rounded-lg border border-amber-500/30 bg-amber-950/20 p-3">
                                 <span className="text-[11px] text-amber-200/80">
-                                    {t("This rule sets domainStrategy \"{value}\", which no supported Xray core reads on a rule. Set it on routing instead.", { value: String(rule.domainStrategy) })}
+                                    {t("This rule sets domainStrategy \"{value}\", which no supported Xray core reads on a rule. For IP rules to match a domain, set Domain Strategy to IPIfNonMatch or IPOnDemand at the top of Routing; to resolve IPv4 only, set Query Strategy to UseIPv4 in DNS.", { value: String(rule.domainStrategy) })}
                                 </span>
                                 <button
                                     type="button"

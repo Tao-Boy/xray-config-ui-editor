@@ -2,11 +2,16 @@ import { useState, useCallback, useMemo } from 'react';
 import { useConfigStore } from '../store/configStore';
 
 export const useReverseEditor = () => {
-    const { config, updateSection, toggleSection } = useConfigStore();
+    // One slice each, not the whole store: destructuring useConfigStore()
+    // re-rendered this modal on every change anywhere in the app — a panel
+    // fetch, a history entry, a toast-driven flag.
+    const rawReverse = useConfigStore(state => state.config?.reverse);
+    const updateSection = useConfigStore(state => state.updateSection);
+    const toggleSection = useConfigStore(state => state.toggleSection);
     /** Whether the config has a reverse section at all — `null` decodes to nil, which every line ignores. */
-    const hasReverse = config?.reverse !== undefined && config?.reverse !== null;
+    const hasReverse = rawReverse !== undefined && rawReverse !== null;
     // Memoised so the callbacks below keep their identity between renders.
-    const reverse = useMemo(() => config?.reverse || { bridges: [], portals: [] }, [config?.reverse]);
+    const reverse = useMemo(() => rawReverse || { bridges: [], portals: [] }, [rawReverse]);
     const [activeTab, setActiveTab] = useState<'bridges' | 'portals'>('bridges');
 
     const updateList = useCallback((type: 'bridges' | 'portals', newList: any[]) => {

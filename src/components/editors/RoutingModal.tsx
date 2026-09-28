@@ -73,6 +73,9 @@ export const RoutingModal = ({ onClose, onOpenSnippets }: any) => {
     const { geoSites, geoIps, loadingGeo } = useGeoData();
     const { sidebarWidth, startResizing } = useSidebarResizer();
 
+    const routingStrategy: string = config?.routing?.domainStrategy || 'AsIs';
+    const strategyKnown = ['asis', 'ipifnonmatch', 'ipondemand'].includes(routingStrategy.toLowerCase());
+
     return (
         <Modal
             title={t("Routing Manager")}
@@ -99,14 +102,24 @@ export const RoutingModal = ({ onClose, onOpenSnippets }: any) => {
                     </ModalBottomBar>
                 )}
                 <div className={`flex flex-col w-full md:w-64 ${mobileEditMode ? 'hidden md:flex' : ''}`}>
+                    {/* The three values routing reads (infra/conf/router.go,
+                        getDomainStrategy, all supported tags). Anything else —
+                        UseIPv4 is the usual one, borrowed from outbounds — falls
+                        to AsIs without a word, so it is shown for what it does. */}
                     <Select
                         label={t("Domain Strategy")}
-                        value={config?.routing?.domainStrategy || "AsIs"}
+                        hint={t("Whether a domain is resolved so IP rules can match it. Which address family it resolves to is DNS Query Strategy.")}
+                        value={routingStrategy}
                         onChange={val => updateSection('routing', { ...config?.routing, domainStrategy: val })}
                         options={[
                             { value: "AsIs", label: t("AsIs"), description: t("Use domain as provided") },
                             { value: "IPIfNonMatch", label: t("IPIfNonMatch"), description: t("Resolve if no domain match") },
                             { value: "IPOnDemand", label: t("IPOnDemand"), description: t("Resolve before matching") },
+                            ...(strategyKnown ? [] : [{
+                                value: routingStrategy,
+                                label: routingStrategy,
+                                description: t("Not a routing strategy — the core treats it as AsIs"),
+                            }]),
                         ]}
                     />
                 </div>

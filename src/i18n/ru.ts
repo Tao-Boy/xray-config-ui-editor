@@ -137,8 +137,6 @@ export const ru: Record<string, string> = {
         'Перенесите адрес из servers[] в settings.address и settings.port.',
     'A hysteria inbound needs version 2; Xray {tag} refuses it missing or different.':
         'Hysteria-inbound нужна version 2; без неё или с другой Xray {tag} его отвергает.',
-    'This rule sets domainStrategy "{value}", which no supported Xray core reads on a rule. Set it on routing instead.':
-        'У правила задан domainStrategy «{value}», а у правила его не читает ни одно поддерживаемое ядро Xray. Задайте его в routing.',
     'Local OS (26.9+)':
         'ОС узла (26.9+)',
     'Matches the OS the Xray process runs on (e.g. windows, linux, darwin). Read from Xray 26.9; older cores drop the key, and a rule left with no other condition then fails to load.':
@@ -397,6 +395,13 @@ export const ru: Record<string, string> = {
 
     'hysteriaSettings needs version 2; Xray {tag} refuses anything else.':
         'hysteriaSettings нужна version 2; всё остальное Xray {tag} отвергает.',
+
+    'Whether a domain is resolved so IP rules can match it. Which address family it resolves to is DNS Query Strategy.':
+        'Резолвить ли домен, чтобы по нему сработали IP-правила. В какой адрес — IPv4 или IPv6 — решает Query Strategy в DNS.',
+    'Not a routing strategy — the core treats it as AsIs':
+        'Это не стратегия маршрутизации — ядро считает её AsIs',
+    'This rule sets domainStrategy "{value}", which no supported Xray core reads on a rule. For IP rules to match a domain, set Domain Strategy to IPIfNonMatch or IPOnDemand at the top of Routing; to resolve IPv4 only, set Query Strategy to UseIPv4 in DNS.':
+        'У правила задан domainStrategy «{value}», а у правила его не читает ни одно поддерживаемое ядро Xray. Чтобы IP-правила срабатывали по домену, поставьте Domain Strategy = IPIfNonMatch или IPOnDemand вверху окна маршрутизации; чтобы резолвить только в IPv4 — Query Strategy = UseIPv4 в DNS.',
 
     // ── Freedom: fragment, noises and the rest of its settings ──────────────
     'Domain Strategy (legacy key)': 'Стратегия доменов (старый ключ)',
