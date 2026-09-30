@@ -8,7 +8,11 @@ import { t } from '../../../i18n';
 
 export const DnsServerEditor = ({ server, onChange, onCancel }: any) => {
     const isString = typeof server === 'string';
-    const [local, setLocal] = useState(isString ? { address: server } : { ...server });
+    // No draft: every field writes straight into the config, as the simple
+    // form below always did. A copy taken when the pane opened kept showing
+    // that server after another was picked, and whatever sat unsaved in it
+    // was dropped without a word — by the next pick or by the modal's Save.
+    const current = isString ? { address: server } : (server ?? {});
 
     // One arrival, so one piece of state: "still loading" is an object server
     // with nothing fetched yet, not a flag to keep in step with two lists.
@@ -33,13 +37,13 @@ export const DnsServerEditor = ({ server, onChange, onCancel }: any) => {
     }, [isString]);
 
     const update = (field: FieldPath, val: any) => {
-        setLocal((prev: any) => ({ ...prev, [field as string]: val }));
+        onChange({ ...current, [field as string]: val });
     };
 
-    // `local`/`update` here play the same role as `local`/`updateField` from
-    // useXrayEditor — useField binds directly on top, same as everywhere else.
-    const domains = useField<string[]>(local, update, 'domains');
-    const expectIPs = useField<string[]>(local, update, 'expectIPs');
+    // `current`/`update` here play the same role as `local`/`updateField`
+    // from useXrayEditor — useField binds directly on top, same as everywhere else.
+    const domains = useField<string[]>(current, update, 'domains');
+    const expectIPs = useField<string[]>(current, update, 'expectIPs');
 
     const convertToAdvanced = () => {
         onChange({ address: server, domains: [], expectIPs: [] });
@@ -72,14 +76,14 @@ export const DnsServerEditor = ({ server, onChange, onCancel }: any) => {
         <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-4 h-full flex flex-col">
             <div className="flex justify-between items-center border-b border-slate-800 pb-2">
                 <h3 className="text-sm font-bold text-indigo-400">{t("Advanced Server Config")}</h3>
-                <Button variant="ghost" onClick={() => onChange(local)}>{t("Save & Close")}</Button>
+                <Button variant="ghost" onClick={onCancel}>{t("Done")}</Button>
             </div>
 
             <div className="overflow-y-auto custom-scroll flex-1 space-y-4 pr-2">
                 <SchemaForm
                     schema={DnsServerObjectSchema}
-                    value={local}
-                    onChange={setLocal}
+                    value={current}
+                    onChange={onChange}
                     excludeKeys={['domains', 'expectIPs']}
                     fieldConfigs={{
                         address: {

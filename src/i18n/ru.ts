@@ -1324,7 +1324,6 @@ export const ru: Record<string, string> = {
     'Need domains filtering or specific IPs?': 'Нужен фильтр по доменам или конкретные IP?',
     'Convert to Advanced Object': 'Превратить в расширенный объект',
     'Advanced Server Config': 'Расширенная настройка сервера',
-    'Save & Close': 'Сохранить и закрыть',
     'Domains (Routing)': 'Домены (маршрутизация)',
     'Expect IPs (Optional)': 'Ожидаемые IP (необязательно)',
     'Skip Fallback': 'Без fallback',

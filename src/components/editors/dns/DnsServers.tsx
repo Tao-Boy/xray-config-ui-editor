@@ -1,7 +1,6 @@
 import React from 'react';
 import { Button } from '../../ui/Button';
 import { Icon } from '../../ui/Icon';
-import { useArrayField } from '../../../hooks/useField';
 
 // DnD Imports
 import { DndContext, closestCenter } from '@dnd-kit/core';
@@ -65,18 +64,16 @@ const SortableDnsItem = ({ server, id, isActive, onClick, onDelete }: SortableDn
 
 interface DnsServersProps {
     servers?: any[];
+    /** The server open in the pane beside the list, if any. */
+    activeIndex?: number | null;
     onSelect: (index: number) => void;
     onAdd: (initial?: any) => void;
     onDelete: (index: number) => void;
-    onReorder: (servers: any[]) => void;
+    /** Indices, not the new array: the owner has an open pane to keep on its server. */
+    onMove: (from: number, to: number) => void;
 }
 
-export const DnsServers = ({ servers = [], onSelect, onAdd, onDelete, onReorder }: DnsServersProps) => {
-    // No path-based updateField here (onReorder replaces the whole servers
-    // array), so we adapt useArrayField the same way DnsFakedns does:
-    // wrap `servers` as a single-key local object and forward to onReorder.
-    const list = useArrayField<any>({ servers }, (_path, value) => onReorder(value), 'servers');
-
+export const DnsServers = ({ servers = [], activeIndex = null, onSelect, onAdd, onDelete, onMove }: DnsServersProps) => {
     const handleDragEnd = (event: any) => {
         const { active, over } = event;
         if (!over || active.id === over.id) return;
@@ -84,7 +81,7 @@ export const DnsServers = ({ servers = [], onSelect, onAdd, onDelete, onReorder 
         const oldIndex = parseInt(active.id.split('-')[1]);
         const newIndex = parseInt(over.id.split('-')[1]);
 
-        list.move(oldIndex, newIndex);
+        onMove(oldIndex, newIndex);
     };
 
     return (
@@ -120,7 +117,7 @@ export const DnsServers = ({ servers = [], onSelect, onAdd, onDelete, onReorder 
                                 key={`srv-${i}`} 
                                 id={`srv-${i}`} 
                                 server={s} 
-                                isActive={false} // Можно добавить состояние активного выбора
+                                isActive={i === activeIndex}
                                 onClick={() => onSelect(i)}
                                 onDelete={() => onDelete(i)}
                             />

@@ -2,6 +2,22 @@ import { useState, useCallback, useMemo } from 'react';
 import { useConfigStore } from '../store/configStore';
 import { useShallow } from 'zustand/react/shallow';
 
+/**
+ * Where the entry at `index` sits after the one at `from` moved to `to`:
+ * the moved entry lands on `to`, the ones it passed shift one place back
+ * toward where it came from.
+ */
+export const indexAfterMove = (index: number, from: number, to: number): number => {
+    if (index === from) return to;
+    if (from < index && index <= to) return index - 1;
+    if (to <= index && index < from) return index + 1;
+    return index;
+};
+
+/** Where the entry at `index` sits after the one at `removed` is deleted; null if it was that one. */
+export const indexAfterRemove = (index: number, removed: number): number | null =>
+    index === removed ? null : index > removed ? index - 1 : index;
+
 export const useDnsEditor = () => {
     const { config, updateSection } = useConfigStore(useShallow(state => ({ config: state.config, updateSection: state.updateSection })));
     // Memoised so the callbacks below keep their identity between renders.
@@ -31,14 +47,27 @@ export const useDnsEditor = () => {
         setMobileEditMode(true);
     }, []);
 
+    // The open pane is an index into the list, so anything that shifts the
+    // list has to carry it along — or the pane quietly starts editing the
+    // server that slid into its slot.
     const handleDeleteServer = useCallback((idx: number) => {
         const newServers = [...(dns.servers || [])];
         newServers.splice(idx, 1);
         handleUpdateDns({ ...dns, servers: newServers });
-        if (editingServerIdx === idx) {
-            setEditingServerIdx(null);
-            setMobileEditMode(false);
-        }
+        if (editingServerIdx === null) return;
+        const next = indexAfterRemove(editingServerIdx, idx);
+        setEditingServerIdx(next);
+        if (next === null) setMobileEditMode(false);
+    }, [dns, handleUpdateDns, editingServerIdx]);
+
+    const handleMoveServer = useCallback((from: number, to: number) => {
+        const servers = [...(dns.servers || [])];
+        if (from === to || to < 0 || to >= servers.length) return;
+        const [moved] = servers.splice(from, 1);
+        if (moved === undefined) return;
+        servers.splice(to, 0, moved);
+        handleUpdateDns({ ...dns, servers });
+        if (editingServerIdx !== null) setEditingServerIdx(indexAfterMove(editingServerIdx, from, to));
     }, [dns, handleUpdateDns, editingServerIdx]);
 
     const handleUpdateServer = useCallback((val: any) => {
@@ -77,6 +106,7 @@ export const useDnsEditor = () => {
         handleAddServer,
         handleSelectServer,
         handleDeleteServer,
+        handleMoveServer,
         handleUpdateServer,
         handleCompositeUpdate,
         updateHosts,

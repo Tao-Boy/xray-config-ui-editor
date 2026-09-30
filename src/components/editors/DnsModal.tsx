@@ -31,6 +31,7 @@ export const DnsModal = ({ onClose }: any) => {
         handleAddServer,
         handleSelectServer,
         handleDeleteServer,
+        handleMoveServer,
         handleUpdateServer,
         handleCompositeUpdate,
         updateHosts,
@@ -141,10 +142,11 @@ export const DnsModal = ({ onClose }: any) => {
                         <div className={`${mobileEditMode ? 'hidden md:block' : 'block'} ${editingServerIdx !== null ? 'w-full md:w-1/3' : 'w-full max-w-2xl mx-auto'} transition-all duration-300 h-full overflow-hidden flex flex-col`}>
                             <DnsServers
                                 servers={dns.servers}
+                                activeIndex={editingServerIdx}
                                 onSelect={handleSelectServer}
                                 onAdd={handleAddServer}
                                 onDelete={handleDeleteServer}
-                                onReorder={(newServers) => handleUpdateDns({ ...dns, servers: newServers })}
+                                onMove={handleMoveServer}
                             />
                         </div>
 

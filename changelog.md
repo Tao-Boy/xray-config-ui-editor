@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.24.3] - 2026-09-30
+
+### Fixed
+- **Picking another DNS server left the pane on the first one.** The advanced server pane copied its server once, when it opened, and kept showing that copy whichever row was picked next — so switching looked like it did nothing. It reads the picked server now, every time.
+- **Edits in that pane were lost unless you pressed its own "Save & Close".** Picking another server, or the modal's Save, dropped them without a word — and "Save & Close" did not close. The pane writes into the config as you type, like the simple-server form always did, and its button is "Done".
+- **The list now marks the server that is open**, and the pane stays on that server when a row above it is deleted or a row is dragged past it, instead of quietly switching to whichever one slid into its slot.
+
 ## [1.24.2] - 2026-09-28
 
 ### Changed
