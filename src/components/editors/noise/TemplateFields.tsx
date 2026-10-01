@@ -30,7 +30,33 @@ import { formatAwgSpec, parseAwgSpec, type AwgTag } from '../../../core/noise/aw
 /** RFC 9000 s14.1 — a client MUST pad an Initial datagram to at least this. */
 const MIN_DATAGRAM = 1200;
 
+/** What this packet is, said once above its fields rather than per field. */
+const KIND_INTRO = (kind: Template['kind']): string => ({
+    sip: t("A SIP call opening. Everything below ends up in the packet as plain text, which is what makes it read as somebody's softphone."),
+    quic: t("A real QUIC client Initial: encrypted the way the protocol says, carrying a TLS ClientHello. Only the server name below is readable on the path."),
+    dns: t("A DNS query. It is never resolved — the datagram goes to the peer, not to a resolver — so the name only has to read like a name."),
+    stun: t("A STUN Binding request, the packet a WebRTC call starts with."),
+    awg: t("A tag chain copied from an AmneziaWG profile. AmneziaWG redraws its random tags before every handshake; carried here they are frozen at one draw."),
+    hex: t("Raw bytes. Nothing is generated and nothing is checked beyond the hex itself."),
+}[kind]);
+
+const Intro = ({ kind }: { kind: Template['kind'] }) => (
+    <p className="text-[11px] text-slate-400 leading-relaxed bg-slate-950/40 border border-slate-800 rounded-lg p-2.5">
+        {KIND_INTRO(kind)}
+    </p>
+);
+
 export const TemplateFields = ({ template, onChange }: {
+    template: Template;
+    onChange: (next: Template) => void;
+}) => (
+    <div className="space-y-3">
+        <Intro kind={template.kind} />
+        <Fields template={template} onChange={onChange} />
+    </div>
+);
+
+const Fields = ({ template, onChange }: {
     template: Template;
     onChange: (next: Template) => void;
 }) => {

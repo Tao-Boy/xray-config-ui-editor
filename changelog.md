@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.26.1] - 2026-10-01
+
+### Added
+- **The generator says what each decoy is, where you pick it and where you edit it.** Every kind now carries a line explaining what the packet imitates and the port that protocol normally runs on — the decoys go to the same address and port as the real traffic, so a DNS query arriving at `:2408` is odd in a way the packet itself cannot fix. The empty list says what the screen does at all, and the Add row explains why one kind plus junk usually reads better than a mixture.
+- **Advice about the chain as a whole, not just each packet.** Three checks, none of which stop the config loading:
+  - A SIP request and a SIP reply sent from the same end. A caller sends INVITE and *receives* 100 Trying; both from here is not a conversation anyone has — and that is exactly what the shipped WARP C preset does.
+  - Decoys imitating several protocols on one address and port, where a real flow is one application.
+  - More than eight datagrams before the first real one, since a long burst is a shape of its own.
+
 ## [1.26.0] - 2026-10-01
 
 ### Added

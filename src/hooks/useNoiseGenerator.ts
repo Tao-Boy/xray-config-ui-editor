@@ -15,6 +15,7 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { cryptoRng } from '../core/noise/bytes';
 import {
+    combinationNotes,
     datagramCount,
     fromNoiseItems,
     largestDatagram,
@@ -209,7 +210,7 @@ export const useNoiseGenerator = (initialItems?: unknown, initialReset?: unknown
     }, [load]);
 
     const items = useMemo(() => toNoiseItems(recipe), [recipe]);
-    const problems = useMemo(() => recipeProblems(recipe), [recipe]);
+    const problems = useMemo(() => [...recipeProblems(recipe), ...combinationNotes(recipe)], [recipe]);
     const awg = useMemo(() => awgObfuscationFromRecipe(recipe), [recipe]);
 
     const step = recipe.steps[selected];

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Button } from '../../ui/Button';
+import { Help } from '../../ui/Help';
 import { Icon } from '../../ui/Icon';
 import type { Step, Template } from '../../../core/noise/recipe';
 import { formatAwgSpec } from '../../../core/noise/awg-tags';
@@ -26,6 +27,21 @@ const KIND_LABEL = (kind: Template['kind']): string => ({
     stun: t("STUN binding"),
     awg: t("AmneziaWG chain"),
     hex: t("Raw bytes"),
+}[kind]);
+
+/**
+ * One line per kind, shown where the choice is made. Each says what the packet
+ * is and the port that protocol normally runs on — the decoys go to the same
+ * address and port as the real traffic, so a DNS query arriving at :2408 is
+ * odd in a way the packet itself cannot fix.
+ */
+const KIND_HINT = (kind: Template['kind']): string => ({
+    sip: t("The opening of a VoIP call. A text protocol, so it reads as words in the dump. Normally port 5060."),
+    quic: t("The first packet of a QUIC connection, carrying a real TLS ClientHello. The server name inside it travels in the clear — it is the one field anyone on the path reads. Normally port 443."),
+    dns: t("The most ordinary UDP packet there is, and the smallest of these. Normally port 53."),
+    stun: t("How a WebRTC call starts. Without the SOFTWARE attribute it is a bare 20-byte header, which is the commonest shape on the wire. Normally port 3478."),
+    awg: t("An I1-I5 line from an AmneziaWG profile, kept as its tags so it can be written back unchanged."),
+    hex: t("Bytes exactly as entered — for repeating a packet from someone else's capture or profile."),
 }[kind]);
 
 /** What the row says under its title: enough to tell two steps of a kind apart. */
@@ -104,9 +120,12 @@ export const NoiseStepList = ({ steps, selected, onSelect, onMove, onRemove, onA
     <div className="flex flex-col h-full min-h-0 gap-3">
         <div className="flex-1 min-h-0 overflow-y-auto custom-scroll space-y-2 pr-1">
             {steps.length === 0 ? (
-                <div className="text-center py-10 bg-slate-950/50 border border-dashed border-slate-800 rounded-xl text-slate-500 text-xs">
-                    <Icon name="Shuffle" className="text-2xl mx-auto mb-2 opacity-20" />
-                    {t("No decoys yet. Add one below.")}
+                <div className="text-center py-8 px-4 bg-slate-950/50 border border-dashed border-slate-800 rounded-xl text-slate-500 text-xs space-y-2">
+                    <Icon name="Shuffle" className="text-2xl mx-auto opacity-20" />
+                    <p className="font-bold text-slate-400">{t("No decoys yet. Add one below.")}</p>
+                    <p className="leading-relaxed">
+                        {t("These are datagrams sent ahead of the real traffic, once per destination. They change nothing about the real packets — the core sends the list, then carries on as usual.")}
+                    </p>
                 </div>
             ) : steps.map((step, index) => (
                 <Row
@@ -124,13 +143,17 @@ export const NoiseStepList = ({ steps, selected, onSelect, onMove, onRemove, onA
 
         {/* Controls at the foot of the pane, where a thumb reaches. */}
         <div className="shrink-0 space-y-1.5">
-            <div className="label-xs">{t("Add a decoy")}</div>
+            <div className="label-xs flex items-center gap-1.5">
+                {t("Add a decoy")}
+                <Help>{t("Every decoy goes to the same address and port as the real traffic, one after another, before a single real byte. So the list reads as one flow to one endpoint: a single kind plus junk usually looks more like an application than a mixture does.")}</Help>
+            </div>
             <div className="flex flex-wrap gap-1.5">
                 {(['sip', 'quic', 'dns', 'stun', 'hex', 'awg'] as const).map(kind => (
                     <button
                         key={kind}
                         type="button"
                         disabled={busy}
+                        title={KIND_HINT(kind)}
                         onClick={() => onAddPacket(kind)}
                         className="px-2 py-1.5 text-[10px] rounded-md border bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-600 transition-all flex items-center gap-1 disabled:opacity-40"
                     >

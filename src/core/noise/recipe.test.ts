@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'bun:test';
 import { seededRng } from './bytes';
+import { sipDefaults } from './packets/sip';
 import { noiseItems } from '../presets/noise';
 import {
+    combinationNotes,
     datagramCount,
     fromNoiseItems,
     largestDatagram,
@@ -167,6 +169,50 @@ describe('what a recipe adds up to', () => {
             ],
         };
         expect(largestDatagram(recipe)).toBe(1400);
+    });
+});
+
+describe('combinationNotes', () => {
+    const sip = (method: string) => ({
+        kind: 'packet' as const, hex: 'aa', seed: 's',
+        template: { kind: 'sip' as const, params: { ...sipDefaults(rng()), method: method as never } },
+    });
+    const packet = (kind: 'quic' | 'dns' | 'stun') => ({
+        kind: 'packet' as const, hex: 'aa', seed: 's', template: newTemplate(kind, rng()) as never,
+    });
+    const said = (recipe: Recipe, match: string) =>
+        combinationNotes(recipe).filter(note => note.message.includes(match));
+
+    it('says nothing about one kind plus junk, which is what the presets are', () => {
+        expect(combinationNotes({ steps: [packet('quic'), { kind: 'junk', count: 4, size: '40-70' }] })).toEqual([]);
+    });
+
+    it('catches a SIP request and its own reply sent from the same end', () => {
+        // A caller sends INVITE and receives 100 Trying. Both from here is not
+        // a call anyone makes, and the shipped WARP C preset does exactly that.
+        const notes = said({ steps: [sip('invite'), sip('trying')] }, 'not a conversation');
+        expect(notes).toHaveLength(1);
+        expect(notes[0]!.severity).toBe('warning');
+    });
+
+    it('leaves two requests alone — only a request with a reply is the problem', () => {
+        expect(said({ steps: [sip('invite'), sip('register')] }, 'not a conversation')).toHaveLength(0);
+        expect(said({ steps: [sip('trying'), sip('ringing')] }, 'not a conversation')).toHaveLength(0);
+    });
+
+    it('mentions a chain that imitates several protocols at one endpoint', () => {
+        expect(said({ steps: [packet('quic'), packet('dns')] }, 'protocols')).toHaveLength(1);
+        expect(said({ steps: [packet('quic'), packet('quic')] }, 'protocols')).toHaveLength(0);
+    });
+
+    it('does not count raw bytes as a protocol, since they claim nothing', () => {
+        const raw = { kind: 'packet' as const, hex: 'aa', seed: 's', template: { kind: 'hex' as const, hex: 'aa' } };
+        expect(said({ steps: [packet('quic'), raw] }, 'protocols')).toHaveLength(0);
+    });
+
+    it('counts datagrams rather than steps when the burst gets long', () => {
+        expect(said({ steps: [{ kind: 'junk', count: 9, size: '1-2' }] }, '9 datagrams')).toHaveLength(1);
+        expect(said({ steps: [{ kind: 'junk', count: 8, size: '1-2' }] }, 'datagrams go out')).toHaveLength(0);
     });
 });
 

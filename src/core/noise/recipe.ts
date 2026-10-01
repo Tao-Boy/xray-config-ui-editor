@@ -331,6 +331,76 @@ const templateProblems = (template: Template): Note[] => {
     }
 };
 
+/** Datagrams before the first real byte, past which the burst is itself a shape. */
+const BUSY_CHAIN = 8;
+
+/** SIP replies: a caller sends a request and receives these, never both. */
+const SIP_REPLIES: string[] = ['trying', 'ringing'];
+
+/** What a packet imitates, for spotting a chain that tells two stories at once. */
+const protocolOf = (template: Template): string | null => {
+    switch (template.kind) {
+        case 'sip': return 'SIP';
+        case 'quic': return 'QUIC';
+        case 'dns': return 'DNS';
+        case 'stun': return 'STUN';
+        // Raw bytes and an imported chain could be anything, so they make no claim.
+        case 'hex':
+        case 'awg':
+            return null;
+    }
+};
+
+/**
+ * How the chain reads as a whole.
+ *
+ * Each decoy goes to the same address and port as the real traffic, in order,
+ * before anything real is sent — so the list is one flow to one endpoint, and
+ * it either tells a story that endpoint could plausibly be part of or it does
+ * not. None of this stops the config loading.
+ */
+export const combinationNotes = (recipe: Recipe): Note[] => {
+    const notes: Note[] = [];
+    const packets = recipe.steps.filter((step): step is PacketStep => step.kind === 'packet');
+
+    // A caller sends INVITE; the far end answers 100 Trying. Both from this
+    // side is not a call anyone makes, and a reader that follows SIP sees it.
+    const methods = packets.flatMap(step => (step.template.kind === 'sip' ? [step.template.params.method] : []));
+    const asks = methods.filter(method => !SIP_REPLIES.includes(method));
+    const answers = methods.filter(method => SIP_REPLIES.includes(method));
+    if (asks.length > 0 && answers.length > 0) {
+        notes.push({
+            severity: 'warning',
+            message: t("This chain sends a SIP request and a SIP reply ({replies}) from the same end. In a real call the reply comes back from the other side, so the two together are not a conversation anyone has. Keep the request, or send the reply on its own.", {
+                replies: answers.join(', '),
+            }),
+        });
+    }
+
+    // One endpoint, one application. Several protocols back to back is a
+    // grab bag rather than a flow.
+    const protocols = [...new Set(packets.map(step => protocolOf(step.template)).filter((name): name is string => name !== null))];
+    if (protocols.length > 1) {
+        notes.push({
+            severity: 'info',
+            message: t("These decoys imitate {count} protocols ({names}) on one address and port. A real flow is one application, so a single kind — plus junk — usually reads better than a mixture.", {
+                count: protocols.length,
+                names: protocols.join(', '),
+            }),
+        });
+    }
+
+    const total = datagramCount(recipe);
+    if (total > BUSY_CHAIN) {
+        notes.push({
+            severity: 'info',
+            message: t("{n} datagrams go out before the first real one. A long burst is a shape of its own; the WARP profiles send five or six.", { n: total }),
+        });
+    }
+
+    return notes;
+};
+
 /**
  * What this recipe gets wrong, in the config's terms rather than each
  * builder's. Nothing here is fatal to the core — a noise layer is bytes on a

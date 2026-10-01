@@ -746,6 +746,41 @@ export const ru: Record<string, string> = {
     'SOFTWARE is {bytes} bytes — RFC 5389 s15.10 caps the attribute at {max}.':
         'SOFTWARE занимает {bytes} байт, а RFC 5389 п.15.10 ограничивает атрибут {max} байтами.',
 
+    'The opening of a VoIP call. A text protocol, so it reads as words in the dump. Normally port 5060.':
+        'Начало VoIP-звонка. Текстовый протокол, поэтому в дампе читается словами. Обычный порт — 5060.',
+    'The first packet of a QUIC connection, carrying a real TLS ClientHello. The server name inside it travels in the clear — it is the one field anyone on the path reads. Normally port 443.':
+        'Первый пакет QUIC-соединения с настоящим TLS ClientHello внутри. Имя сервера в нём идёт открытым текстом — это единственное поле, которое читает любой на пути. Обычный порт — 443.',
+    'The most ordinary UDP packet there is, and the smallest of these. Normally port 53.':
+        'Самый обычный UDP-пакет в сети и самый маленький из здешних. Обычный порт — 53.',
+    'How a WebRTC call starts. Without the SOFTWARE attribute it is a bare 20-byte header, which is the commonest shape on the wire. Normally port 3478.':
+        'С этого начинается WebRTC-звонок. Без атрибута SOFTWARE это голый 20-байтный заголовок — самая частая его форма в сети. Обычный порт — 3478.',
+    'An I1-I5 line from an AmneziaWG profile, kept as its tags so it can be written back unchanged.':
+        'Строка I1–I5 из профиля AmneziaWG. Хранится тегами, поэтому выгружается обратно без изменений.',
+    "Bytes exactly as entered — for repeating a packet from someone else's capture or profile.":
+        'Байты ровно как введены — чтобы повторить пакет из чужого дампа или профиля.',
+    'These are datagrams sent ahead of the real traffic, once per destination. They change nothing about the real packets — the core sends the list, then carries on as usual.':
+        'Это датаграммы, которые уходят перед настоящим трафиком, один раз на каждый адрес. Сами настоящие пакеты они никак не меняют: ядро отправляет список и дальше работает как обычно.',
+    'Every decoy goes to the same address and port as the real traffic, one after another, before a single real byte. So the list reads as one flow to one endpoint: a single kind plus junk usually looks more like an application than a mixture does.':
+        'Все обманки уходят на тот же адрес и порт, что и настоящий трафик, подряд, до единого настоящего байта. Поэтому список читается как один поток к одному узлу: один вид плюс мусор обычно выглядит убедительнее смеси.',
+    "A SIP call opening. Everything below ends up in the packet as plain text, which is what makes it read as somebody's softphone.":
+        'Начало SIP-звонка. Всё, что ниже, попадает в пакет открытым текстом — именно это и делает его похожим на чей-то софтфон.',
+    'A real QUIC client Initial: encrypted the way the protocol says, carrying a TLS ClientHello. Only the server name below is readable on the path.':
+        'Настоящий клиентский QUIC Initial: зашифрован так, как требует протокол, внутри TLS ClientHello. На пути читается только имя сервера, заданное ниже.',
+    'A DNS query. It is never resolved — the datagram goes to the peer, not to a resolver — so the name only has to read like a name.':
+        'DNS-запрос. Он никогда не будет разрешён — датаграмма идёт пиру, а не резолверу, — поэтому имени достаточно просто выглядеть именем.',
+    'A STUN Binding request, the packet a WebRTC call starts with.':
+        'Запрос STUN Binding — пакет, с которого начинается WebRTC-звонок.',
+    'A tag chain copied from an AmneziaWG profile. AmneziaWG redraws its random tags before every handshake; carried here they are frozen at one draw.':
+        'Цепочка тегов из профиля AmneziaWG. Сам AmneziaWG перерисовывает случайные теги перед каждым рукопожатием, здесь же они заморожены на одном значении.',
+    'Raw bytes. Nothing is generated and nothing is checked beyond the hex itself.':
+        'Произвольные байты. Ничего не генерируется и не проверяется, кроме самой шестнадцатеричной записи.',
+    'This chain sends a SIP request and a SIP reply ({replies}) from the same end. In a real call the reply comes back from the other side, so the two together are not a conversation anyone has. Keep the request, or send the reply on its own.':
+        'Цепочка отправляет с одной стороны и SIP-запрос, и SIP-ответ ({replies}). В настоящем звонке ответ приходит с другой стороны, поэтому вместе они не похожи ни на один реальный разговор. Оставьте либо запрос, либо только ответ.',
+    'These decoys imitate {count} protocols ({names}) on one address and port. A real flow is one application, so a single kind — plus junk — usually reads better than a mixture.':
+        'Обманки изображают {count} протокола ({names}) на одном адресе и порту. Настоящий поток — это одно приложение, поэтому один вид плюс мусор обычно выглядит убедительнее смеси.',
+    '{n} datagrams go out before the first real one. A long burst is a shape of its own; the WARP profiles send five or six.':
+        'До первой настоящей датаграммы уходит {n}. Длинная очередь — сама по себе приметный признак; профили WARP отправляют пять-шесть.',
+
     // ── Freedom: fragment, noises and the rest of its settings ──────────────
     'Domain Strategy (legacy key)': 'Стратегия доменов (старый ключ)',
     'TLS Fragmentation': 'Фрагментация TLS',
