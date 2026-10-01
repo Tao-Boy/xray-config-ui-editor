@@ -232,6 +232,27 @@ export function useFinalmaskEditor(finalmask: any, onChange: (v: any) => void, s
         writeList(list, next);
     };
 
+    /**
+     * Several settings in one write.
+     *
+     * `setSetting` reads the mask out of the `finalmask` prop, so two calls in
+     * one event handler both start from the value before either of them — the
+     * second silently discards the first. Anything changing more than one key
+     * at a time (the generator writes `noise` and `reset` together) has to go
+     * through here instead.
+     */
+    const patchSettings = (list: MaskList, index: number, patch: Record<string, unknown>) => {
+        const next = [...masksOf(list)];
+        const mask = isObject(next[index]) ? next[index] as Json : {};
+        const settings: Json = { ...(isObject(mask.settings) ? mask.settings : {}) };
+        for (const [key, value] of Object.entries(patch)) {
+            if (isEmptyValue(value)) delete settings[key];
+            else settings[key] = value;
+        }
+        next[index] = { ...mask, settings };
+        writeList(list, next);
+    };
+
     // Noise items keep every key they came with (randRange, a WARP preset's
     // packet type): only the field being edited changes.
     const noiseItems = (list: MaskList, index: number): Json[] => {
@@ -293,6 +314,7 @@ export function useFinalmaskEditor(finalmask: any, onChange: (v: any) => void, s
         changeType,
         convertLayer,
         setSetting,
+        patchSettings,
         addNoiseItem,
         updateNoiseItem,
         removeNoiseItem,

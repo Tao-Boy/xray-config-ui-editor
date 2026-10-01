@@ -11,6 +11,8 @@ export {
 export { generateSpiderPath, parseSpiderPaths, mergeSpiderPaths } from './spider-path';
 export type { SpiderPathShape, SpiderPathOptions } from './spider-path';
 export { generateWarpAccount, warpAddresses, withWarpAccount, withoutWarpAccount } from './warp';
+export { toAwgConf } from './awg-conf';
+export type { AwgConfOptions, AwgConfResult } from './awg-conf';
 export type { WarpAccount } from './warp';
 export {
     createDefaultRoutingRule,

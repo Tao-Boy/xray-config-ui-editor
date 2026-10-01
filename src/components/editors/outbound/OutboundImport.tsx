@@ -2,12 +2,28 @@ import React, { useState } from 'react';
 import { Button } from '../../ui/Button';
 import { Help } from '../../ui/Help';
 import { Icon } from '../../ui/Icon';
-import { parseXrayLink, parseWireguardConfig, parseJsonSubscription } from '../../../utils/link-parser';
+import { parseXrayLink, parseWireguardConfig, parseWireguardConfigDetailed, parseJsonSubscription } from '../../../utils/link-parser';
+import type { Note } from '../../../core/noise/types';
 import { toast } from 'sonner';
 import { t, tn } from '../../../i18n';
 
 export const OutboundImport = ({ onImport }: any) => {
     const [input, setInput] = useState("");
+
+    /**
+     * An AmneziaWG profile can ask for things Xray has no way to do — padded
+     * handshakes, renumbered message types — and a config missing them looks
+     * perfectly fine while never completing a handshake. Each one gets its own
+     * toast, the worst held longest, rather than a single success message that
+     * hides them.
+     */
+    const report = (notes: Note[]) => {
+        for (const note of notes) {
+            const show = note.severity === 'critical' ? toast.error
+                : note.severity === 'warning' ? toast.warning : toast.info;
+            show(note.message, { duration: note.severity === 'info' ? 6000 : 14000 });
+        }
+    };
 
     const handleImport = (mode: 'direct' | 'chained' | 'only-obfuscator') => {
         const trimmed = input.trim();
@@ -42,7 +58,7 @@ export const OutboundImport = ({ onImport }: any) => {
 
         // Try WG config
         if (trimmed.includes('[Interface]')) {
-            const parsed = parseWireguardConfig(trimmed, mode === 'chained' ? 'chained' : 'direct');
+            const { result: parsed, notes } = parseWireguardConfigDetailed(trimmed, mode === 'chained' ? 'chained' : 'direct');
             if (parsed) {
                 if (mode === 'only-obfuscator') {
                     // Если режим "только обфускатор", парсим в chained и берем только freedom
@@ -52,6 +68,7 @@ export const OutboundImport = ({ onImport }: any) => {
                         onImport(obfuscator);
                         setInput("");
                         toast.success(t("Only Obfuscator (Freedom) imported"));
+                        report(notes);
                         return;
                     }
                 }
@@ -60,6 +77,7 @@ export const OutboundImport = ({ onImport }: any) => {
                 toast.success(mode === 'chained'
                 ? t("WG + Obfuscator (Legacy Chain) imported")
                 : t("Direct WireGuard (Modern) imported"));
+                report(notes);
                 return;
             }
         }

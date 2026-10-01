@@ -407,10 +407,6 @@ export const ru: Record<string, string> = {
         'Пресеты шума',
     "The noise the WARP profiles send ahead of WireGuard's handshake. Pressing one replaces the packets of this chain's noise layer, or adds a noise layer next to the socket if there is none. Made for WireGuard; any UDP transport takes it.":
         'Шум, который WARP-профили отправляют перед рукопожатием WireGuard. Кнопка заменяет пакеты в noise-слое этой цепочки, а если его нет — добавляет noise-слой у сокета. Сделано под WireGuard, но подходит любому UDP-транспорту.',
-    'A QUIC Initial packet, then four random 40-70 byte packets — the noise WARP Profile A sends.':
-        'Пакет QUIC Initial, затем четыре случайных пакета по 40–70 байт — шум из WARP Profile A.',
-    'A different QUIC Initial packet, then four random 40-70 byte packets — the noise WARP Profile B sends.':
-        'Другой пакет QUIC Initial, затем четыре случайных пакета по 40–70 байт — шум из WARP Profile B.',
     'A SIP call opening (INVITE, then 100 Trying), then four random 40-70 byte packets — the noise WARP Profile C sends.':
         'Начало SIP-звонка (INVITE, затем 100 Trying), затем четыре случайных пакета по 40–70 байт — шум из WARP Profile C.',
 
@@ -420,6 +416,335 @@ export const ru: Record<string, string> = {
         'Откройте outbound и нажмите «Сгенерировать WARP», чтобы его зарегистрировать. Причина: {reason}',
     'Network error or proxy timeout.':
         'Ошибка сети или таймаут прокси.',
+
+    "The call this datagram claims to be part of. Every one of these ends up in the plain text a middlebox reads, so they are what make the packet look like somebody's softphone rather than ours.":
+        'Звонок, частью которого притворяется эта датаграмма. Все эти поля попадают в открытый текст, который читает промежуточное оборудование, — именно они делают пакет похожим на чей-то софтфон, а не на наш.',
+    'Who is calling whom':
+        'Кто кому звонит',
+    'A new call — what a softphone opens with.':
+        'Новый звонок — с этого начинает софтфон.',
+    "A proxy's provisional answer to an INVITE.":
+        'Предварительный ответ прокси на INVITE.',
+    "The callee's phone is alerting.":
+        'Телефон вызываемого звонит.',
+    'A client binding its address with a registrar.':
+        'Клиент регистрирует свой адрес на сервере.',
+    'The capability probe proxies trade as a keep-alive.':
+        'Запрос возможностей, которым прокси обмениваются для поддержания связи.',
+    'A request (INVITE, REGISTER, OPTIONS) carries Max-Forwards and a Contact; 100 and 180 are responses to an INVITE and carry neither.':
+        'Запрос (INVITE, REGISTER, OPTIONS) несёт Max-Forwards и Contact; 100 и 180 — ответы на INVITE, и в них нет ни того, ни другого.',
+    'Caller':
+        'Кто звонит',
+    "Caller's host":
+        'Хост звонящего',
+    'Callee':
+        'Кому звонят',
+    "Callee's host":
+        'Хост вызываемого',
+    'Via host':
+        'Хост в Via',
+    "The Via sent-by: the endpoint this datagram claims to come from, inside the caller's own domain.":
+        'Поле sent-by в Via: узел, от имени которого отправлена датаграмма, внутри домена звонящего.',
+    'Call identifiers':
+        'Идентификаторы звонка',
+    'Drawn fresh for every call. Edit them to pin this packet down exactly.':
+        'Генерируются заново для каждого звонка. Измените, если нужно зафиксировать пакет точно.',
+    'Via branch':
+        'Branch в Via',
+    'The transaction id. RFC 3261 s8.1.1.7 requires the magic cookie z9hG4bK in front of it — without it a receiver reads the whole packet under the older RFC 2543 rules.':
+        'Идентификатор транзакции. RFC 3261 п.8.1.1.7 требует префикс-метку z9hG4bK — без неё получатель разбирает весь пакет по старым правилам RFC 2543.',
+    'From tag':
+        'Тег в From',
+    'RFC 3261 s19.3 asks for at least 32 bits of randomness here.':
+        'RFC 3261 п.19.3 требует здесь не менее 32 бит случайности.',
+    'CSeq':
+        'CSeq',
+    'The sequence number of this request. Real stacks start anywhere below 2^31, so a large number is as plausible as a small one.':
+        'Порядковый номер запроса. Настоящие стеки начинают с любого числа меньше 2^31, так что большое значение выглядит не менее правдоподобно, чем маленькое.',
+    'Call-ID':
+        'Call-ID',
+    'RFC 3261 s8.1.1.4: a cryptographically random local id, then @ and the host it was made on.':
+        'RFC 3261 п.8.1.1.4: криптослучайный локальный идентификатор, затем @ и хост, на котором он создан.',
+    'ALPN':
+        'ALPN',
+    'Comma-separated protocol ids. QUIC makes ALPN mandatory (RFC 9001 s8.1); h3 is what a browser sends.':
+        'Идентификаторы протоколов через запятую. В QUIC поле ALPN обязательно (RFC 9001 п.8.1); браузер отправляет h3.',
+    'Datagram size':
+        'Размер датаграммы',
+    'The whole datagram, padding included: RFC 9000 s14.1 requires a client Initial of at least {n} bytes. The ClientHello is a few hundred — everything past it is PADDING frames, exactly as a real client sends them.':
+        'Вся датаграмма вместе с набивкой: RFC 9000 п.14.1 требует для клиентского Initial не менее {n} байт. ClientHello занимает несколько сотен, всё остальное — кадры PADDING, ровно как у настоящего клиента.',
+    'Destination connection ID':
+        'Идентификатор соединения получателя',
+    "Hex, 8 bytes in a real client's first packet. The initial keys are derived from it, which is why anyone can decrypt this datagram — it buys camouflage, never privacy.":
+        'Шестнадцатеричное, 8 байт в первом пакете настоящего клиента. Из него выводятся начальные ключи, поэтому расшифровать эту датаграмму может кто угодно: она даёт маскировку, но не приватность.',
+    'Source connection ID':
+        'Идентификатор соединения отправителя',
+    'Hex. May be empty — plenty of clients send no source id at all.':
+        'Шестнадцатеричное. Может быть пустым — многие клиенты вообще не отправляют свой идентификатор.',
+    'The question this query asks. It is never resolved — the datagram goes to the peer, not to a resolver — so it only has to read like a name.':
+        'Имя, о котором спрашивает запрос. Он никогда не будет разрешён — датаграмма идёт пиру, а не резолверу, — поэтому достаточно, чтобы оно выглядело как имя.',
+    'Record type':
+        'Тип записи',
+    'An IPv4 address: the commonest query there is.':
+        'Адрес IPv4 — самый частый запрос.',
+    'An IPv6 address.':
+        'Адрес IPv6.',
+    'What a browser asks for before it connects (RFC 9460).':
+        'То, что браузер запрашивает перед подключением (RFC 9460).',
+    'Free text — the least ordinary of the four on a fresh flow.':
+        'Произвольный текст — наименее обычный из четырёх в начале соединения.',
+    'Recursion desired':
+        'Нужна рекурсия',
+    'The RD flag of the header. A stub resolver asking a recursive server always sets it, so leaving it off is the unusual choice.':
+        'Флаг RD в заголовке. Клиентский резолвер, обращаясь к рекурсивному серверу, всегда его ставит, так что снятый флаг выглядит необычно.',
+    'SOFTWARE':
+        'SOFTWARE',
+    'Names the ICE agent, the way a real one does. Leave it empty and the attribute is left out entirely — a bare 20-byte header, which is still a complete Binding request and the commonest shape on the wire.':
+        'Называет ICE-агента так же, как это делает настоящий. Оставьте пустым — и атрибут не будет добавлен вовсе: голый 20-байтный заголовок, который остаётся полноценным запросом Binding и встречается в сети чаще всего.',
+    'Tag chain':
+        'Цепочка тегов',
+    'An AmneziaWG I1..I5 line. <b hex> writes those bytes, <r n> n random ones, <rc n> and <rd n> n random letters or digits, <t> a four-byte timestamp. <d>, <ds> and <dz n> splice in the real WireGuard payload, which a standalone decoy has none of.':
+        'Строка I1..I5 из AmneziaWG. <b hex> пишет эти байты, <r n> — n случайных, <rc n> и <rd n> — n случайных букв или цифр, <t> — четырёхбайтную метку времени. Теги <d>, <ds> и <dz n> подставляют настоящую полезную нагрузку WireGuard, которой у отдельной обманки нет.',
+    'No tags yet — a chain is written as <b 0x…><r 16>, and anything outside the brackets is ignored.':
+        'Тегов пока нет. Цепочка записывается как <b 0x…><r 16>; всё за пределами скобок игнорируется.',
+    'Bytes':
+        'Байты',
+    'Not hex — expected pairs of 0-9 and a-f.':
+        'Не шестнадцатеричное значение — ожидаются пары из 0-9 и a-f.',
+    '{n} bytes. Whitespace and a leading 0x are ignored, so pasting a dump works.':
+        '{n} байт. Пробелы и ведущий 0x игнорируются, так что можно вставить дамп как есть.',
+    "The same decoys as AmneziaWG writes them. These lines go in the [Interface] section of a .conf, beside the keys. The rest of the profile — addresses, peer, MTU — comes from the outbound itself; export the whole thing from the outbound's menu.":
+        'Те же обманки в записи AmneziaWG. Эти строки идут в секцию [Interface] файла .conf, рядом с ключами. Остальная часть профиля — адреса, пир, MTU — берётся из самого outbound; целиком его можно выгрузить кнопкой в редакторе outbound.',
+    "Bytes per datagram, as a range. The upper bound is exclusive, so 40-70 sends 40 to 69 bytes — the same as AmneziaWG's Jmin/Jmax.":
+        'Байт на датаграмму, диапазоном. Верхняя граница не включается: 40-70 отправляет от 40 до 69 байт — так же, как Jmin/Jmax в AmneziaWG.',
+    'Byte values':
+        'Значения байт',
+    'Which byte values the random bytes are drawn from, both ends included. Empty means the whole range, 0-255. AmneziaWG has no equivalent, so a narrowed range is dropped on export.':
+        'Из каких значений берутся случайные байты, включая обе границы. Пусто — весь диапазон 0-255. В AmneziaWG такого нет, поэтому при выгрузке суженный диапазон теряется.',
+    'Noise Generator':
+        'Генератор шума',
+    'Redraw all':
+        'Перегенерировать всё',
+    'Decoys':
+        'Обманки',
+    'Settings':
+        'Настройки',
+    'AmneziaWG':
+        'AmneziaWG',
+    'Redraw':
+        'Перегенерировать',
+    'Pick a decoy on the left, or add one.':
+        'Выберите обманку слева или добавьте новую.',
+    'Delay after':
+        'Пауза после',
+    'Milliseconds to wait before the next datagram, as a range. Empty sends them back to back, which is what AmneziaWG does.':
+        'Сколько миллисекунд ждать перед следующей датаграммой, диапазоном. Пусто — отправлять подряд, как делает AmneziaWG.',
+    'What goes on the wire':
+        'Что уйдёт в сеть',
+    'largest {n} B':
+        'самая большая {n} Б',
+    'Seconds of silence to a destination after which the decoys are sent again. Empty sends them once per destination; AmneziaWG instead sends them before every handshake, so a value near the key rotation time is the closest match.':
+        'Сколько секунд тишины до адреса, после которых обманки отправляются снова. Пусто — один раз на адрес; AmneziaWG же шлёт их перед каждым рукопожатием, поэтому ближе всего значение около времени смены ключей.',
+    '{n} datagram|{n} datagrams':
+        '{n} датаграмма|{n} датаграммы|{n} датаграмм',
+    'SIP call':
+        'Звонок SIP',
+    'QUIC Initial':
+        'QUIC Initial',
+    'DNS query':
+        'Запрос DNS',
+    'STUN binding':
+        'Binding STUN',
+    'AmneziaWG chain':
+        'Цепочка AmneziaWG',
+    'Raw bytes':
+        'Произвольные байты',
+    'no SOFTWARE attribute':
+        'без атрибута SOFTWARE',
+    'empty chain':
+        'пустая цепочка',
+    'Random junk':
+        'Случайный мусор',
+    '{n} B':
+        '{n} Б',
+    '×{count}, {size} B':
+        '×{count}, {size} Б',
+    'No decoys yet. Add one below.':
+        'Обманок пока нет. Добавьте ниже.',
+    'Add a decoy':
+        'Добавить обманку',
+    'AmneziaWG profile copied':
+        'Профиль AmneziaWG скопирован',
+    'Paste it into a .conf file.':
+        'Вставьте его в файл .conf.',
+    'Export .conf':
+        'Выгрузить .conf',
+    'Nothing to send yet.':
+        'Отправлять пока нечего.',
+    '… {n} more bytes':
+        '… ещё {n} байт',
+    'A QUIC Initial for www.cloudflare.com, then four random 40-70 byte packets. The shape WARP Profile A sends.':
+        'QUIC Initial для www.cloudflare.com, затем четыре случайных пакета по 40–70 байт. Та же форма, что шлёт WARP Profile A.',
+    'A QUIC Initial for www.google.com, then four random 40-70 byte packets. The shape WARP Profile B sends.':
+        'QUIC Initial для www.google.com, затем четыре случайных пакета по 40–70 байт. Та же форма, что шлёт WARP Profile B.',
+    'Generate…':
+        'Сгенерировать…',
+
+    'Not hex — the packet keeps the last id that was.':
+        'Не шестнадцатеричное значение — пакет сохраняет последний корректный идентификатор.',
+    'Server name (SNI)':
+        'Имя сервера (SNI)',
+    'The name that travels in the clear inside the ClientHello — the one field anyone on the path actually reads. Pick a host an ordinary browser would be opening.':
+        'Имя, которое передаётся открытым текстом внутри ClientHello: единственное поле, которое реально читает любой на пути. Выберите хост, который открывал бы обычный браузер.',
+    'A whole number, at least {n} — until then the packet keeps its last valid size.':
+        'Целое число не меньше {n}; до этого пакет сохраняет последний корректный размер.',
+    'This packet could not be built, so it still holds the last version that worked: {reason}':
+        'Пакет не удалось собрать, поэтому он сохраняет последнюю удачную версию: {reason}',
+
+    'larger than a 1280-byte path allows':
+        'больше, чем пропустит путь с MTU 1280',
+    '"{arg}" is not a number':
+        '«{arg}» — не число',
+    'negative length {length}':
+        'отрицательная длина {length}',
+    'length {length} exceeds one datagram':
+        'длина {length} не помещается в одну датаграмму',
+    'empty argument':
+        'пустой аргумент',
+    'odd amount of symbols':
+        'нечётное количество символов',
+    '"{arg}" is not hex':
+        '«{arg}» — не шестнадцатеричное значение',
+    'missing enclosing > — the chain is cut off':
+        'нет закрывающей > — цепочка обрывается',
+    'empty tag <>':
+        'пустой тег <>',
+    'unknown tag <{key}>':
+        'неизвестный тег <{key}>',
+    'failed to build <{key}>: {error}':
+        'не удалось собрать <{key}>: {error}',
+    '<{key}> has no usable length ({error}) and contributes nothing':
+        'у <{key}> нет пригодной длины ({error}), и он ничего не добавляет',
+    '<b> is not usable hex ({error}) and contributes nothing':
+        '<b> содержит непригодное шестнадцатеричное значение ({error}) и ничего не добавляет',
+    '<t> is the current unix time, read anew on every AWG handshake; this config freezes it at its first draw':
+        '<t> — текущее время unix, которое AWG берёт заново перед каждым рукопожатием; здесь оно фиксируется на первом значении',
+    '<r> is random bytes, drawn anew on every AWG handshake; this config freezes it at its first draw':
+        '<r> — случайные байты, которые AWG берёт заново перед каждым рукопожатием; здесь они фиксируются на первом значении',
+    '<rc> is random latin letters, drawn anew on every AWG handshake; this config freezes it at its first draw':
+        '<rc> — случайные латинские буквы, которые AWG берёт заново перед каждым рукопожатием; здесь они фиксируются на первом значении',
+    '<rd> is random digits, drawn anew on every AWG handshake; this config freezes it at its first draw':
+        '<rd> — случайные цифры, которые AWG берёт заново перед каждым рукопожатием; здесь они фиксируются на первом значении',
+    '<d> stands for the real WireGuard payload, which a standalone noise packet has none of — it contributes nothing here':
+        '<d> подставляет настоящую нагрузку WireGuard, которой у отдельного noise-пакета нет, — здесь он ничего не добавляет',
+    '<ds> stands for the real WireGuard payload, which a standalone noise packet has none of — its base64 is empty here':
+        '<ds> подставляет настоящую нагрузку WireGuard, которой у отдельного noise-пакета нет, — здесь его base64 пуст',
+    '<dz> stands for the real WireGuard payload, which a standalone noise packet has none of — it becomes that many zero bytes':
+        '<dz> подставляет длину настоящей нагрузки WireGuard, которой у отдельного noise-пакета нет, — здесь он превращается в столько же нулевых байт',
+    'The finalmask noise layer has no noise list, so the exported .conf carries no decoys.':
+        'В noise-слое finalmask нет списка пакетов, поэтому в выгруженном .conf нет обманок.',
+    "The outbound's reserved ({bytes}) was dropped: it substitutes three bytes of WireGuard's header for Cloudflare WARP, and AWG has no equivalent. It is not the same thing as S1/S2, which pad handshake messages, so it was not written as those.":
+        'Поле reserved ({bytes}) не перенесено: оно подменяет три байта заголовка WireGuard для Cloudflare WARP, а в AWG такого нет. Это не то же самое, что S1/S2, которые добавляют паддинг к handshake-сообщениям, поэтому записывать его туда нельзя.',
+    'Peer {index} has no publicKey and no endpoint, so the client app has nothing to connect to.':
+        'У пира {index} нет ни publicKey, ни endpoint, поэтому клиенту некуда подключаться.',
+    'Peer {index} has no {field}, so the client app has nothing to connect to.':
+        'У пира {index} нет поля {field}, поэтому клиенту некуда подключаться.',
+    'This outbound is "{protocol}", not wireguard. Only the fields a WireGuard client reads were exported.':
+        'Этот outbound имеет протокол «{protocol}», а не wireguard. Выгружены только поля, которые читает клиент WireGuard.',
+    'The outbound has no secretKey, so the .conf has no PrivateKey and no client app will load it.':
+        'У outbound нет secretKey, поэтому в .conf нет строки PrivateKey и ни один клиент его не загрузит.',
+    'The outbound has no address, so the .conf has no Address line and the interface cannot come up.':
+        'У outbound нет адреса, поэтому в .conf нет строки Address и интерфейс не поднимется.',
+    'The outbound has no peers, so the .conf has no [Peer] section.':
+        'У outbound нет пиров, поэтому в .conf нет секции [Peer].',
+    'The outbound could not be exported: {error}':
+        'Не удалось выгрузить outbound: {error}',
+    '{n} noise item sets both packet and rand, which no supported core loads (v26.7.28:infra/conf/transport_finalmask.go:387). Exported as fixed bytes.|{n} noise items set both packet and rand, which no supported core loads (v26.7.28:infra/conf/transport_finalmask.go:387). Exported as fixed bytes.':
+        '{n} noise-пакет задаёт сразу packet и rand, чего не принимает ни одно поддерживаемое ядро (v26.7.28:infra/conf/transport_finalmask.go:387). Выгружен как фиксированные байты.|{n} noise-пакета задают сразу packet и rand, чего не принимает ни одно поддерживаемое ядро (v26.7.28:infra/conf/transport_finalmask.go:387). Выгружены как фиксированные байты.|{n} noise-пакетов задают сразу packet и rand, чего не принимает ни одно поддерживаемое ядро (v26.7.28:infra/conf/transport_finalmask.go:387). Выгружены как фиксированные байты.',
+    '{n} noise item has neither packet nor rand and were left out.|{n} noise items have neither packet nor rand and were left out.':
+        '{n} noise-пакет не содержит ни packet, ни rand и пропущен.|{n} noise-пакета не содержат ни packet, ни rand и пропущены.|{n} noise-пакетов не содержат ни packet, ни rand и пропущены.',
+    '{n} noise packet could not be decoded (type must be hex, str, base64 or array) and were left out.|{n} noise packets could not be decoded (type must be hex, str, base64 or array) and were left out.':
+        '{n} noise-пакет не удалось раскодировать (type должен быть hex, str, base64 или array), он пропущен.|{n} noise-пакета не удалось раскодировать (type должен быть hex, str, base64 или array), они пропущены.|{n} noise-пакетов не удалось раскодировать (type должен быть hex, str, base64 или array), они пропущены.',
+    '{n} noise packet decoded to no bytes and were left out: AWG has no way to send an empty decoy.|{n} noise packets decoded to no bytes and were left out: AWG has no way to send an empty decoy.':
+        '{n} noise-пакет раскодировался в ноль байт и пропущен: AWG не умеет отправлять пустую обманку.|{n} noise-пакета раскодировались в ноль байт и пропущены: AWG не умеет отправлять пустую обманку.|{n} noise-пакетов раскодировались в ноль байт и пропущены: AWG не умеет отправлять пустую обманку.',
+    '{n} random noise item has a size that could not be read (expected "40-70" or a number) and were left out of Jc.|{n} random noise items have a size that could not be read (expected "40-70" or a number) and were left out of Jc.':
+        'У {n} случайного noise-пакета не удалось прочитать размер (ожидается «40-70» или число), он не вошёл в Jc.|У {n} случайных noise-пакетов не удалось прочитать размер (ожидается «40-70» или число), они не вошли в Jc.|У {n} случайных noise-пакетов не удалось прочитать размер (ожидается «40-70» или число), они не вошли в Jc.',
+    '{what} is not hex.':
+        '{what} — не шестнадцатеричное значение.',
+    '{what} is {size} bytes; QUIC v1 allows at most {max} (RFC 9000 s17.2).':
+        '{what} занимает {size} байт, а QUIC v1 допускает не больше {max} (RFC 9000 п.17.2).',
+    'Destination Connection ID':
+        'Идентификатор соединения получателя',
+    'Source Connection ID':
+        'Идентификатор соединения отправителя',
+    "Destination Connection ID is {size} bytes; a client's first one must be at least {min} so the server gets enough entropy (RFC 9000 s7.2).":
+        'Идентификатор соединения получателя занимает {size} байт, а в первом пакете клиента их должно быть не меньше {min}, чтобы сервер получил достаточно энтропии (RFC 9000 п.7.2).',
+    'Size must be a whole number of bytes.':
+        'Размер должен быть целым числом байт.',
+    'Size is {size}; a client Initial datagram must be padded to at least {min} bytes or a server will drop it (RFC 9000 s14.1).':
+        'Размер {size}, а клиентскую датаграмму Initial нужно дополнить минимум до {min} байт, иначе сервер её отбросит (RFC 9000 п.14.1).',
+    'Size is {size}; a UDP payload cannot exceed {max} bytes.':
+        'Размер {size}, а полезная нагрузка UDP не может превышать {max} байт.',
+    'Server name is empty; the SNI extension needs a host name to carry.':
+        'Имя сервера пустое, а расширению SNI нужно имя хоста.',
+    '"{name}" is not a host name, so the SNI will not look like a browser\'s.':
+        '«{name}» — не имя хоста, поэтому SNI не будет похож на браузерный.',
+    'No ALPN ids; QUIC requires ALPN, and a server closes the connection without it (RFC 9001 s8.1).':
+        'Не задан ни один идентификатор ALPN. В QUIC поле ALPN обязательно, без него сервер закроет соединение (RFC 9001 п.8.1).',
+    'An ALPN id is empty; each one is a non-empty byte string (RFC 7301 s3.1).':
+        'Один из идентификаторов ALPN пуст, а каждый должен быть непустой строкой байт (RFC 7301 п.3.1).',
+    'ALPN id "{id}" is longer than the 255 bytes its length prefix allows.':
+        'Идентификатор ALPN «{id}» длиннее 255 байт, которые допускает его префикс длины.',
+    'A {size}-byte datagram leaves {room} bytes for frames, but this ClientHello needs {needed}. Raise the size or shorten the server name.':
+        'В датаграмме размером {size} байт под кадры остаётся {room} байт, а этому ClientHello нужно {needed}. Увеличьте размер или сократите имя сервера.',
+    'handshake initiation':
+        'начало рукопожатия',
+    'handshake response':
+        'ответ рукопожатия',
+    'cookie reply':
+        'ответ cookie',
+    'transport packets':
+        'транспортные пакеты',
+    'This profile pads WireGuard\'s own messages — {targets}. Xray\'s WireGuard sends them unpadded, and the setting is dropped. It is not the same thing as the outbound\'s "reserved", which substitutes three header bytes for Cloudflare WARP; writing it there would corrupt the handshake.':
+        'Профиль добавляет паддинг к собственным сообщениям WireGuard: {targets}. WireGuard в Xray отправляет их без паддинга, поэтому настройка не перенесена. Это не то же самое, что поле «reserved» у outbound, которое подменяет три байта заголовка для Cloudflare WARP: запись туда испортила бы рукопожатие.',
+    "This profile renumbers WireGuard's message types ({keys}). The peer expects that numbering and Xray speaks the standard one, so this outbound will not complete a handshake with it. The decoys below were still imported.":
+        'Профиль меняет номера типов сообщений WireGuard ({keys}). Пир ожидает именно такую нумерацию, а Xray использует стандартную, поэтому рукопожатие с ним не состоится. Обманки ниже всё же импортированы.',
+    "Not carried across: {keys}. This app models WireGuard plus AmneziaWG's decoys; anything else in the profile is left behind.":
+        'Не перенесено: {keys}. Приложение описывает WireGuard и обманки AmneziaWG; всё остальное из профиля остаётся за бортом.',
+    'AmneziaWG carries five decoy packets (I1-I5); the last {n} were left out.':
+        'AmneziaWG вмещает пять пакетов-обманок (I1–I5); последние {n} не вошли.',
+    'AmneziaWG sends all five I packets before its junk, so a packet written after a junk step moves ahead of it.':
+        'AmneziaWG отправляет все пять пакетов I до мусора, поэтому пакет, записанный после шага с мусором, окажется перед ним.',
+    'Delays were dropped: AmneziaWG writes its decoys back to back.':
+        'Паузы не перенесены: AmneziaWG отправляет обманки подряд.',
+    '"reset" was dropped: AmneziaWG sends its decoys before every handshake rather than re-arming after silence.':
+        'Поле «reset» не перенесено: AmneziaWG отправляет обманки перед каждым рукопожатием, а не после паузы в тишине.',
+    'AmneziaWG\'s junk is always uniform random bytes, so a narrowed "randRange" was dropped.':
+        'Мусор в AmneziaWG — всегда равномерно случайные байты, поэтому суженный «randRange» не перенесён.',
+    'AmneziaWG has one junk setting (Jc/Jmin/Jmax), so {steps} junk steps became {count} packets of {min}-{max} bytes.':
+        'В AmneziaWG одна настройка мусора (Jc/Jmin/Jmax), поэтому {steps} шагов превратились в {count} пакетов по {min}–{max} байт.',
+    'An AmneziaWG chain with no tags sends an empty datagram.':
+        'Цепочка AmneziaWG без тегов отправляет пустую датаграмму.',
+    'A packet with no bytes sends an empty datagram.':
+        'Пакет без байт отправляет пустую датаграмму.',
+    '"{size}" is not a length range — the core refuses the config.':
+        '«{size}» — не диапазон длины, ядро не примет такой конфиг.',
+    'A junk length cannot be negative.':
+        'Длина мусора не может быть отрицательной.',
+    'A junk step that sends nothing.':
+        'Шаг с мусором, который ничего не отправляет.',
+    '"{label}..." is {size} bytes — RFC 1035 s2.3.4 caps a label at {max}, so it is sent cut short and the decoy asks about a different name.':
+        '«{label}…» занимает {size} байт, а RFC 1035 п.2.3.4 ограничивает метку {max} байтами, поэтому она будет обрезана и обманка спросит про другое имя.',
+    'The name is {total} bytes — RFC 1035 s2.3.4 caps an encoded name at 255, which is {max} as written here. A resolver would refuse to parse it.':
+        'Имя занимает {total} байт, а RFC 1035 п.2.3.4 ограничивает закодированное имя 255 байтами, то есть {max} в такой записи. Резолвер откажется его разбирать.',
+    'RFC 3261 s8.1.1.7 wants the branch to start with "z9hG4bK" — "{branch}" does not.':
+        'RFC 3261 п.8.1.1.7 требует, чтобы branch начинался с «z9hG4bK», а «{branch}» — нет.',
+    '{label} is empty — the URI it goes in will not parse as SIP.':
+        'Поле «{label}» пустое — URI, в который оно подставляется, не разберётся как SIP.',
+    'SOFTWARE is {chars} characters — RFC 5389 s15.10 wants fewer than {max}.':
+        'SOFTWARE содержит {chars} символов, а RFC 5389 п.15.10 требует меньше {max}.',
+    'SOFTWARE is {bytes} bytes — RFC 5389 s15.10 caps the attribute at {max}.':
+        'SOFTWARE занимает {bytes} байт, а RFC 5389 п.15.10 ограничивает атрибут {max} байтами.',
 
     // ── Freedom: fragment, noises and the rest of its settings ──────────────
     'Domain Strategy (legacy key)': 'Стратегия доменов (старый ключ)',

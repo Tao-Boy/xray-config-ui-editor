@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Button } from '../../ui/Button';
 import { Icon } from '../../ui/Icon';
 import { toast } from 'sonner';
@@ -6,7 +6,7 @@ import { Switch } from '../../ui/Switch';
 import { Select } from '../../ui/Select';
 import { FormField } from '../../ui/FormField';
 import { useCoreVersion } from '../../../hooks/useCoreVersion';
-import { generateWarpAccount, withWarpAccount } from '../../../core/generators';
+import { generateWarpAccount, withWarpAccount, toAwgConf } from '../../../core/generators';
 import { useConfigStore } from '../../../store/configStore';
 import { useShallow } from 'zustand/react/shallow';
 import { useField, useArrayField } from '../../../hooks/useField';
@@ -21,7 +21,20 @@ export const OutboundWireguard = ({ outbound, onChange, errors = {} as any }: an
     // stays mounted across a protocol switch (React requires the exact same
     // hooks, in the exact same order, on every render of the same instance).
     // Hooks now run unconditionally; the early return moves below them.
-    const { warpWorkerUrl } = useConfigStore(useShallow(state => ({ warpWorkerUrl: state.warpWorkerUrl })));
+    // The selector returns the stored array itself, never a derived one: a
+    // fresh array fails useShallow's comparison every time and puts this
+    // editor back to re-rendering on every change anywhere in the app.
+    const { warpWorkerUrl, servers } = useConfigStore(useShallow(state => ({
+        warpWorkerUrl: state.warpWorkerUrl,
+        servers: state.config?.dns?.servers,
+    })));
+    // Plain addresses only: a DoH URL is an Xray server object, not something
+    // a WireGuard client knows what to do with.
+    const dnsServers = useMemo(
+        () => (Array.isArray(servers) ? servers : [])
+            .filter((server: unknown): server is string => typeof server === 'string' && !server.includes('://')),
+        [servers],
+    );
     const settings = outbound.settings || { secretKey: "", address: ["10.0.0.1/24"], peers: [] };
     const [loading, setLoading] = useState(false);
 
@@ -58,6 +71,24 @@ export const OutboundWireguard = ({ outbound, onChange, errors = {} as any }: an
 
     if (outbound.protocol !== 'wireguard') return null;
 
+    /**
+     * The outbound as the `.conf` an AmneziaWG or WireGuard client loads — the
+     * import in reverse. The decoys go out as `I1..I5` and `Jc/Jmin/Jmax`;
+     * anything that has no AmneziaWG equivalent is reported rather than
+     * dropped quietly, because a profile that looks complete and connects to
+     * nothing is the worst outcome here.
+     */
+    const handleExportConf = () => {
+        const { conf, notes } = toAwgConf(outbound, { dns: dnsServers });
+        void navigator.clipboard?.writeText(conf);
+        toast.success(t("AmneziaWG profile copied"), { description: t("Paste it into a .conf file.") });
+        for (const note of notes) {
+            const show = note.severity === 'critical' ? toast.error
+                : note.severity === 'warning' ? toast.warning : toast.info;
+            show(note.message, { duration: note.severity === 'info' ? 6000 : 14000 });
+        }
+    };
+
     const handleGenerateWarp = async () => {
         setLoading(true);
         try {
@@ -85,6 +116,9 @@ export const OutboundWireguard = ({ outbound, onChange, errors = {} as any }: an
 </h4>
                 <Button variant="secondary" className="px-3 py-1.5 text-xs bg-indigo-600/20 text-indigo-400 border-indigo-500/50 hover:bg-indigo-600 hover:text-white" onClick={handleGenerateWarp} disabled={loading}>
                     {loading ? t("Generating...") : t("Generate WARP")}
+                </Button>
+                <Button variant="secondary" className="px-3 py-1.5 text-xs" icon="Export" onClick={handleExportConf}>
+                    {t("Export .conf")}
                 </Button>
             </div>
 

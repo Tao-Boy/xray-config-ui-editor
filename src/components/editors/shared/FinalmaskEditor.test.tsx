@@ -198,6 +198,27 @@ describe('noise presets', () => {
     });
 });
 
+describe('writing several settings at once', () => {
+    it('keeps both, where two separate writes lost one', () => {
+        // Each setSetting reads the mask out of the `finalmask` prop, so two
+        // calls in one handler both start from the value before either ran and
+        // the second discards the first. The generator applies `noise` and
+        // `reset` together, which is exactly that case.
+        const { editor, writes } = hook({ udp: [{ type: 'noise', settings: { noise: [{ rand: '1-2' }] } }] }, 'outbound');
+        editor.patchSettings('udp', 0, { noise: [{ type: 'hex', packet: 'aa' }], reset: '120-180' });
+        expect(writes[writes.length - 1].udp[0].settings).toEqual({
+            noise: [{ type: 'hex', packet: 'aa' }],
+            reset: '120-180',
+        });
+    });
+
+    it('removes a key the patch clears, and keeps the ones it does not mention', () => {
+        const { editor, writes } = hook({ udp: [{ type: 'noise', settings: { noise: [{ rand: '1-2' }], reset: '60' } }] }, 'outbound');
+        editor.patchSettings('udp', 0, { reset: undefined });
+        expect(writes[writes.length - 1].udp[0].settings).toEqual({ noise: [{ rand: '1-2' }] });
+    });
+});
+
 describe('QUIC parameters', () => {
     it('offers bbrProfile from 26.7, the four switches on 26.9, and udpHop until 26.9 took it away', () => {
         onLine('26.3');

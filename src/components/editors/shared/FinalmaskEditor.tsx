@@ -11,6 +11,7 @@ import {
     type LayerView,
 } from '../../../hooks/useFinalmaskEditor';
 import type { FinalmaskIssue, MaskKey, MaskList, MaskSide } from '../../../core/xray/versions/finalmask-rules';
+import { NoiseGeneratorModal } from '../noise/NoiseGeneratorModal';
 import { t } from '../../../i18n';
 
 type Editor = ReturnType<typeof useFinalmaskEditor>;
@@ -464,8 +465,21 @@ const NoiseEditor = ({ target, value }: { target: NoiseTarget; value: unknown })
     const { list, index, editor } = target;
     const items = Array.isArray(value) ? value : [];
     const update = (item: number, patch: Record<string, unknown>) => editor.updateNoiseItem(list, index, item, patch);
+    // Hand-editing hex is fine for one pasted packet and hopeless for a whole
+    // chain, so the generator builds them from what they are meant to look
+    // like. It is a separate sheet because it needs the room.
+    const [generating, setGenerating] = useState(false);
+    const layer = editor.chains.find(chain => chain.list === list)?.layers[index];
     return (
         <div className="space-y-2">
+            {generating && (
+                <NoiseGeneratorModal
+                    noise={items}
+                    reset={layer?.settings.reset}
+                    onClose={() => setGenerating(false)}
+                    onApply={(next, reset) => editor.patchSettings(list, index, { noise: next, reset })}
+                />
+            )}
             {items.map((raw, i) => {
                 const item = raw && typeof raw === 'object' ? raw as Record<string, unknown> : {};
                 const isPacket = item.packet !== undefined;
@@ -513,9 +527,14 @@ const NoiseEditor = ({ target, value }: { target: NoiseTarget; value: unknown })
                     </div>
                 );
             })}
-            <Button variant="secondary" size="sm" icon="Plus" onClick={() => editor.addNoiseItem(list, index)}>
-                {t("Add Noise Packet")}
-            </Button>
+            <div className="flex flex-wrap gap-2">
+                <Button variant="secondary" size="sm" icon="Plus" onClick={() => editor.addNoiseItem(list, index)}>
+                    {t("Add Noise Packet")}
+                </Button>
+                <Button variant="secondary" size="sm" icon="Sparkle" onClick={() => setGenerating(true)}>
+                    {t("Generate…")}
+                </Button>
+            </div>
         </div>
     );
 };

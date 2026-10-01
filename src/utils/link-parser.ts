@@ -1,3 +1,8 @@
+import { cryptoRng } from '../core/noise/bytes';
+import { awgProtocolNotes, isAwgInterface, recipeFromAwgInterface } from '../core/noise/awg';
+import { toNoiseItems } from '../core/noise/recipe';
+import type { Note } from '../core/noise/types';
+
 /**
  * An mKCP link's header type, as the finalmask mask that carries it now.
  *
@@ -15,13 +20,24 @@ const kcpHeaderMask = (type: unknown): { udp: { type: string; settings: { header
     return { udp: [{ type: 'mkcp-legacy', settings: { header } }] };
 };
 
-export const parseWireguardConfig = (text: string, mode: 'direct' | 'chained' = 'direct'): any => {
+/**
+ * A WireGuard or AmneziaWG `.conf` as an outbound, plus everything about the
+ * profile that Xray cannot do. The notes are why this entry exists: an AWG
+ * profile can ask for padded handshakes or renumbered message types, and
+ * without a word about them the result is a config that looks right and never
+ * completes a handshake.
+ */
+export const parseWireguardConfigDetailed = (
+    text: string,
+    mode: 'direct' | 'chained' = 'direct',
+): { result: any; notes: Note[] } => {
     const lines = text.split('\n');
     const config: any = {
         Interface: {},
         Peers: [] as any[]
     };
     
+    const notes: Note[] = [];
     let currentSection = "";
     for (let line of lines) {
         line = line.trim();
@@ -48,7 +64,7 @@ export const parseWireguardConfig = (text: string, mode: 'direct' | 'chained' = 
         }
     }
 
-    if (!config.Interface.PrivateKey) return null;
+    if (!config.Interface.PrivateKey) return { result: null, notes };
 
     const outbound: any = {
         tag: "wg-imported-" + Math.floor(Math.random() * 1000),
@@ -73,47 +89,38 @@ export const parseWireguardConfig = (text: string, mode: 'direct' | 'chained' = 
         }
     };
 
-    // --- AmneziaWG / Finalmask Noise Generation ---
-    const isAWG = config.Interface.Jc || config.Interface.Jmin || config.Interface.H1 || config.Interface.I1;
-    
-    if (isAWG) {
-        const noise: any[] = [];
-        const extractHex = (val: string) => {
-            if (!val) return null;
-            const match = val.match(/0x([0-9a-fA-F]+)/);
-            return match ? match[1] : null;
-        };
+    // --- AmneziaWG: the decoys it sends, and what could not come with them ---
+    if (isAwgInterface(config.Interface)) {
+        const { recipe, notes: decoyNotes } = recipeFromAwgInterface(config.Interface, cryptoRng);
+        const noise = toNoiseItems(recipe);
+        notes.push(...awgProtocolNotes(config.Interface), ...decoyNotes);
 
-        const i1Hex = extractHex(config.Interface.I1);
-        if (i1Hex) noise.push({ type: "hex", packet: i1Hex, delay: "5-10" });
-        const i2Hex = extractHex(config.Interface.I2);
-        if (i2Hex) noise.push({ type: "hex", packet: i2Hex, delay: "5-10" });
-
-        const jc = parseInt(config.Interface.Jc) || 0;
-        const jmin = parseInt(config.Interface.Jmin) || 40;
-        const jmax = parseInt(config.Interface.Jmax) || 70;
-        for (let i = 0; i < jc; i++) {
-            noise.push({ rand: `${jmin}-${jmax}`, delay: "5-15" });
-        }
-
-        // Smart Reserved
-        const isWARP = outbound.settings.peers.some((p: any) => 
+        // Cloudflare WARP substitutes three bytes of the WireGuard header, which
+        // is what `reserved` is for. S1/S2 are not that: they are padding lengths
+        // on handshake messages (device/send.go:149,199). Writing them here, as
+        // this importer used to, corrupted the header on every non-WARP profile.
+        const isWARP = outbound.settings.peers.some((p: any) =>
             p.endpoint?.includes('cloudflare') || p.endpoint?.includes('162.159.')
         );
         if (isWARP) {
             outbound.settings.reserved = [0, 0, 0];
-        } else if (config.Interface.S1 || config.Interface.S2) {
-            outbound.settings.reserved = [parseInt(config.Interface.S1) || 0, parseInt(config.Interface.S2) || 0, 0];
+        }
+
+        // A profile whose decoys all failed to parse still imports as plain
+        // WireGuard; the notes say what was dropped.
+        if (noise.length === 0) {
+            return { result: outbound, notes };
         }
 
         if (mode === 'direct') {
-            // МЕТОД 1: Finalmask внутри WG (Xray 1.26+)
+            // Finalmask inside the WireGuard outbound itself.
             outbound.streamSettings.network = "raw"; 
             outbound.streamSettings.finalmask = {
                 udp: [{ type: "noise", settings: { noise } }]
             };
         } else {
-            // МЕТОД 2: Цепочка через dialerProxy (Legacy / Старые ядра)
+            // A separate freedom outbound carries the decoys, reached through
+            // dialerProxy — for a core whose WireGuard has no finalmask.
             const noiseTag = outbound.tag + "-obfuscator";
             outbound.streamSettings.sockopt = { dialerProxy: noiseTag };
             
@@ -126,12 +133,16 @@ export const parseWireguardConfig = (text: string, mode: 'direct' | 'chained' = 
                     finalmask: { udp: [{ type: "noise", settings: { noise } }] }
                 }
             };
-            return { multiple: true, outbounds: [outbound, obfuscator] };
+            return { result: { multiple: true, outbounds: [outbound, obfuscator] }, notes };
         }
     }
 
-    return outbound;
+    return { result: outbound, notes };
 };
+
+/** The outbound alone, for the callers that have nowhere to show a note. */
+export const parseWireguardConfig = (text: string, mode: 'direct' | 'chained' = 'direct'): any =>
+    parseWireguardConfigDetailed(text, mode).result;
 
 const decodeBase64Safe = (b64: string): string => {
   try {

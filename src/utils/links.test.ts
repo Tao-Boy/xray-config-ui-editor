@@ -1,5 +1,5 @@
 import { expect, test, describe } from "bun:test";
-import { parseXrayLink, parseWireguardConfig, parseRawSubscriptionText } from "./link-parser";
+import { parseXrayLink, parseWireguardConfig, parseWireguardConfigDetailed, parseRawSubscriptionText } from "./link-parser";
 import { generateXrayLink } from "./link-generator";
 
 describe("Link Parser & Generator", () => {
@@ -119,7 +119,47 @@ Endpoint = 89.46.38.91:51820
             expect(parsed.settings.secretKey).toBe("myprivatekey");
             expect(parsed.streamSettings.network).toBe("raw");
             expect(parsed.streamSettings.finalmask).toBeDefined();
-            expect(parsed.settings.reserved).toEqual([5, 10, 0]);
+            // Jc = 4 junk packets, and no I lines in this profile.
+            expect(parsed.streamSettings.finalmask.udp[0].settings.noise)
+                .toEqual([...Array(4)].map(() => ({ rand: "40-70" })));
+        });
+
+        test("leaves reserved alone: S1/S2 are not what it holds", () => {
+            // S1/S2 are padding lengths on WireGuard's handshake messages
+            // (device/send.go:149,199). `reserved` substitutes three bytes of
+            // the header for Cloudflare WARP. Writing one into the other, as
+            // this importer used to, corrupts the handshake — and this peer is
+            // not WARP, so nothing should be written at all.
+            const parsed = parseWireguardConfig(wgConfig, 'direct');
+            expect(parsed.settings.reserved).toBeUndefined();
+        });
+
+        test("says what it could not bring across", () => {
+            const { notes } = parseWireguardConfigDetailed(wgConfig, 'direct');
+            const said = (match: string) => notes.filter(note => note.message.includes(match));
+            // S1/S2 ask for padded handshakes, which Xray cannot send.
+            expect(said("S1 (handshake initiation)")).toHaveLength(1);
+            // H1 renumbers the initiation message, so this peer is unreachable.
+            const renumbered = said("renumbers");
+            expect(renumbered).toHaveLength(1);
+            expect(renumbered[0]!.severity).toBe("critical");
+        });
+
+        test("keeps every I line, and every tag within one", () => {
+            const withPackets = wgConfig.replace(
+                "Jc = 4",
+                ["I1 = <b 0xdeadbeef><r 4>", "I2 = <b 0xcafe>", "I3 = <b 0xfeed>",
+                 "I4 = <b 0xf00d>", "I5 = <b 0xbeef>", "Jc = 4"].join("\n"),
+            );
+            const noise = parseWireguardConfig(withPackets, 'direct')
+                .streamSettings.finalmask.udp[0].settings.noise;
+            // Five packets then the junk, the order AmneziaWG sends them in.
+            expect(noise.filter((item: any) => item.packet)).toHaveLength(5);
+            expect(noise.slice(5).every((item: any) => item.rand === "40-70")).toBe(true);
+            // I1 carries a second tag: four random bytes after the fixed four.
+            // Reading only the first <b ...> used to drop them.
+            expect(noise[0].packet).toHaveLength(("deadbeef".length) + 8);
+            expect(noise[0].packet.startsWith("deadbeef")).toBe(true);
         });
 
         test("should parse AmneziaWG (chained) correctly", () => {
