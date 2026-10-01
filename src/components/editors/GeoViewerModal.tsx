@@ -129,22 +129,49 @@ export const GeoViewerModal = ({ onClose }: { onClose: () => void }) => {
         );
     };
 
-    // Virtualization grid logic: chunk data into rows of 5
+    // How many fit across, measured rather than guessed from a breakpoint.
+    // The virtual list hands out rows, so the row has to hold exactly what one
+    // line of the grid shows — otherwise the overflow wraps, rows differ in
+    // height, and the heights are what the virtualiser is estimating from.
+    const gridRef = React.useRef<HTMLDivElement>(null);
+    const [columns, setColumns] = React.useState(4);
+
+    React.useEffect(() => {
+        const node = gridRef.current;
+        if (!node) return;
+        const measure = () => {
+            // ~230px is where a domain like `google-ads` stops being truncated.
+            const fits = Math.floor((node.clientWidth - 16) / 230);
+            setColumns(Math.max(1, Math.min(6, fits)));
+        };
+        measure();
+        const observer = new ResizeObserver(measure);
+        observer.observe(node);
+        return () => observer.disconnect();
+    }, []);
+
     const chunkedRows = useMemo(() => {
         const rows = [];
-        for (let i = 0; i < displayData.length; i += 5) {
-            rows.push(displayData.slice(i, i + 5));
+        for (let i = 0; i < displayData.length; i += columns) {
+            rows.push(displayData.slice(i, i + columns));
         }
         return rows;
-    }, [displayData]);
+    }, [displayData, columns]);
 
     return (
-        <Modal title={t("Geo Data Viewer")} onClose={onClose} onSave={onClose} className="max-w-7xl"
-            extraButtons={
-                <div className="flex bg-slate-950 p-1 rounded-xl border border-slate-800 shrink-0 h-11 items-center">
-                    <button onClick={() => handleTabChange('geosite')} className={`px-4 h-full text-xs font-bold rounded-lg transition-all ${activeTab === 'geosite' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'}`}>{t("GeoSite")}</button>
-                    <button onClick={() => handleTabChange('geoip')} className={`px-4 h-full text-xs font-bold rounded-lg transition-all ${activeTab === 'geoip' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'}`}>{t("GeoIP")}</button>
-                    <button onClick={() => handleTabChange('custom')} className={`px-4 h-full text-xs font-bold rounded-lg transition-all ${activeTab === 'custom' ? 'bg-emerald-600 text-white' : 'text-slate-400 hover:text-white'}`}>{t("Custom Source")}</button>
+        <Modal
+            title={t("Geo Data Viewer")}
+            onClose={onClose}
+            onSave={onClose}
+            // A height of its own. Without one the sheet sizes to its content
+            // and the list below, which asks for the room that is left, is
+            // given none of it.
+            className="max-w-7xl md:h-[88vh] md:max-h-[92dvh]"
+            tabs={
+                <div className="flex bg-slate-950 p-1 rounded-lg border border-slate-800 shrink-0">
+                    <button onClick={() => handleTabChange('geosite')} className={`px-2.5 py-1.5 text-xs font-bold rounded transition-all ${activeTab === 'geosite' ? 'bg-indigo-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}>{t("GeoSite")}</button>
+                    <button onClick={() => handleTabChange('geoip')} className={`px-2.5 py-1.5 text-xs font-bold rounded transition-all ${activeTab === 'geoip' ? 'bg-indigo-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}>{t("GeoIP")}</button>
+                    <button onClick={() => handleTabChange('custom')} className={`px-2.5 py-1.5 text-xs font-bold rounded transition-all ${activeTab === 'custom' ? 'bg-emerald-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}>{t("Custom Source")}</button>
                 </div>
             }
         >
@@ -241,7 +268,7 @@ export const GeoViewerModal = ({ onClose }: { onClose: () => void }) => {
                 </div>
 
                 <div className="flex-1 flex flex-col md:flex-row gap-4 min-h-0 overflow-hidden">
-                    <div className={`${viewTag ? 'hidden md:block' : 'block'} flex-1 bg-slate-950 rounded-xl border border-slate-800 relative min-w-0`}>
+                    <div ref={gridRef} className={`${viewTag ? 'hidden md:block' : 'block'} flex-1 bg-slate-950 rounded-xl border border-slate-800 relative min-w-0`}>
                         {loading && activeTab !== 'custom' ? (
                             <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-500 z-10 bg-slate-950/50 backdrop-blur-sm">
                                 <Icon name="Spinner" className="text-4xl animate-spin mb-4 text-indigo-500" />
@@ -255,7 +282,11 @@ export const GeoViewerModal = ({ onClose }: { onClose: () => void }) => {
                         ) : (
                             <VList className="h-full w-full custom-scroll" style={{ overflowY: 'auto' }}>
                                 {chunkedRows.map((row, rowIdx) => (
-                                    <div key={rowIdx} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-2 p-2">
+                                    <div
+                                        key={rowIdx}
+                                        className="grid gap-2 px-2 pt-2"
+                                        style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}
+                                    >
                                         {row.map(item => renderItem(item))}
                                     </div>
                                 ))}

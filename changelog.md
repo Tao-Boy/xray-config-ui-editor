@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.26.2] - 2026-10-02
+
+### Fixed
+- **The Geo Data Viewer showed nothing at all.** It opened without a height of its own, so on a desktop the sheet sized itself to its content — 301px — and the list below, which asks for whatever room is left, was given none: a scroll area 0 pixels tall holding 12360 pixels of categories. It now takes the same height as the other large editors, which they were given in 1.24.2 and this one was missed out of.
+- **Its rows were cut into fives while the grid showed one to five columns**, depending on the window. At every width but the largest the leftover items wrapped onto a second line, so rows varied in height — and row height is exactly what the virtual list measures to decide what to draw. The number of columns now comes from the list's own measured width, and the same number cuts the rows, so a row is always one full line.
+- **Its tabs were still the old tall pill above the content.** They sit in the footer now, in the compact style every other editor moved to in 1.24.2.
+
 ## [1.26.1] - 2026-10-01
 
 ### Added
