@@ -414,6 +414,13 @@ export const ru: Record<string, string> = {
     'A SIP call opening (INVITE, then 100 Trying), then four random 40-70 byte packets — the noise WARP Profile C sends.':
         'Начало SIP-звонка (INVITE, затем 100 Trying), затем четыре случайных пакета по 40–70 байт — шум из WARP Profile C.',
 
+    'WARP did not register — {tag} was added without keys':
+        'WARP не зарегистрировался — {tag} добавлен без ключей',
+    'Open the outbound and press Generate WARP to register it. Reason: {reason}':
+        'Откройте outbound и нажмите «Сгенерировать WARP», чтобы его зарегистрировать. Причина: {reason}',
+    'Network error or proxy timeout.':
+        'Ошибка сети или таймаут прокси.',
+
     // ── Freedom: fragment, noises and the rest of its settings ──────────────
     'Domain Strategy (legacy key)': 'Стратегия доменов (старый ключ)',
     'TLS Fragmentation': 'Фрагментация TLS',

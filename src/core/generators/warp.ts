@@ -1,3 +1,5 @@
+import { WARP_ENDPOINT } from '../presets';
+
 export interface WarpAccount {
     id: string;
     token: string;
@@ -79,7 +81,7 @@ export async function generateWarpAccount(customWorkerUrl?: string): Promise<War
                         privateKey: data.privKey,
                         publicKey: data.publicKey || '',
                         peerPublicKey: data.peer_pub,
-                        endpoint: data.peer_endpoint || 'engage.cloudflareclient.com:2408',
+                        endpoint: data.peer_endpoint || WARP_ENDPOINT,
                         ipv4: data.client_ipv4,
                         ipv6: data.client_ipv6,
                         reserved: data.reserved || [0, 0, 0],
@@ -101,3 +103,46 @@ export async function generateWarpAccount(customWorkerUrl?: string): Promise<War
     throw lastError || new Error('WARP registration failed. Please try again.');
 }
 
+/** The interface addresses a registration returned — only the families it returned. */
+export const warpAddresses = (warp: Pick<WarpAccount, 'ipv4' | 'ipv6'>): string[] => [
+    ...(warp.ipv4 ? [`${warp.ipv4}/32`] : []),
+    ...(warp.ipv6 ? [`${warp.ipv6}/128`] : []),
+];
+
+const firstPeer = (settings: any): [any, any[]] => {
+    const peers = Array.isArray(settings?.peers) && settings.peers.length > 0 ? settings.peers : [{}];
+    const [first, ...rest] = peers;
+    return [first && typeof first === 'object' ? first : {}, rest];
+};
+
+/**
+ * WireGuard `settings` with a registered WARP account in them: the key, the
+ * addresses, `reserved`, and the first peer's endpoint and public key. Only
+ * what the registration decides is written — the first peer keeps its
+ * allowedIPs (a profile that leaves local networks out stays that way),
+ * other peers and the rest of settings (mtu, workers…) stay as they were.
+ */
+export const withWarpAccount = (settings: any, warp: WarpAccount) => {
+    const [first, rest] = firstPeer(settings);
+    return {
+        ...settings,
+        secretKey: warp.privateKey,
+        address: warpAddresses(warp),
+        reserved: warp.reserved,
+        peers: [{ keepAlive: 15, ...first, endpoint: warp.endpoint, publicKey: warp.peerPublicKey }, ...rest],
+    };
+};
+
+/**
+ * WireGuard `settings` for a WARP profile whose registration failed: no key
+ * and no peer key — the outbound's Generate WARP button registers it and
+ * fills them — but Cloudflare's endpoint, so the peer is not left blank.
+ */
+export const withoutWarpAccount = (settings: any) => {
+    const [first, rest] = firstPeer(settings);
+    return {
+        ...settings,
+        secretKey: '',
+        peers: [{ keepAlive: 15, ...first, endpoint: first.endpoint || WARP_ENDPOINT, publicKey: '' }, ...rest],
+    };
+};

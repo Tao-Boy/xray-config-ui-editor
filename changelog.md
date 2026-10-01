@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.25.1] - 2026-10-01
+
+### Changed
+- **A WARP registration that fails no longer throws the profile away.** The generator builds the outbound anyway — preset, noise and allowed IPs as chosen — with both keys empty and the peer on Cloudflare's endpoint, and says so: the outbound was added without keys, open it and press **Generate WARP** to register it, and why the registration failed.
+
+### Fixed
+- **Generate WARP in a WireGuard outbound replaced the peer list.** It wrote one new peer, so the profile's `allowedIPs` — "leave local networks out" included — went with the old one and everything started going through WARP. It now fills the key, addresses, `reserved`, endpoint and peer key into the peer that is there and leaves the rest alone.
+- The same button wrote `undefined/128` when the registration returned no IPv6 address (the generator was fixed in 1.24.2; the button was not). Both go through one merge now.
+
 ## [1.25.0] - 2026-10-01
 
 ### Added

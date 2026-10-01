@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { generateWarpAccount } from '../core/generators/warp';
+import { generateWarpAccount, withWarpAccount, withoutWarpAccount, type WarpAccount } from '../core/generators/warp';
 import { useConfigStore } from '../store/configStore';
 import { useShallow } from 'zustand/react/shallow';
 import { getPresets } from '../core/presets';
@@ -27,8 +27,17 @@ export function useWarpGenerator(onGenerate: (outbound: any) => void, onClose: (
     const handleGenerate = async () => {
         setLoading(true);
         try {
-            // 1. Generate WARP account
-            const warp = await generateWarpAccount(warpWorkerUrl);
+            // 1. Register a WARP account. A failure does not stop the
+            //    profile: it is built without keys, and the outbound's own
+            //    Generate WARP button registers it later.
+            let warp: WarpAccount | null = null;
+            let failure = '';
+            try {
+                warp = await generateWarpAccount(warpWorkerUrl);
+            } catch (e: any) {
+                console.error(e);
+                failure = e?.message || t("Network error or proxy timeout.");
+            }
 
             // 2. Fetch templates
             const allPresets = getPresets();
@@ -71,22 +80,10 @@ export function useWarpGenerator(onGenerate: (outbound: any) => void, onClose: (
 
             if (!baseOutbound) throw new Error("Base outbound generation failed");
 
-            // Ensure settings exists
-            if (!baseOutbound.settings) baseOutbound.settings = {};
-            if (!baseOutbound.settings.peers) baseOutbound.settings.peers = [{}];
-
             // 3. Merge data
-            baseOutbound.settings.secretKey = warp.privateKey;
-            // Only the families the registration actually returned: a missing
-            // one used to be written as `undefined/128`, which no WireGuard
-            // config parses.
-            baseOutbound.settings.address = [
-                ...(warp.ipv4 ? [`${warp.ipv4}/32`] : []),
-                ...(warp.ipv6 ? [`${warp.ipv6}/128`] : []),
-            ];
-            baseOutbound.settings.reserved = warp.reserved;
-            baseOutbound.settings.peers[0].endpoint = warp.endpoint;
-            baseOutbound.settings.peers[0].publicKey = warp.peerPublicKey;
+            baseOutbound.settings = warp
+                ? withWarpAccount(baseOutbound.settings || {}, warp)
+                : withoutWarpAccount(baseOutbound.settings || {});
 
             // 4. Allowed IPs logic
             if (excludeLocal) {
@@ -108,7 +105,14 @@ export function useWarpGenerator(onGenerate: (outbound: any) => void, onClose: (
             baseOutbound.tag = `${prefix}-${Math.floor(Math.random() * 1000)}`;
 
             onGenerate(baseOutbound);
-            toast.success(t("Outbound profile generated successfully"));
+            if (warp) {
+                toast.success(t("Outbound profile generated successfully"));
+            } else {
+                toast.warning(t("WARP did not register — {tag} was added without keys", { tag: baseOutbound.tag }), {
+                    description: t("Open the outbound and press Generate WARP to register it. Reason: {reason}", { reason: failure }),
+                    duration: 12000,
+                });
+            }
             onClose();
 
         } catch (e: any) {

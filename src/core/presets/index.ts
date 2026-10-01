@@ -38,6 +38,9 @@ export interface Preset {
     config: Partial<XrayConfig>;
 }
 
+/** Cloudflare's WARP peer — what a registration hands back, and where a profile without one points. */
+export const WARP_ENDPOINT = 'engage.cloudflareclient.com:2408';
+
 const AWG_WARP_BASE = {
     tag: 'warp-amnezia',
     protocol: 'wireguard',
@@ -47,7 +50,7 @@ const AWG_WARP_BASE = {
         mtu: 1280,
         reserved: [0, 0, 0], // Replaced by S1/S2 later if needed
         peers: [{
-            endpoint: 'engage.cloudflareclient.com:2408',
+            endpoint: WARP_ENDPOINT,
             publicKey: '', // Users must generate this later
             keepAlive: 15,
             allowedIPs: ['0.0.0.0/0', '::/0']

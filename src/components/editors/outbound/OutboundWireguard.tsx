@@ -6,7 +6,7 @@ import { Switch } from '../../ui/Switch';
 import { Select } from '../../ui/Select';
 import { FormField } from '../../ui/FormField';
 import { useCoreVersion } from '../../../hooks/useCoreVersion';
-import { generateWarpAccount } from '../../../core/generators';
+import { generateWarpAccount, withWarpAccount } from '../../../core/generators';
 import { useConfigStore } from '../../../store/configStore';
 import { useShallow } from 'zustand/react/shallow';
 import { useField, useArrayField } from '../../../hooks/useField';
@@ -62,17 +62,10 @@ export const OutboundWireguard = ({ outbound, onChange, errors = {} as any }: an
         setLoading(true);
         try {
             const warp = await generateWarpAccount(warpWorkerUrl);
-            onChange('settings', {
-                ...settings,
-                secretKey: warp.privateKey,
-                address: [`${warp.ipv4}/32`, `${warp.ipv6}/128`],
-                reserved: warp.reserved,
-                peers: [{
-                    endpoint: warp.endpoint,
-                    publicKey: warp.peerPublicKey,
-                    keepAlive: 15
-                }]
-            });
+            // Into the peer that is there: replacing the list used to drop
+            // its allowedIPs, so a profile that left local networks out
+            // started routing them through WARP.
+            onChange('settings', withWarpAccount(settings, warp));
             toast.success(t("WARP account generated successfully"));
         } catch (e: any) {
             toast.error(t("Failed to generate WARP account"), {

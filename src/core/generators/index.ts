@@ -10,7 +10,7 @@ export {
 // built out of words rather than random characters.
 export { generateSpiderPath, parseSpiderPaths, mergeSpiderPaths } from './spider-path';
 export type { SpiderPathShape, SpiderPathOptions } from './spider-path';
-export { generateWarpAccount } from './warp';
+export { generateWarpAccount, warpAddresses, withWarpAccount, withoutWarpAccount } from './warp';
 export type { WarpAccount } from './warp';
 export {
     createDefaultRoutingRule,
