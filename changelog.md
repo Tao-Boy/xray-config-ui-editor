@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.25.0] - 2026-10-01
+
+### Added
+- **Noise presets in every finalmask editor.** The UDP chain has a row of ready-made noise — **WARP A · QUIC**, **WARP B · QUIC** and **WARP C · SIP**, the packets the three WARP profiles send ahead of WireGuard's handshake — so an existing WireGuard outbound (or any UDP transport, inbound or outbound) gets them in one press instead of regenerating the WARP config.
+  - A press fills the chain's noise layer, keeping its `reset`; with no noise layer it adds one at the end the core wraps around the socket first (`udp[0]` on 26.3, `udp[last]` from 26.7), so the decoys reach the wire as they are — just inside a mask that has to hold that end (xicmp, realm, udphop). A transport without finalmask gets one with that single layer.
+  - The preset a layer already holds is marked.
+- The three noise lists live once, in `src/core/presets/noise.ts`; the WARP profiles build from it and produce the same configs as before.
+
 ## [1.24.3] - 2026-09-30
 
 ### Fixed

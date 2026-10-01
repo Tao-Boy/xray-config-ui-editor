@@ -14,6 +14,14 @@ import {
     createDefaultDns,
     matchResolverPreset,
 } from './dns';
+import {
+    getNoisePresets,
+    matchNoisePreset,
+    noiseItems,
+    noiseMask,
+    withNoisePreset,
+} from './noise';
+import { getPresets } from './index';
 
 describe('bypass list registry', () => {
     it('has unique ids and no empty list', () => {
@@ -99,5 +107,59 @@ describe('DNS presets', () => {
         const first = createDefaultDns();
         first.servers.push('8.8.4.4');
         expect(createDefaultDns().servers).toEqual(['1.1.1.1', '8.8.8.8', 'localhost']);
+    });
+});
+
+describe('noise presets', () => {
+    const typesOf = (finalmask: any) => finalmask.udp.map((mask: any) => mask.type);
+    const salamander = { type: 'salamander', settings: { password: 'x' } };
+
+    it('are the noise the WARP profiles carry, one copy for both', () => {
+        const profiles = getPresets().filter(preset => preset.name.startsWith('WARP Profile'));
+        const carried = profiles.map(preset => (preset.config as any).outbounds[0].streamSettings.finalmask.udp[0].settings.noise);
+        expect(carried).toEqual(getNoisePresets().map(preset => preset.noise));
+    });
+
+    it('hand out a fresh copy every time', () => {
+        const first = noiseItems('warp-a');
+        first[0]!.delay = '1-2';
+        expect(noiseItems('warp-a')[0]!.delay).toBe('5-10');
+    });
+
+    it('recognise a list as the preset it is, however its keys are written', () => {
+        const reordered = noiseItems('warp-c').map(item => Object.fromEntries(Object.entries(item).reverse()));
+        expect(matchNoisePreset(reordered)).toBe('warp-c');
+        expect(matchNoisePreset(noiseItems('warp-c').slice(1))).toBeNull();
+        expect(matchNoisePreset(undefined)).toBeNull();
+    });
+
+    it('start a UDP chain when there is none', () => {
+        expect(withNoisePreset(undefined, 'warp-b', '26.7')).toEqual({ udp: [noiseMask('warp-b')] });
+        // The rest of finalmask stays as it was.
+        const quicParams = { congestion: 'bbr' };
+        expect(withNoisePreset({ quicParams }, 'warp-b', '26.7')).toEqual({ quicParams, udp: [noiseMask('warp-b')] });
+    });
+
+    it('fill the noise layer a chain has, keeping its reset and its place', () => {
+        const finalmask = { udp: [salamander, { type: 'noise', settings: { reset: '30-60', noise: [{ rand: '10-20' }] } }] };
+        const next = withNoisePreset(finalmask, 'warp-a', '26.7') as any;
+        expect(next.udp[0]).toBe(salamander);
+        expect(next.udp[1]).toEqual({ type: 'noise', settings: { reset: '30-60', noise: noiseItems('warp-a') } });
+        // Nothing written back into the value it was given.
+        expect(finalmask.udp[1]!.settings).toEqual({ reset: '30-60', noise: [{ rand: '10-20' }] });
+    });
+
+    it('add a new layer at the end the core wraps around the socket first', () => {
+        // 26.3 walks the list forward, 26.7 and 26.9 from the back.
+        expect(typesOf(withNoisePreset({ udp: [salamander] }, 'warp-a', '26.3'))).toEqual(['noise', 'salamander']);
+        expect(typesOf(withNoisePreset({ udp: [salamander] }, 'warp-a', '26.7'))).toEqual(['salamander', 'noise']);
+        expect(typesOf(withNoisePreset({ udp: [salamander] }, 'warp-a', '26.9'))).toEqual(['salamander', 'noise']);
+    });
+
+    it('leave a mask that has to hold that end where it is', () => {
+        const xicmp = { type: 'xicmp', settings: {} };
+        // xicmp is pinned to udp[last] on 26.9 and udp[0] on 26.3.
+        expect(typesOf(withNoisePreset({ udp: [salamander, xicmp] }, 'warp-a', '26.9'))).toEqual(['salamander', 'noise', 'xicmp']);
+        expect(typesOf(withNoisePreset({ udp: [xicmp, salamander] }, 'warp-a', '26.3'))).toEqual(['xicmp', 'noise', 'salamander']);
     });
 });

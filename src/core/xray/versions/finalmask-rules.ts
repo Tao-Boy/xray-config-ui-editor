@@ -369,6 +369,21 @@ const INNERMOST: Record<string, Partial<Record<CoreVersionId, 'first' | 'last'>>
     sudoku: { '26.3': 'last', '26.7': 'last', '26.9': 'first' },
 };
 
+/**
+ * The end of a mask list the core wraps around the socket first — the mask
+ * whose output is what goes on the wire. 26.3 walks the list forward
+ * (v26.3.27:finalmask/finalmask.go:31), 26.7 walks it backward
+ * (v26.7.28:finalmask.go:32) and 26.9 reverses it before walking
+ * (v26.9.9:finalmask.go:22).
+ */
+export const socketEnd = (version: CoreVersionId): 'first' | 'last' => (version === '26.3' ? 'first' : 'last');
+
+/** The end of the UDP list a mask of this type has to hold on this line, if it has to hold one. */
+export const pinnedEnd = (version: CoreVersionId, type: string): 'first' | 'last' | undefined => {
+    const key = type.toLowerCase();
+    return OUTERMOST[key]?.[version] ?? INNERMOST[key]?.[version];
+};
+
 const UDPHOP_MODES = ['intervallocal', 'intervalremote', 'perconnremote'];
 
 const isObject = (value: unknown): value is Record<string, unknown> =>

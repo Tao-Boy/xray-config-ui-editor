@@ -2,7 +2,8 @@
  * Business logic for FinalmaskEditor: what the chosen core line offers for
  * each mask and for quicParams, what the config already holds that the line
  * refuses or ignores, and the edits — add/remove/move a layer, change or
- * convert its type, set or clear one setting, edit noise items.
+ * convert its type, set or clear one setting, edit noise items, put a
+ * ready-made noise list (core/presets/noise) into the UDP chain.
  *
  * `finalmask` is a whole-object value and `onChange` replaces it wholesale
  * (no store path), so this does not fit the path-based useField model.
@@ -32,6 +33,13 @@ import {
     type MaskTypeStatus,
 } from '../core/xray/versions/finalmask-rules';
 import type { CoreVersionId } from '../core/xray/versions';
+import {
+    getNoisePresets,
+    matchNoisePreset,
+    withNoisePreset,
+    type NoisePreset,
+    type NoisePresetId,
+} from '../core/presets/noise';
 
 export type FinalmaskNetType = MaskList;
 
@@ -62,6 +70,13 @@ export interface ChainView {
     layers: LayerView[];
     /** Issues about the list as a whole. */
     issues: FinalmaskIssue[];
+}
+
+export interface NoisePresetsView {
+    /** Empty when the line has no UDP noise mask to put them in. */
+    presets: NoisePreset[];
+    /** The preset the chain's noise layer holds now, if it holds one exactly. */
+    active: NoisePresetId | null;
 }
 
 export interface QuicView {
@@ -242,6 +257,16 @@ export function useFinalmaskEditor(finalmask: any, onChange: (v: any) => void, s
         setSetting(list, index, 'noise', items);
     };
 
+    // Ready-made noise: into the noise layer the chain has, or a new one by
+    // the socket — the placement lives with the presets, not here.
+    const noiseOffered = maskTypeStatus(version, 'udp', 'noise', side).accepted;
+    const firstNoise = masksOf('udp').find(mask => isObject(mask) && typeof mask.type === 'string' && mask.type.toLowerCase() === 'noise');
+    const noisePresets: NoisePresetsView = {
+        presets: noiseOffered ? getNoisePresets() : [],
+        active: isObject(firstNoise) && isObject(firstNoise.settings) ? matchNoisePreset(firstNoise.settings.noise) : null,
+    };
+    const applyNoisePreset = (id: NoisePresetId) => onChange(withNoisePreset(finalmask, id, version));
+
     /** A cleared quicParams key is removed, and an empty quicParams with it. */
     const setQuic = (key: string, value: unknown) => {
         const quicParams: Json = { ...quicValue };
@@ -271,6 +296,8 @@ export function useFinalmaskEditor(finalmask: any, onChange: (v: any) => void, s
         addNoiseItem,
         updateNoiseItem,
         removeNoiseItem,
+        noisePresets,
+        applyNoisePreset,
         setQuic,
     };
 }

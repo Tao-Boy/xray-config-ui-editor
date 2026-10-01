@@ -4,7 +4,7 @@ import React from 'react';
 import { FinalmaskEditor } from './FinalmaskEditor';
 import { useFinalmaskEditor } from '../../../hooks/useFinalmaskEditor';
 import { useConfigStore } from '../../../store/configStore';
-import { getPresets } from '../../../core/presets';
+import { getPresets, noiseItems, noiseMask } from '../../../core/presets';
 import type { CoreVersionId } from '../../../core/xray/versions';
 
 /**
@@ -165,6 +165,36 @@ describe('the WARP noise masks', () => {
         expect(noise[0]).toEqual(finalmask.udp[0].settings.noise[0]);
         expect(noise[1]).toEqual({ rand: '50-80', delay: '5-15' });
         expect(noise).toHaveLength(5);
+    });
+});
+
+describe('noise presets', () => {
+    const pressed = (label: string) => screen.getByText(label).closest('button')!.getAttribute('aria-pressed');
+
+    it('give a transport with no finalmask a working noise layer in one press', () => {
+        const { last } = draw(undefined, 'outbound');
+        fireEvent.click(screen.getByText('WARP A · QUIC'));
+        expect(last()).toEqual({ udp: [noiseMask('warp-a')] });
+    });
+
+    it('replace the packets of the noise layer already there', () => {
+        const finalmask = { udp: [{ type: 'noise', settings: { reset: '30-60', noise: [{ rand: '10-20' }] } }] };
+        const { last } = draw(finalmask, 'outbound');
+        fireEvent.click(screen.getByText('WARP C · SIP'));
+        expect(last()).toEqual({ udp: [{ type: 'noise', settings: { reset: '30-60', noise: noiseItems('warp-c') } }] });
+    });
+
+    it('mark the preset the layer holds', () => {
+        const preset = getPresets().find(candidate => candidate.name === 'WARP Profile B')!;
+        draw((preset.config as any).outbounds[0].streamSettings.finalmask, 'outbound');
+        expect(pressed('WARP B · QUIC')).toBe('true');
+        expect(pressed('WARP A · QUIC')).toBe('false');
+    });
+
+    it('sit with the UDP chain, not the TCP one', () => {
+        const { container } = draw({ udp: [], tcp: [] }, 'outbound');
+        expect(container.querySelector('[data-testid="finalmask-udp"] [data-testid="noise-presets"]')).not.toBeNull();
+        expect(container.querySelector('[data-testid="finalmask-tcp"] [data-testid="noise-presets"]')).toBeNull();
     });
 });
 

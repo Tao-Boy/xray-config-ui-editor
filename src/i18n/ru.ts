@@ -403,6 +403,17 @@ export const ru: Record<string, string> = {
     'This rule sets domainStrategy "{value}", which no supported Xray core reads on a rule. For IP rules to match a domain, set Domain Strategy to IPIfNonMatch or IPOnDemand at the top of Routing; to resolve IPv4 only, set Query Strategy to UseIPv4 in DNS.':
         'У правила задан domainStrategy «{value}», а у правила его не читает ни одно поддерживаемое ядро Xray. Чтобы IP-правила срабатывали по домену, поставьте Domain Strategy = IPIfNonMatch или IPOnDemand вверху окна маршрутизации; чтобы резолвить только в IPv4 — Query Strategy = UseIPv4 в DNS.',
 
+    'Noise presets':
+        'Пресеты шума',
+    "The noise the WARP profiles send ahead of WireGuard's handshake. Pressing one replaces the packets of this chain's noise layer, or adds a noise layer next to the socket if there is none. Made for WireGuard; any UDP transport takes it.":
+        'Шум, который WARP-профили отправляют перед рукопожатием WireGuard. Кнопка заменяет пакеты в noise-слое этой цепочки, а если его нет — добавляет noise-слой у сокета. Сделано под WireGuard, но подходит любому UDP-транспорту.',
+    'A QUIC Initial packet, then four random 40-70 byte packets — the noise WARP Profile A sends.':
+        'Пакет QUIC Initial, затем четыре случайных пакета по 40–70 байт — шум из WARP Profile A.',
+    'A different QUIC Initial packet, then four random 40-70 byte packets — the noise WARP Profile B sends.':
+        'Другой пакет QUIC Initial, затем четыре случайных пакета по 40–70 байт — шум из WARP Profile B.',
+    'A SIP call opening (INVITE, then 100 Trying), then four random 40-70 byte packets — the noise WARP Profile C sends.':
+        'Начало SIP-звонка (INVITE, затем 100 Trying), затем четыре случайных пакета по 40–70 байт — шум из WARP Profile C.',
+
     // ── Freedom: fragment, noises and the rest of its settings ──────────────
     'Domain Strategy (legacy key)': 'Стратегия доменов (старый ключ)',
     'TLS Fragmentation': 'Фрагментация TLS',

@@ -40,9 +40,13 @@ export const FinalmaskEditor = ({ finalmask, onChange, side }: {
             </div>
 
             {!editor.enabled ? (
-                <Button variant="secondary" size="sm" icon="Plus" onClick={editor.enable}>
-                    {t("Add finalmask")}
-                </Button>
+                <div className="space-y-3">
+                    <Button variant="secondary" size="sm" icon="Plus" onClick={editor.enable}>
+                        {t("Add finalmask")}
+                    </Button>
+                    {/* Straight to a working noise layer, without building one by hand. */}
+                    <NoisePresets editor={editor} />
+                </div>
             ) : (
                 <div className="bg-slate-950/40 p-4 rounded-xl border border-slate-800/60 space-y-8">
                     {editor.chains.map(chain => (
@@ -81,7 +85,46 @@ const ChainSection = ({ chain, editor }: { chain: ChainView; editor: Editor }) =
             <Button variant="secondary" size="sm" icon="Plus" onClick={() => editor.addLayer(chain.list)}>
                 {t("Add Layer")}
             </Button>
+            {chain.list === 'udp' && <NoisePresets editor={editor} />}
         </section>
+    );
+};
+
+/**
+ * The WARP profiles' noise, one press away on any transport: it fills the
+ * chain's noise layer (keeping its reset) or adds one next to the socket.
+ * The preset the layer already holds is marked.
+ */
+const NoisePresets = ({ editor }: { editor: Editor }) => {
+    const { presets, active } = editor.noisePresets;
+    if (presets.length === 0) return null;
+    return (
+        <div className="space-y-1.5" data-testid="noise-presets">
+            <div className="label-xs flex items-center gap-1.5">
+                {t("Noise presets")}
+                <Help>{t("The noise the WARP profiles send ahead of WireGuard's handshake. Pressing one replaces the packets of this chain's noise layer, or adds a noise layer next to the socket if there is none. Made for WireGuard; any UDP transport takes it.")}</Help>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+                {presets.map(preset => {
+                    const on = preset.id === active;
+                    return (
+                        <button
+                            key={preset.id}
+                            type="button"
+                            title={preset.hint}
+                            aria-pressed={on}
+                            onClick={() => editor.applyNoisePreset(preset.id)}
+                            className={`px-2 py-1.5 text-[10px] rounded-md border transition-all flex items-center gap-1 ${on
+                                ? 'bg-emerald-950/40 border-emerald-500/50 text-emerald-300'
+                                : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-600'}`}
+                        >
+                            {on && <Icon name="Check" size={10} weight="bold" />}
+                            {preset.label}
+                        </button>
+                    );
+                })}
+            </div>
+        </div>
     );
 };
 
