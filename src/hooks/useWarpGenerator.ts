@@ -61,24 +61,24 @@ export function useWarpGenerator(onGenerate: (outbound: any) => void, onClose: (
                 };
             } else {
                 const targetPresetName =
-                    presetType === 'awgm1' ? 'WARP Profile A' :
-                    presetType === 'awgm2' ? 'WARP Profile B' :
-                    presetType === 'awgm3' ? 'WARP Profile C' : '';
+                    presetType === 'awgm1' ? t("WARP Profile A") :
+                    presetType === 'awgm2' ? t("WARP Profile B") :
+                    presetType === 'awgm3' ? t("WARP Profile C") : '';
 
                 const preset = allPresets.find(p => p.name === targetPresetName);
                 if (!preset || !preset.config.outbounds || preset.config.outbounds.length === 0) {
                     console.error("Mismatched target:", targetPresetName, "Available:", allPresets.map(p => p.name));
-                    throw new Error(`Internal lookup failed for "${targetPresetName}"`);
+                    throw new Error(t("Internal lookup failed for \"{value1}\"", { value1: String(targetPresetName) }));
                 }
 
                 // Clone the outbound from preset to avoid mutations
                 const originalOb = preset.config.outbounds.find(o => o.protocol === 'wireguard');
-                if (!originalOb) throw new Error("WireGuard outbound not found in preset");
+                if (!originalOb) throw new Error(t("WireGuard outbound not found in preset"));
 
                 baseOutbound = JSON.parse(JSON.stringify(originalOb));
             }
 
-            if (!baseOutbound) throw new Error("Base outbound generation failed");
+            if (!baseOutbound) throw new Error(t("Base outbound generation failed"));
 
             // 3. Merge data
             baseOutbound.settings = warp
@@ -118,7 +118,7 @@ export function useWarpGenerator(onGenerate: (outbound: any) => void, onClose: (
         } catch (e: any) {
             console.error(e);
             toast.error(t("Generation failed"), {
-                description: e.message || "Network error or proxy timeout."
+                description: e.message || t("Network error or proxy timeout.")
             });
         } finally {
             setLoading(false);

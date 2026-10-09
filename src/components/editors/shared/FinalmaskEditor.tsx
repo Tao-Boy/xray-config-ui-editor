@@ -135,7 +135,7 @@ const LayerCard = ({ list, layer, count, editor }: { list: MaskList; layer: Laye
     const options = layer.typeOptions.map(option => ({
         value: option,
         label: option === type && refused
-            ? `${option} — ${t("refused by Xray {tag}", { tag: editor.tag })}`
+            ? t("{value1} — {value2}", { value1: String(option), value2: String(t("refused by Xray {tag}", { tag: editor.tag })) })
             : option,
     }));
 
@@ -341,7 +341,7 @@ const ChoiceInput = ({ options, value, onChange }: { options: string[]; value: u
             options={[
                 { value: '', label: t("Default") },
                 ...options.map(option => ({ value: option, label: option })),
-                ...(known ? [] : [{ value: current, label: `${current} — ${t("not a value this version takes")}` }]),
+                ...(known ? [] : [{ value: current, label: t("{value1} — {value2}", { value1: String(current), value2: String(t("not a value this version takes")) }) }]),
             ]}
         />
     );
@@ -451,8 +451,8 @@ const UdpHopInput = ({ value, onChange }: { value: unknown; onChange: (value: un
     const shown = (v: unknown) => (typeof v === 'string' || typeof v === 'number' ? String(v) : '');
     return (
         <div className="grid grid-cols-2 gap-2">
-            <input className="input-base text-xs font-mono" aria-label="ports" placeholder="20000-30000,443" value={shown(hop.ports)} onChange={e => set('ports', e.target.value)} />
-            <input className="input-base text-xs font-mono" aria-label="interval" placeholder="5-30" value={shown(hop.interval)} onChange={e => set('interval', e.target.value)} />
+            <input className="input-base text-xs font-mono" aria-label={t("ports")} placeholder="20000-30000,443" value={shown(hop.ports)} onChange={e => set('ports', e.target.value)} />
+            <input className="input-base text-xs font-mono" aria-label={t("interval")} placeholder="5-30" value={shown(hop.interval)} onChange={e => set('interval', e.target.value)} />
         </div>
     );
 };

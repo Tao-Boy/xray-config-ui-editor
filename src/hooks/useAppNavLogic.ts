@@ -1,3 +1,4 @@
+import { t } from '../i18n';
 import { useMemo } from 'react';
 import { useConfigStore } from '../store/configStore';
 import { useShallow } from 'zustand/react/shallow';
@@ -47,8 +48,8 @@ export function useAppNavLogic() {
             remnawave.profiles.forEach((rp) => {
                 opts.push({
                     value: `cloud:${rp.uuid}`,
-                    label: `☁ ${rp.name || 'Unnamed Cloud Profile'}`,
-                    description: `Remnawave Cloud Config (${rp.uuid.substring(0, 8)})`
+                    label: t("☁ {value1}", { value1: String(rp.name || 'Unnamed Cloud Profile') }),
+                    description: t("Remnawave Cloud Config ({value1})", { value1: String(rp.uuid.substring(0, 8)) })
                 });
             });
         }
@@ -58,7 +59,7 @@ export function useAppNavLogic() {
             const isCurrent = p.id === activeProfileId && !remnawave.activeProfileUuid;
             const inCount = isCurrent ? (config?.inbounds?.length || 0) : (p.config?.inbounds?.length || 0);
             const outCount = isCurrent ? (config?.outbounds?.length || 0) : (p.config?.outbounds?.length || 0);
-            const name = p.name === 'Default Profile' ? 'Default' : p.name;
+            const name = p.name === t("Default Profile") ? 'Default' : p.name;
 
             opts.push({
                 value: `local:${p.id}`,
@@ -70,8 +71,8 @@ export function useAppNavLogic() {
         // Action to create new local profile
         opts.push({
             value: `action:new_local`,
-            label: `+ New Local Profile`,
-            description: `Create a new local profile`
+            label: t("+ New Local Profile"),
+            description: t("Create a new local profile")
         });
 
         return opts;
@@ -95,7 +96,7 @@ export function useAppNavLogic() {
             const id = val.replace('local:', '');
             switchProfile(id);
         } else if (val === 'action:new_local') {
-            const name = prompt("Enter new local profile name:");
+            const name = prompt(t("Enter new local profile name:"));
             if (name && name.trim()) {
                 createProfile(name.trim());
             }

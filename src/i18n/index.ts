@@ -1,9 +1,15 @@
 import { useSyncExternalStore } from 'react';
 import { ru } from './ru';
+import { zhCN } from './zh-CN';
+import { z } from 'zod';
+import chineseLocale from 'zod/v4/locales/zh-CN.js';
+import englishLocale from 'zod/v4/locales/en.js';
+import russianLocale from 'zod/v4/locales/ru.js';
 
-export type Lang = 'en' | 'ru';
+export type Lang = 'zh-CN' | 'en' | 'ru';
 
 export const LANGUAGES: { code: Lang; label: string; short: string }[] = [
+    { code: 'zh-CN', label: '简体中文', short: '中文' },
     { code: 'en', label: 'English', short: 'EN' },
     { code: 'ru', label: 'Русский', short: 'RU' },
 ];
@@ -18,34 +24,36 @@ export const LANGUAGES: { code: Lang; label: string; short: string }[] = [
  * good English, so the app is never broken by an incomplete dictionary, and
  * `bun test` can diff the two sides to report what is still untranslated.
  */
-const DICTIONARIES: Record<Lang, Record<string, string>> = { en: {}, ru };
+const DICTIONARIES: Record<Lang, Record<string, string>> = { 'zh-CN': zhCN, en: {}, ru };
 
 const STORAGE_KEY = 'xray-ui-lang';
 
-const isLang = (v: unknown): v is Lang => v === 'en' || v === 'ru';
+const isLang = (v: unknown): v is Lang => v === 'zh-CN' || v === 'en' || v === 'ru';
 
-const detect = (): Lang => {
+/** This fork defaults to Chinese; an explicit saved choice always wins. */
+export const detectLang = (): Lang => {
     try {
         const saved = localStorage.getItem(STORAGE_KEY);
         if (isLang(saved)) return saved;
-        // First visit follows the browser: a Russian-speaking operator should
-        // not have to find the language switch before being able to read it.
-        if (typeof navigator !== 'undefined' && navigator.language?.toLowerCase().startsWith('ru')) {
-            return 'ru';
-        }
     } catch {
-        // Private mode / storage blocked — English is a fine default.
+        // Storage blocked or absent: the Chinese default still works.
     }
-    return 'en';
+    return 'zh-CN';
 };
 
-let current: Lang = detect();
+let current: Lang = detectLang();
 const listeners = new Set<() => void>();
 
 // Stamped on load as well as on every switch: index.html can only carry one
 // language, and a wrong `lang` sends screen readers and spellcheckers down the
 // wrong dictionary before anyone has touched the switch.
-if (typeof document !== 'undefined') document.documentElement.lang = current;
+const syncDocument = () => {
+    z.config(current === 'zh-CN' ? chineseLocale() : current === 'ru' ? russianLocale() : englishLocale());
+    if (typeof document === 'undefined') return;
+    document.documentElement.lang = current;
+    document.title = DICTIONARIES[current]['Xray Config Editor'] ?? 'Xray Config Editor';
+};
+syncDocument();
 
 export const getLang = (): Lang => current;
 
@@ -57,7 +65,7 @@ export const setLang = (lang: Lang) => {
     } catch {
         // Not persisting is survivable; switching within the session still works.
     }
-    if (typeof document !== 'undefined') document.documentElement.lang = lang;
+    syncDocument();
     listeners.forEach(fn => fn());
 };
 
@@ -101,7 +109,7 @@ export const t = (key: string, vars?: TVars): string =>
 export const tn = (n: number, one: string, many: string, vars?: TVars): string => {
     const key = `${one}|${many}`;
     const forms = (DICTIONARIES[current][key] ?? key).split('|');
-    const index = current === 'ru' ? russianPluralIndex(n) : n === 1 ? 0 : 1;
+    const index = current === 'zh-CN' ? 0 : current === 'ru' ? russianPluralIndex(n) : n === 1 ? 0 : 1;
     const form = forms[Math.min(index, forms.length - 1)] ?? key;
     return interpolate(form, { n, ...vars });
 };

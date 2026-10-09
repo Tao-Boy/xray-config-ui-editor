@@ -1,3 +1,4 @@
+import { t } from '../../i18n';
 import type { RemnawaveProfile } from '../types/remnawave.types';
 import type { SnippetDefinition } from '../snippets';
 import type { PanelHost } from '../generators/client-outbound';
@@ -38,7 +39,7 @@ export class RemnawaveClient {
         // surface as an error, not be swallowed into `null` and reported as
         // success by callers like saveToRemnawave().
         if (!res.ok) {
-            let errorMsg = res.statusText || 'Unknown error';
+            let errorMsg = res.statusText || t("Unknown error");
             if (text && text.trim() !== '') {
                 try {
                     const data = JSON.parse(text);
@@ -47,7 +48,7 @@ export class RemnawaveClient {
                     // Non-JSON error body (e.g. an HTML error page from a proxy) — fall back to statusText.
                 }
             }
-            throw new Error(`API Error ${res.status}: ${errorMsg}`);
+            throw new Error(t("API Error {value1}: {value2}", { value1: String(res.status), value2: String(errorMsg) }));
         }
 
         if (res.status === 204 || res.status === 304) return null;
@@ -56,7 +57,7 @@ export class RemnawaveClient {
         try {
             return JSON.parse(text);
         } catch {
-            throw new Error(`Invalid JSON received from API (${res.status})`);
+            throw new Error(t("Invalid JSON received from API ({value1})", { value1: String(res.status) }));
         }
     }
 
@@ -66,7 +67,7 @@ export class RemnawaveClient {
             body: JSON.stringify({ username, password }),
         });
         if (data.response?.accessToken) return data.response.accessToken;
-        throw new Error('AccessToken not found in response');
+        throw new Error(t("AccessToken not found in response"));
     }
 
     async getConfigProfiles(): Promise<RemnawaveProfile[]> {

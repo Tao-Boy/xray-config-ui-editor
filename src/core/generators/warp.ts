@@ -1,3 +1,4 @@
+import { t } from '../../i18n';
 import { WARP_ENDPOINT } from '../presets';
 
 export interface WarpAccount {
@@ -64,12 +65,12 @@ export async function generateWarpAccount(customWorkerUrl?: string): Promise<War
                         await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
                         continue;
                     }
-                    throw new Error('Cloudflare WARP API rate limited (Error 1015/429). Please wait a few seconds and try again.');
+                    throw new Error(t("Cloudflare WARP API rate limited (Error 1015/429). Please wait a few seconds and try again."));
                 }
 
                 if (!response.ok) {
                     const message = rawData?.message || rawData?.error || responseText.substring(0, 50);
-                    throw new Error(`Worker returned ${response.status}: ${message}`);
+                    throw new Error(t("Worker returned {value1}: {value2}", { value1: String(response.status), value2: String(message) }));
                 }
 
                 const data = rawData?.result || (rawData?.success === true ? rawData : rawData);
@@ -88,7 +89,7 @@ export async function generateWarpAccount(customWorkerUrl?: string): Promise<War
                     };
                 }
 
-                throw new Error('Invalid worker response format. Missing keys in response.');
+                throw new Error(t("Invalid worker response format. Missing keys in response."));
             } catch (e: any) {
                 console.warn(`[WARP Generator] Attempt ${attempt}/${maxRetries} failed for ${url}:`, e.message);
                 lastError = e;
@@ -100,7 +101,7 @@ export async function generateWarpAccount(customWorkerUrl?: string): Promise<War
         }
     }
 
-    throw lastError || new Error('WARP registration failed. Please try again.');
+    throw lastError || new Error(t("WARP registration failed. Please try again."));
 }
 
 /** The interface addresses a registration returned — only the families it returned. */

@@ -100,7 +100,7 @@ export const OutboundWireguard = ({ outbound, onChange, errors = {} as any }: an
             toast.success(t("WARP account generated successfully"));
         } catch (e: any) {
             toast.error(t("Failed to generate WARP account"), {
-                description: e?.message || "CORS error or proxy is down. Check your settings."
+                description: e?.message || t("CORS error or proxy is down. Check your settings.")
             });
         } finally {
             setLoading(false);

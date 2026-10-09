@@ -10,6 +10,7 @@ import { autocompletion, completionKeymap, closeBrackets, closeBracketsKeymap } 
 import { lintKeymap, linter, lintGutter } from "@codemirror/lint";
 import { jsonc, jsoncLanguage } from "@platformos/lang-jsonc";
 import { oneDark } from "@codemirror/theme-one-dark";
+import { codeMirrorPhrases } from "./code-mirror-phrases";
 
 
 import { parseJsonc } from "../../utils/jsonc";
@@ -100,7 +101,7 @@ export const JsonEditorView = ({ value, onChange, readOnly = false, schemaMode =
                     from,
                     to,
                     severity: "error",
-                    message: e.message || "Invalid JSON syntax",
+                    message: e.message || t("Invalid JSON syntax"),
                 });
             }
             return diagnostics;
@@ -145,7 +146,7 @@ export const JsonEditorView = ({ value, onChange, readOnly = false, schemaMode =
                             label: quoted ? `"${value}"` : value,
                             apply: quoted ? `"${value}"` : `"${value}"`,
                             type: "constant",
-                            detail: "value",
+                            detail: t("value"),
                         });
                     }
                 } else {
@@ -170,7 +171,7 @@ export const JsonEditorView = ({ value, onChange, readOnly = false, schemaMode =
                             label: quoted ? `"${field.name}"` : field.name,
                             apply: `"${field.name}": `,
                             type: "property",
-                            detail: field.required ? `${field.type} · required` : field.type,
+                            detail: field.required ? `${field.type} · ${t("required")}` : field.type,
                             info: field.values ? field.values.join(" | ") : undefined,
                             boost: field.required ? 1 : 0,
                         });
@@ -187,6 +188,7 @@ export const JsonEditorView = ({ value, onChange, readOnly = false, schemaMode =
         if (!editorParent.current) return;
 
         const extensions = [
+            EditorState.phrases.of(codeMirrorPhrases()),
             lineNumbers(),
             highlightActiveLineGutter(),
             highlightSpecialChars(),
@@ -293,7 +295,7 @@ export const JsonEditorView = ({ value, onChange, readOnly = false, schemaMode =
                             const snapshot = latest.current.onCommitShortcut();
                             if (snapshot) {
                                 console.log('[JsonEditor] Created snapshot commit:', snapshot);
-                                toast.success(`✓ Git Commit: ${snapshot.id.substring(0, 7)} (+${snapshot.additions ?? 0} -${snapshot.deletions ?? 0})`, { id: 'ctrl-shift-s-toast' });
+                                toast.success(t("✓ Git Commit: {value1} (+{value2} -{value3})", { value1: String(snapshot.id.substring(0, 7)), value2: String(snapshot.additions ?? 0), value3: String(snapshot.deletions ?? 0) }), { id: 'ctrl-shift-s-toast' });
                             } else {
                                 console.log('[JsonEditor] Already at HEAD');
                                 toast.info(t("Already at HEAD (no changes to commit)"), { id: 'ctrl-shift-s-toast' });
@@ -374,8 +376,8 @@ export const JsonEditorView = ({ value, onChange, readOnly = false, schemaMode =
     }, [value]);
 
     return (
-        <div 
-            ref={editorParent} 
+        <div
+            ref={editorParent}
             className="h-full w-full bg-[#1e1e1e] overflow-hidden flex flex-col font-mono text-[13px] border border-slate-700 rounded-lg shadow-inner"
         >
             <style>{`
@@ -384,9 +386,9 @@ export const JsonEditorView = ({ value, onChange, readOnly = false, schemaMode =
                 .cm-content { padding-bottom: 100px !important; font-variant-ligatures: none !important; font-feature-settings: "calt" 0, "liga" 0 !important; }
                 .cm-gutterElement { font-size: 11px; opacity: 0.5; }
                 /* Исправление отображения ошибок */
-                .cm-lintRange-error { 
-                    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="6" height="3">%3Cpath d="M0 3 L3 0 L6 3" fill="none" stroke="%23f87171" stroke-width="1.2"/%3E') !important; 
-                    background-position: bottom left !important; 
+                .cm-lintRange-error {
+                    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="6" height="3">%3Cpath d="M0 3 L3 0 L6 3" fill="none" stroke="%23f87171" stroke-width="1.2"/%3E') !important;
+                    background-position: bottom left !important;
                     background-repeat: repeat-x !important;
                     padding-bottom: 1px !important;
                 }

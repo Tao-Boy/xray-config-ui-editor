@@ -7,7 +7,7 @@ import { useShallow } from 'zustand/react/shallow';
 import { GitDiffViewer } from './GitDiffViewer';
 import { computeJsonDiff } from '../../core/git/gitEngine';
 import { tallyLineChanges } from '../../core/git/bounded-diff';
-import { t } from '../../i18n';
+import { t, getLang } from '../../i18n';
 
 export const GitHistoryModal = ({ onClose }: { onClose: () => void }) => {
     const {
@@ -39,7 +39,7 @@ export const GitHistoryModal = ({ onClose }: { onClose: () => void }) => {
 
     // Profile display name
     const profileName = remnawave.activeProfileUuid
-        ? (remnawave.profiles?.find(p => p.uuid === remnawave.activeProfileUuid)?.name || 'Remnawave Cloud')
+        ? (remnawave.profiles?.find(p => p.uuid === remnawave.activeProfileUuid)?.name || t("Remnawave Cloud"))
         : (profiles.find(p => p.id === activeProfileId)?.name || 'Default');
 
     const [selectedCommitId, setSelectedCommitId] = useState<string | null>(
@@ -83,7 +83,7 @@ export const GitHistoryModal = ({ onClose }: { onClose: () => void }) => {
         const snapshot = history.find(h => h.id === id);
         if (!snapshot) return;
         const confirmed = confirm(
-            `⏪ ROLLBACK CONFIRMATION\n\nRollback configuration to commit ${id.substring(0, 7)} ("${snapshot.label}")?\n\nThis will restore the exact config from ${new Date(snapshot.timestamp).toLocaleString()}.`
+            t("⏪ ROLLBACK CONFIRMATION\n\nRollback configuration to commit {value1} (\"{value2}\")?\n\nThis will restore the exact config from {value3}.", { value1: String(id.substring(0, 7)), value2: String(snapshot.label), value3: String(new Date(snapshot.timestamp).toLocaleString(getLang())) })
         );
         if (confirmed) {
             restoreSnapshot(id);
@@ -148,14 +148,12 @@ export const GitHistoryModal = ({ onClose }: { onClose: () => void }) => {
                             {t("Git Commits")}
                             </span>
                         <div className="text-[10px] text-slate-500 font-mono">
-                            {history.length} commits
-                        </div>
+                            {history.length} {t("commits")} </div>
                     </div>
 
                     <div className="flex-1 overflow-y-auto custom-scroll p-2 space-y-2">
                         {history.length === 0 ? (
-                            <div className="py-12 text-center text-slate-500 italic text-xs">
-                                No git commits recorded yet.<br />
+                            <div className="py-12 text-center text-slate-500 italic text-xs"> {t("No git commits recorded yet.")}<br />
                                 {t("Save or edit your config to create commits.")}
                                 </div>
                         ) : (
@@ -180,7 +178,7 @@ export const GitHistoryModal = ({ onClose }: { onClose: () => void }) => {
                                                     {shortHash}
                                                 </span>
                                                 <span className="text-xs font-bold text-white truncate">
-                                                    {commit.label || "Config update"}
+                                                    {commit.label || t("Config update")}
                                                 </span>
                                             </div>
                                             <div className="flex items-center gap-1.5 shrink-0">
@@ -218,7 +216,7 @@ export const GitHistoryModal = ({ onClose }: { onClose: () => void }) => {
                                                     );
                                                 })()}
                                                 <span className="text-slate-500 text-[9px]">
-                                                    {new Date(commit.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                    {new Date(commit.timestamp).toLocaleTimeString(getLang(), { hour: '2-digit', minute: '2-digit' })}
                                                 </span>
                                             </div>
                                         </div>
@@ -236,11 +234,9 @@ export const GitHistoryModal = ({ onClose }: { onClose: () => void }) => {
                             <div className="p-3 border-b border-slate-800 bg-slate-900/50 flex flex-wrap justify-between items-center shrink-0 gap-2">
                                 <div className="min-w-0 flex-1">
                                     <h4 className="text-xs font-bold text-white flex items-center gap-2 truncate">
-                                        <Icon name="GitCommit" className="text-indigo-400 shrink-0" />
-                                        Commit {selectedSnapshot.id.substring(0, 7)} — {selectedSnapshot.label}
+                                        <Icon name="GitCommit" className="text-indigo-400 shrink-0" /> {t("Commit")} {selectedSnapshot.id.substring(0, 7)} — {selectedSnapshot.label}
                                     </h4>
-                                    <p className="text-[10px] text-slate-400 font-mono mt-0.5 truncate">
-                                        Committed on {new Date(selectedSnapshot.timestamp).toLocaleString()} • {selectedSnapshot.summary}
+                                    <p className="text-[10px] text-slate-400 font-mono mt-0.5 truncate"> {t("Committed on")} {new Date(selectedSnapshot.timestamp).toLocaleString(getLang())} • {selectedSnapshot.summary}
                                     </p>
                                 </div>
                                 <div className="flex items-center gap-2 shrink-0">
@@ -258,8 +254,7 @@ export const GitHistoryModal = ({ onClose }: { onClose: () => void }) => {
                                         className="text-xs py-1.5 px-3.5 bg-emerald-600 hover:bg-emerald-500 border-emerald-500 text-white font-bold shadow-lg shadow-emerald-950/50"
                                         onClick={() => handleRestore(selectedSnapshot.id)}
                                         icon="ArrowCounterClockwise"
-                                    >
-                                        ⏪ Rollback to this commit ({selectedSnapshot.id.substring(0, 7)})
+                                    > {t("⏪ Rollback to this commit (")}{selectedSnapshot.id.substring(0, 7)})
                                     </Button>
                                 </div>
                             </div>
@@ -267,8 +262,8 @@ export const GitHistoryModal = ({ onClose }: { onClose: () => void }) => {
                             <div className="flex-1 p-3 overflow-hidden">
                                 <GitDiffViewer
                                     changes={diffChanges}
-                                    titleOld={selectedIdx < history.length - 1 ? `Commit #${history[selectedIdx + 1]?.id.substring(0, 7) ?? ""}` : 'Initial Baseline'}
-                                    titleNew={`Commit #${selectedSnapshot.id.substring(0, 7)}`}
+                                    titleOld={selectedIdx < history.length - 1 ? t("Commit #{id}", { id: history[selectedIdx + 1]?.id.substring(0, 7) ?? "" }) : t("Initial Baseline")}
+                                    titleNew={t("Commit #{id}", { id: selectedSnapshot.id.substring(0, 7) })}
                                 />
                             </div>
                         </>

@@ -1,13 +1,13 @@
 /**
  * Reports the state of the translations: which strings the app renders without
- * a Russian entry, and which entries no longer match anything in the source.
+ * a translation, and which entries no longer match anything in the source.
  *
  * `bun test` enforces both as assertions; this prints them grouped by file so
  * they are actually fixable. Run with `bun run i18n:report`.
  */
 import { readdirSync, readFileSync, statSync } from 'fs';
 import { join } from 'path';
-import { ru } from '../src/i18n/ru';
+import { dictionaryFor, LANGUAGES } from '../src/i18n';
 import { UNTRANSLATED } from '../src/i18n/untranslated';
 
 const sourceFiles = (dir: string): string[] => {
@@ -45,36 +45,42 @@ for (const file of sourceFiles('src')) {
     }
 }
 
-const missing = new Map<string, string[]>();
-let missingCount = 0;
-for (const [file, keys] of used) {
-    const gaps = keys.filter(key => !(key in ru) && !UNTRANSLATED.has(key));
-    if (gaps.length) {
-        missing.set(file, gaps);
-        missingCount += gaps.length;
+for (const language of LANGUAGES.filter(item => item.code !== 'en')) {
+    const dictionary = dictionaryFor(language.code);
+    console.log(`\n=== ${language.label} (${language.code}) ===`);
+    const missing = new Map<string, string[]>();
+    let missingCount = 0;
+    for (const [file, keys] of used) {
+        const gaps = keys.filter(key => !(key in dictionary) && !UNTRANSLATED.has(key));
+        if (gaps.length) {
+            missing.set(file, gaps);
+            missingCount += gaps.length;
+        }
     }
-}
 
-for (const [file, keys] of [...missing].sort((a, b) => b[1].length - a[1].length)) {
-    console.log(`\n### ${file}  (${keys.length})`);
-    for (const key of keys) console.log(`  ${key}`);
-}
+    for (const [file, keys] of [...missing].sort((a, b) => b[1].length - a[1].length)) {
+        console.log(`\n### ${file}  (${keys.length})`);
+        for (const key of keys) console.log(`  ${key}`);
+    }
 
-const stale = Object.keys(ru).filter(key => !seen.has(key));
-const unusedExemptions = [...UNTRANSLATED].filter(key => !seen.has(key));
-if (stale.length) {
-    console.log(`\n### stale entries in ru.ts  (${stale.length})`);
-    for (const key of stale) console.log(`  ${key}`);
-}
+    const stale = Object.keys(dictionary).filter(key => !seen.has(key));
+    const unusedExemptions = [...UNTRANSLATED].filter(key => !seen.has(key));
+    if (stale.length) {
+        console.log(`\n### stale entries in ${language.code} dictionary  (${stale.length})`);
+        for (const key of stale) console.log(`  ${key}`);
+    }
 
-if (unusedExemptions.length) {
-    console.log(`\n### untranslated.ts entries nothing renders  (${unusedExemptions.length})`);
-    for (const key of unusedExemptions) console.log(`  ${key}`);
-}
+    if (unusedExemptions.length) {
+        console.log(`\n### untranslated.ts entries nothing renders  (${unusedExemptions.length})`);
+        for (const key of unusedExemptions) console.log(`  ${key}`);
+    }
 
-const exempt = [...seen].filter(key => !(key in ru) && UNTRANSLATED.has(key)).length;
-console.log(
-    `\n${seen.size} keys rendered · ${seen.size - missingCount - exempt} translated · ` +
-    `${exempt} same in both languages · ${missingCount} missing · ` +
-    `${stale.length} stale · ${unusedExemptions.length} unused exemptions`,
-);
+    const exempt = [...seen].filter(key => !(key in dictionary) && UNTRANSLATED.has(key)).length;
+    console.log(
+        `\n${seen.size} keys rendered · ${seen.size - missingCount - exempt} translated · ` +
+        `${exempt} kept as technical vocabulary/examples · ${missingCount} missing · ` +
+        `${stale.length} stale · ${unusedExemptions.length} unused exemptions`,
+    );
+
+    if (missingCount || stale.length || unusedExemptions.length) process.exitCode = 1;
+}

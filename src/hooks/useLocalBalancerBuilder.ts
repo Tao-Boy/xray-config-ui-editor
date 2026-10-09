@@ -146,7 +146,7 @@ export const useLocalBalancerBuilder = (initialTemplateUuid?: string, initialMod
                     include: true,
                 }));
             if (fresh.length < incoming.length) {
-                toast.info(`Skipped ${incoming.length - fresh.length} duplicate node(s)`);
+                toast.info(t("Skipped {value1} duplicate node(s)", { value1: String(incoming.length - fresh.length) }));
             }
             return [...prev, ...fresh];
         });
@@ -178,7 +178,7 @@ export const useLocalBalancerBuilder = (initialTemplateUuid?: string, initialMod
 
             addNodes(collected);
             if (collected.length > 0) {
-                toast.success(`Parsed ${collected.length} node(s)`);
+                toast.success(t("Parsed {value1} node(s)", { value1: String(collected.length) }));
                 setInput('');
             }
         } catch (e: any) {
@@ -290,19 +290,19 @@ export const useLocalBalancerBuilder = (initialTemplateUuid?: string, initialMod
                 notes.forEach(n => allNotes.add(n));
                 collected.push({ outbound, label: host.remark || host.address });
             } catch (e: any) {
-                failures.push(`${host.remark || host.address}: ${e?.message || 'could not be mirrored'}`);
+                failures.push(t("{value1}: {value2}", { value1: String(host.remark || host.address), value2: String(e?.message || t("Could not mirror this host")) }));
             }
         });
 
         addNodes(collected);
         if (collected.length > 0) {
-            toast.success(`Added ${collected.length} node(s) from the panel`, {
+            toast.success(t("Added {value1} node(s) from the panel", { value1: String(collected.length) }), {
                 description: allNotes.size > 0 ? [...allNotes][0] : undefined,
             });
             setPanelSelection(new Set());
         }
         if (failures.length > 0) {
-            toast.warning(`${failures.length} host(s) skipped`, { description: failures[0] });
+            toast.warning(t("{value1} host(s) skipped", { value1: String(failures.length) }), { description: failures[0] });
         }
     }, [panelUserId, panelSelection, panelCatalog, addNodes]);
 
@@ -382,7 +382,7 @@ export const useLocalBalancerBuilder = (initialTemplateUuid?: string, initialMod
                 error: null,
             };
         } catch (e: any) {
-            return { results: [] as BuildResult[], error: e?.message || 'Could not build a config' };
+            return { results: [] as BuildResult[], error: e?.message || t("Could not build a config") };
         }
     }, [groups, effectiveOptions]);
 
@@ -399,17 +399,17 @@ export const useLocalBalancerBuilder = (initialTemplateUuid?: string, initialMod
     const loadIntoEditor = useCallback(() => {
         if (!preview) return;
         const text = stringifyJsonc(preview.config, 2);
-        loadConfig(preview.config, `Local balancer (${preview.summary.nodeCount} nodes)`, false, text);
+        loadConfig(preview.config, t("Local balancer ({value1} nodes)", { value1: String(preview.summary.nodeCount) }), false, text);
         toast.success(t("Config loaded into the editor"));
     }, [preview, loadConfig]);
 
     const saveAsProfiles = useCallback(() => {
         if (results.length === 0) return;
         results.forEach((result, i) => {
-            const name = result.config.remarks || `Local balancer ${i + 1}`;
+            const name = result.config.remarks || t("Local balancer {value1}", { value1: String(i + 1) });
             createProfile(name, result.config);
         });
-        toast.success(`Created ${results.length} profile(s)`);
+        toast.success(t("Created {value1} profile(s)", { value1: String(results.length) }));
     }, [results, createProfile]);
 
     /** The selector shape the panel expects, filled from the chosen source. */
@@ -436,8 +436,8 @@ export const useLocalBalancerBuilder = (initialTemplateUuid?: string, initialMod
             return;
         }
         setInject(prev => ({ ...prev, selector: { type: 'uuids', values }, selectFrom: 'ALL' }));
-        toast.success(`Injector points at ${values.length} host(s)`, {
-            description: '"Take hosts from" switched to All hosts, so an explicit list is not filtered by hidden/visible.',
+        toast.success(t("Injector points at {value1} host(s)", { value1: String(values.length) }), {
+            description: t("\"Take hosts from\" switched to All hosts, so an explicit list is not filtered by hidden/visible."),
         });
     }, [panelSelection]);
 
@@ -474,7 +474,7 @@ export const useLocalBalancerBuilder = (initialTemplateUuid?: string, initialMod
             setOutputMode('template');
             setTemplateTargetUuid(uuid);
             setTemplateName(full.name || '');
-            toast.success(`Loaded "${full.name}" into the builder`);
+            toast.success(t("Loaded \"{value1}\" into the builder", { value1: String(full.name) }));
         } catch (e: any) {
             toast.error(t("Could not read that template"), { description: e?.message });
         }
@@ -599,12 +599,12 @@ export const useLocalBalancerBuilder = (initialTemplateUuid?: string, initialMod
      */
     const entryHostMissing = useMemo(() => {
         const missing: string[] = [];
-        if (!normalisedPoolTag) missing.push('shared tag');
+        if (!normalisedPoolTag) missing.push(t("shared tag"));
         if (!entryRemark.trim()) missing.push('remark');
         if (!entryAddress.trim()) missing.push('address');
         if (!entryPort) missing.push('port');
         if (!entryInboundUuid) missing.push('inbound');
-        if (!templateTargetUuid) missing.push('saved template');
+        if (!templateTargetUuid) missing.push(t("saved template"));
         return missing;
     }, [normalisedPoolTag, entryRemark, entryAddress, entryPort, entryInboundUuid, templateTargetUuid]);
 

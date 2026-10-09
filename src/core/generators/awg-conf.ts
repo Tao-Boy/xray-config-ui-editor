@@ -287,10 +287,10 @@ const peerBlock = (peer: unknown, index: number, notes: Note[]): string[] => {
  * (device/send.go:149, device/noise-protocol.go:59-62), so inventing values
  * would break the handshake against the plain WireGuard peer Xray dials.
  */
-const HEADER = [
-    '# AmneziaWG configuration exported from an Xray wireguard outbound.',
-    '# No S1-S4 or H1-H4: they change WireGuard\'s own packets, both ends would',
-    '# have to agree, and this config describes a standard WireGuard peer.',
+const header = () => [
+    t("# AmneziaWG configuration exported from an Xray wireguard outbound."),
+    t("# No S1-S4 or H1-H4: they change WireGuard's own packets, both ends would"),
+    t("# have to agree, and this config describes a standard WireGuard peer."),
 ];
 
 /** An Xray `wireguard` outbound as an AmneziaWG .conf. */
@@ -306,7 +306,7 @@ export const toAwgConf = (outbound: unknown, options: AwgConfOptions = {}): AwgC
         }
 
         const settings = get(outbound, 'settings');
-        const lines = [...HEADER, '[Interface]'];
+        const lines = [...header(), '[Interface]'];
 
         const secretKey = text(get(settings, 'secretKey'));
         if (secretKey) lines.push(`PrivateKey = ${secretKey}`);

@@ -114,7 +114,7 @@ export const SockoptEditor = ({ sockopt, onChange, isClient, protocol }: {
                     {/* INBOUND ONLY */}
                     {!isClient && (
                         <>
-                                <Select 
+                                <Select
                                     label={t("TProxy (Linux)")}
                                     value={local.tproxy || "off"}
                                     onChange={val => update('tproxy', val)}
@@ -124,7 +124,7 @@ export const SockoptEditor = ({ sockopt, onChange, isClient, protocol }: {
                                         { value: "redirect", label: t("Redirect") },
                                     ]}
                                 />
-                                <Select 
+                                <Select
                                     label={t("Accept PROXY Protocol")}
                                     value={local.acceptProxyProtocol === true ? "true" : "false"}
                                     onChange={val => update('acceptProxyProtocol', val === "true")}
@@ -133,7 +133,7 @@ export const SockoptEditor = ({ sockopt, onChange, isClient, protocol }: {
                                         { value: "true", label: t("Enabled") },
                                     ]}
                                 />
-                                <Select 
+                                <Select
                                     label={t("V6 Only (Bind ::)")}
                                     value={local.v6only === true ? "true" : "false"}
                                     onChange={val => update('v6only', val === "true")}
@@ -151,9 +151,7 @@ export const SockoptEditor = ({ sockopt, onChange, isClient, protocol }: {
                             <div className="md:col-span-2">
                                 <TagSelector
                                     label={
-                                        <span className="flex items-center gap-1">
-                                            Dialer Proxy (Outbound Tag)
-                                            <Help>{t("Forwards this outbound's traffic through another outbound (tag). Used to \"wrap\" protocols like WireGuard into obfuscation layers like Freedom+Finalmask.")}</Help>
+                                        <span className="flex items-center gap-1"> {t("Dialer Proxy (Outbound Tag)")} <Help>{t("Forwards this outbound's traffic through another outbound (tag). Used to \"wrap\" protocols like WireGuard into obfuscation layers like Freedom+Finalmask.")}</Help>
                                         </span>
                                     }
                                     availableTags={outboundTags}
@@ -176,7 +174,7 @@ export const SockoptEditor = ({ sockopt, onChange, isClient, protocol }: {
                     )}
 
                     {/* TCP ADVANCED / KERNEL */}
-                                <Select 
+                                <Select
                                     label={t("TCP Fast Open")}
                                     value={local.tcpFastOpen === true ? "true" : "false"}
                                     onChange={val => update('tcpFastOpen', val === "true")}
@@ -186,7 +184,7 @@ export const SockoptEditor = ({ sockopt, onChange, isClient, protocol }: {
                                     ]}
                                 />
 
-                                <Select 
+                                <Select
                                     label={t("TCP MPTCP")}
                                     hint={t("Linux 5.6+")}
                                     value={local.tcpMptcp === true ? "true" : "false"}
@@ -219,9 +217,7 @@ export const SockoptEditor = ({ sockopt, onChange, isClient, protocol }: {
 
                             <div className="flex items-center justify-between bg-slate-900/60 p-3 rounded-xl border border-slate-800">
                                 <div>
-                                    <label className="text-xs font-bold text-slate-300 flex items-center gap-1">
-                                        Penetrate Sockopt
-                                        <Help>{t("Applies upload stream socket options to the downstream connection.")}</Help>
+                                    <label className="text-xs font-bold text-slate-300 flex items-center gap-1"> {t("Penetrate Sockopt")} <Help>{t("Applies upload stream socket options to the downstream connection.")}</Help>
                                     </label>
                                     <p className="text-[10px] text-slate-500">{t("Inherit socket options across streams")}</p>
                                 </div>
@@ -236,9 +232,7 @@ export const SockoptEditor = ({ sockopt, onChange, isClient, protocol }: {
                         <div className="bg-slate-900/60 p-3.5 rounded-xl border border-slate-800 space-y-3">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <span className="text-xs font-bold text-slate-300 flex items-center gap-1">
-                                        Happy Eyeballs (RFC 8305 Dual-Stack)
-                                        <Help>{t("Simultaneously attempts IPv4 and IPv6 connections and selects the fastest path.")}</Help>
+                                    <span className="text-xs font-bold text-slate-300 flex items-center gap-1"> {t("Happy Eyeballs (RFC 8305 Dual-Stack)")} <Help>{t("Simultaneously attempts IPv4 and IPv6 connections and selects the fastest path.")}</Help>
                                     </span>
                                     <p className="text-[10px] text-slate-500">{t("Fast fallback between IPv4 & IPv6")}</p>
                                 </div>

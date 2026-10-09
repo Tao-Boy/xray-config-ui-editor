@@ -5,7 +5,7 @@ import { Icon } from '../ui/Icon';
 import { useConfigStore } from '../../store/configStore';
 import { useShallow } from 'zustand/react/shallow';
 import { JsonField } from '../ui/JsonField';
-import { t } from '../../i18n';
+import { t, getLang } from '../../i18n';
 
 export const VersionHistoryModal = ({ onClose }: { onClose: () => void }) => {
     const { histories, activeProfileId, remnawave, restoreSnapshot, clearHistory, historyLimit } = useConfigStore(useShallow(state => ({ histories: state.histories, activeProfileId: state.activeProfileId, remnawave: state.remnawave, restoreSnapshot: state.restoreSnapshot, clearHistory: state.clearHistory, historyLimit: state.historyLimit })));
@@ -28,7 +28,7 @@ export const VersionHistoryModal = ({ onClose }: { onClose: () => void }) => {
     };
 
     const handleClear = () => {
-        if (confirm("Are you sure you want to clear all local version history?")) {
+        if (confirm(t("Are you sure you want to clear all local version history?"))) {
             clearHistory();
             setSelectedSnapshotId(null);
         }
@@ -62,21 +62,18 @@ export const VersionHistoryModal = ({ onClose }: { onClose: () => void }) => {
                             <Icon name="GitBranch" className="text-indigo-400" />
                             {t("Snapshots")}
                             </span>
-                        <div className="text-[10px] text-slate-500 font-mono">
-                            Max {historyLimit} saves
-                        </div>
+                        <div className="text-[10px] text-slate-500 font-mono"> {t("Max")} {historyLimit} {t("saves")} </div>
                     </div>
 
                     <div className="flex-1 overflow-y-auto custom-scroll p-2 space-y-2">
                         {history.length === 0 ? (
-                            <div className="py-12 text-center text-slate-500 italic text-xs">
-                                No history snapshots recorded yet.<br />
+                            <div className="py-12 text-center text-slate-500 italic text-xs"> {t("No history snapshots recorded yet.")}<br />
                                 {t("Edits and saves will automatically create rollback points.")}
                                 </div>
                         ) : (
                             history.map((snapshot, index) => {
                                 const isSelected = snapshot.id === selectedSnapshotId;
-                                const dateStr = new Date(snapshot.timestamp).toLocaleString();
+                                const dateStr = new Date(snapshot.timestamp).toLocaleString(getLang());
                                 const isLatest = index === 0;
 
                                 return (
@@ -94,13 +91,13 @@ export const VersionHistoryModal = ({ onClose }: { onClose: () => void }) => {
                                                 {isLatest && (
                                                     <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
                                                 )}
-                                                {snapshot.label || "Config Edit"}
+                                                {snapshot.label || t("Config Edit")}
                                             </span>
                                             <span className="text-[10px] font-mono text-slate-500 shrink-0">
-                                                {new Date(snapshot.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                                                {new Date(snapshot.timestamp).toLocaleTimeString(getLang(), { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
                                             </span>
                                         </div>
-                                        
+
                                         <div className="text-[10px] text-slate-400 font-mono flex justify-between items-center">
                                             <span className="truncate">{snapshot.summary}</span>
                                             <span className="text-slate-600 text-[9px]">{dateStr.split(',')[0]}</span>
@@ -122,8 +119,7 @@ export const VersionHistoryModal = ({ onClose }: { onClose: () => void }) => {
                                         <Icon name="ClockCounterClockwise" className="text-indigo-400" />
                                         {selectedSnapshot.label}
                                     </h4>
-                                    <p className="text-[10px] text-slate-400 font-mono">
-                                        Saved on {new Date(selectedSnapshot.timestamp).toLocaleString()} • {selectedSnapshot.summary}
+                                    <p className="text-[10px] text-slate-400 font-mono"> {t("Saved on")} {new Date(selectedSnapshot.timestamp).toLocaleString(getLang())} • {selectedSnapshot.summary}
                                     </p>
                                 </div>
                                 <Button

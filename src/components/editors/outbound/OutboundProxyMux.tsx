@@ -66,9 +66,7 @@ export const OutboundProxyMux = ({ outbound, onChange, showMux = true }: any) =>
                             : t("This outbound chains through {tag} via proxySettings. It works on {core}, and stops the config from loading on 26.9 — sockopt.dialerProxy does the same job on every supported version.", { tag: legacyProxyTag, core: coreTag })}
                     </p>
                     <div className={`flex items-center justify-between gap-3 pt-2 border-t ${proxySettingsRefused ? 'border-rose-500/20' : 'border-amber-500/20'}`}>
-                        <span className="text-[11px] text-slate-400 flex items-center gap-1">
-                            Transport Layer Chaining
-                            <Help>{t("When enabled, proxy chaining occurs at the transport layer instead of the application layer.")}</Help>
+                        <span className="text-[11px] text-slate-400 flex items-center gap-1"> {t("Transport Layer Chaining")} <Help>{t("When enabled, proxy chaining occurs at the transport layer instead of the application layer.")}</Help>
                         </span>
                         <Switch
                             checked={transportLayer.value || false}

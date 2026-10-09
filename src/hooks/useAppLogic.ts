@@ -62,7 +62,7 @@ export const useAppLogic = () => {
     const [builderInitialMode, setBuilderInitialMode] = useState<'config' | 'template' | undefined>(undefined);
     const [hostsModalOpen, setHostsModalOpen] = useState(false);
     const [hostsInitialUuid, setHostsInitialUuid] = useState<string | undefined>(undefined);
-    
+
     // UI states
     const [rawMode, setRawMode] = useState(false);
     const [isDragging, setIsDragging] = useState(false);
@@ -96,9 +96,9 @@ export const useAppLogic = () => {
                     // Ctrl + Shift + S -> Git Commit
                     console.log('[Hotkeys] Ctrl+Shift+S -> Creating Git Commit...');
                     store.saveActiveProfile();
-                    const snapshot = store.recordSnapshot("Manual Commit (Ctrl+Shift+S)");
+                    const snapshot = store.recordSnapshot(t("Manual Commit (Ctrl+Shift+S)"));
                     if (snapshot) {
-                        toast.success(`✓ Git Commit: ${snapshot.id.substring(0, 7)} (+${snapshot.additions} -${snapshot.deletions})`, { id: 'global-commit-toast' });
+                        toast.success(t("✓ Git Commit: {value1} (+{value2} -{value3})", { value1: String(snapshot.id.substring(0, 7)), value2: String(snapshot.additions), value3: String(snapshot.deletions) }), { id: 'global-commit-toast' });
                     } else {
                         toast.info(t("Already at HEAD (no changes to commit)"), { id: 'global-commit-toast' });
                     }
@@ -121,7 +121,7 @@ export const useAppLogic = () => {
             const inbounds = store.config.inbounds?.length || 0;
             const outbounds = store.config.outbounds?.length || 0;
             const rules = store.config.routing?.rules?.length || 0;
-            store.recordSnapshot(`Push to Remnawave (${inbounds} in, ${outbounds} out, ${rules} rules)`);
+            store.recordSnapshot(t("Push to Remnawave ({value1} in, {value2} out, {value3} rules)", { value1: String(inbounds), value2: String(outbounds), value3: String(rules) }));
             store.saveActiveProfile();
         }
         saveToRemnawave();
@@ -135,13 +135,13 @@ export const useAppLogic = () => {
                 const result = e.target?.result;
                 if (typeof result === 'string') {
                     const parsed = parseJsonc(result);
-                    
+
                     if (Array.isArray(parsed)) {
                         // Это JSON-подписка (массив конфигов)
                         const obs = parseJsonSubscription(result);
                         if (obs.length > 0) {
                             addOutbounds(obs);
-                            toast.success(`Imported ${obs.length} nodes from JSON file`);
+                            toast.success(t("Imported {value1} nodes from JSON file", { value1: String(obs.length) }));
                         } else {
                             toast.error(t("JSON array detected, but no valid outbounds found"));
                         }

@@ -58,7 +58,7 @@ const TAG_LENGTH = 16;
 
 const hex = (text: string): Uint8Array => {
     const bytes = fromHex(text);
-    if (!bytes) throw new Error(`quic: not hex: ${text}`);
+    if (!bytes) throw new Error(t("quic: not hex: {value1}", { value1: String(text) }));
     return bytes;
 };
 
@@ -423,7 +423,7 @@ export const buildQuic = async (params: QuicParams, rng: Rng): Promise<Uint8Arra
     const room = payloadRoom(params.size, prefixLengthFor(dcid, scid));
     if (room === null || room < frame.length) {
         throw new Error(
-            `quic: a ${params.size}-byte datagram has no room for a ${frame.length}-byte ClientHello frame`,
+            t("quic: a {value1}-byte datagram has no room for a {value2}-byte ClientHello frame", { value1: String(params.size), value2: String(frame.length) }),
         );
     }
 

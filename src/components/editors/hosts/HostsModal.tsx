@@ -177,7 +177,7 @@ export const HostsModal = ({ onClose, initialHostUuid, onOpenTemplates }: {
                                     label={t("Remark")}
                                     value={draft.remark}
                                     onChange={(e: any) => h.update({ remark: e.target.value })}
-                                    placeholder="🇳🇱 ⚡ Нидерланды"
+                                    placeholder={t("🇳🇱 ⚡ Нидерланды")}
                                     hint={t("What the subscriber sees in their client")}
                                 />
                                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
@@ -201,7 +201,7 @@ export const HostsModal = ({ onClose, initialHostUuid, onOpenTemplates }: {
                                     placeholder={t("NLMAIN")}
                                     hint={normalisedTag && normalisedTag !== draft.tag.trim()
                                         ? t("Will be saved as {tag}", { tag: normalisedTag })
-                                        : 'Groups hosts: a template can inject every host sharing this tag'}
+                                        : t("Groups hosts: a template can inject every host sharing this tag")}
                                 />
                             </Section>
 
@@ -245,7 +245,7 @@ export const HostsModal = ({ onClose, initialHostUuid, onOpenTemplates }: {
                                     onChange={v => h.update({ securityLayer: v })}
                                     options={HOST_SECURITY_LAYERS.map(layer => ({
                                         value: layer,
-                                        label: layer === 'DEFAULT' ? 'DEFAULT — whatever the inbound runs' : layer,
+                                        label: layer === 'DEFAULT' ? t("DEFAULT — whatever the inbound runs") : layer,
                                     }))}
                                 />
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -321,8 +321,7 @@ export const HostsModal = ({ onClose, initialHostUuid, onOpenTemplates }: {
                                 </p>
                             )}
                             {!h.isNew && h.pendingPatch && (
-                                <p className="text-[10px] text-slate-500">
-                                    Saving sends only: {Object.keys(h.pendingPatch).filter(k => k !== 'uuid').join(', ')}
+                                <p className="text-[10px] text-slate-500"> {t("Saving sends only:")} {Object.keys(h.pendingPatch).filter(k => k !== 'uuid').join(', ')}
                                 </p>
                             )}
                         </div>

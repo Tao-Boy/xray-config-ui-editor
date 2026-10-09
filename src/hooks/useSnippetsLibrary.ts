@@ -143,7 +143,7 @@ export const useSnippetsLibrary = (open: boolean) => {
             ? { ...prev, body: JSON.parse(JSON.stringify(rules)) }
             : { name: '', body: JSON.parse(JSON.stringify(rules)), description: '', source: 'local', originalName: null });
         setTarget('rules');
-        toast.success(`Captured ${rules.length} rule(s) into the draft`);
+        toast.success(t("Captured {value1} rule(s) into the draft", { value1: String(rules.length) }));
     }, [config]);
 
     const updateDraft = useCallback((patch: Partial<SnippetDraft>) => {
@@ -166,10 +166,10 @@ export const useSnippetsLibrary = (open: boolean) => {
     /** Why the save button is disabled, for its tooltip. */
     const saveBlockedReason = useMemo(() => {
         if (!draft) return null;
-        if (bodySyntaxError) return 'Fix the JSON syntax first';
+        if (bodySyntaxError) return t("Fix the JSON syntax first");
         if (draftNameError) return draftNameError;
         if (draftBodyError) return draftBodyError;
-        if (!draft.name.trim()) return 'Name the snippet first';
+        if (!draft.name.trim()) return t("Name the snippet first");
         return null;
     }, [draft, bodySyntaxError, draftNameError, draftBodyError]);
 

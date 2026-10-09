@@ -66,7 +66,7 @@ export const ReverseModal = ({ onClose }: any) => {
                         rawText={localRawText}
                         rawConfigText={rawConfigText}
                         onSaveShortcut={() => useConfigStore.getState().saveActiveProfile()}
-                        onCommitShortcut={() => useConfigStore.getState().recordSnapshot("Manual Commit (Ctrl+Shift+S)")}
+                        onCommitShortcut={() => useConfigStore.getState().recordSnapshot(t("Manual Commit (Ctrl+Shift+S)"))}
                     />
                 </div>
             </Modal>
@@ -161,12 +161,9 @@ export const ReverseModal = ({ onClose }: any) => {
             ))}
             {(reverse[type] || []).length === 0 && (
                 <div className="text-center py-16 bg-slate-950/50 border border-dashed border-slate-800 rounded-2xl text-slate-500 text-sm">
-                    <Icon name="ArrowsLeftRight" className="text-3xl mx-auto mb-3 opacity-20" />
-                    No {type} configured yet.
-                </div>
+                    <Icon name="ArrowsLeftRight" className="text-3xl mx-auto mb-3 opacity-20" /> {t("Nothing configured yet.")} </div>
             )}
-            <Button variant="secondary" className="w-full h-12 rounded-xl border-dashed border-2 border-slate-800 hover:border-indigo-500/50" onClick={() => addItem(type)} icon="Plus">
-                Add New {type === 'bridges' ? 'Bridge' : 'Portal'}
+            <Button variant="secondary" className="w-full h-12 rounded-xl border-dashed border-2 border-slate-800 hover:border-indigo-500/50" onClick={() => addItem(type)} icon="Plus"> {t("Add New")} {type === 'bridges' ? t("Bridge") : t("Portal")}
             </Button>
         </div>
     );

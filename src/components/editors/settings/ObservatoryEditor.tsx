@@ -5,10 +5,10 @@ import { t } from '../../../i18n';
 
 export const ObservatoryEditor = ({ observatory, onChange, onToggle, outboundTags = [] }: any) => {
     const enabled = !!observatory;
-    const localObs = observatory || { 
-        subjectSelector: [], 
-        probeUrl: "https://www.google.com/generate_204", 
-        probeInterval: "1m" 
+    const localObs = observatory || {
+        subjectSelector: [],
+        probeUrl: "https://www.google.com/generate_204",
+        probeInterval: "1m"
     };
 
     const update = (field: string, val: any) => {
@@ -16,16 +16,16 @@ export const ObservatoryEditor = ({ observatory, onChange, onToggle, outboundTag
     };
 
     return (
-        <Card 
-            title={t("Observatory")} 
+        <Card
+            title={t("Observatory")}
             icon="Eye"
             headerExtra={
-                <Switch 
+                <Switch
                     checked={enabled}
-                    onChange={() => onToggle({ 
-                        subjectSelector: [], 
-                        probeUrl: "https://www.google.com/generate_204", 
-                        probeInterval: "1m" 
+                    onChange={() => onToggle({
+                        subjectSelector: [],
+                        probeUrl: "https://www.google.com/generate_204",
+                        probeInterval: "1m"
                     })}
                 />
             }
@@ -47,7 +47,7 @@ export const ObservatoryEditor = ({ observatory, onChange, onToggle, outboundTag
                             },
                             probeInterval: {
                                 label: t("Probe Interval"),
-                                help: 'Probe interval (e.g. "10s", "1m", "2h").',
+                                help: t("Probe interval (e.g. \"10s\", \"1m\", \"2h\")."),
                                 placeholder: '1m'
                             },
                             enableConcurrency: {
@@ -56,9 +56,9 @@ export const ObservatoryEditor = ({ observatory, onChange, onToggle, outboundTag
                             }
                         }}
                     />
-                    
+
                     <div className="mt-4 pt-4 border-t border-slate-800/50">
-                        <OutboundSelector 
+                        <OutboundSelector
                             label={t("Subject Selector (Outbounds to Watch)")}
                             help={t("Select outbound tags or enter prefix filters (e.g. 'vless-', 'proxy-') to monitor health status. Required for leastPing balancers.")}
                             availableTags={outboundTags}

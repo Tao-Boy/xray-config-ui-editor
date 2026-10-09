@@ -20,9 +20,9 @@ export const OutboundSelector: React.FC<OutboundSelectorProps> = ({
     availableTags = [],
     selected = [],
     onChange,
-    label = 'Target Outbounds',
+    label = t("Target Outbounds"),
     help,
-    placeholder = "e.g. 'us-', 'vless-' (prefix) or exact tag",
+    placeholder = t("e.g. 'us-', 'vless-' (prefix) or exact tag"),
     error,
     colorScheme = 'indigo',
     className = '',
@@ -127,7 +127,7 @@ export const OutboundSelector: React.FC<OutboundSelectorProps> = ({
     const activeExactClass = isPurple
         ? 'bg-purple-600 border-purple-500 text-white shadow-sm shadow-purple-500/20'
         : 'bg-indigo-600 border-indigo-500 text-white shadow-sm shadow-indigo-500/20';
-    
+
     const activePrefixClass = isPurple
         ? 'bg-purple-950/60 border-purple-500/50 text-purple-200'
         : 'bg-indigo-950/60 border-indigo-500/50 text-indigo-200';
@@ -153,8 +153,7 @@ export const OutboundSelector: React.FC<OutboundSelectorProps> = ({
                         )}
                         {stats.total > 0 && (
                             <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-400 font-mono">
-                                {stats.matched}/{stats.total} matched
-                            </span>
+                                {stats.matched}/{stats.total} {t("matched")} </span>
                         )}
                     </div>
                     {help && (
@@ -300,7 +299,7 @@ export const OutboundSelector: React.FC<OutboundSelectorProps> = ({
                             {currentSelected.map((sel: string) => {
                                 const isExact = availableTags.includes(sel);
                                 const matchCount = availableTags.filter(tag => tag.startsWith(sel)).length;
-                                
+
                                 return (
                                     <span
                                         key={sel}

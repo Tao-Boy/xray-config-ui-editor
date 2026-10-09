@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { LANGUAGES, setLang, useLang } from '../../i18n';
+import { LANGUAGES, setLang, useLang, t } from '../../i18n';
 import { Icon } from './Icon';
 
 /**
@@ -61,7 +61,8 @@ export const LanguageSwitcher = ({ className = '' }: { className?: string }) => 
                 onClick={() => setOpen(prev => !prev)}
                 aria-haspopup="listbox"
                 aria-expanded={open}
-                title="Interface language / Язык интерфейса"
+                title={t("Interface language")}
+                aria-label={t("Interface language")}
                 className={`flex items-center gap-1 h-9 px-2 rounded-lg border transition-colors shrink-0 ${
                     open
                         ? 'bg-slate-800 border-indigo-500/50 text-white'
@@ -81,6 +82,7 @@ export const LanguageSwitcher = ({ className = '' }: { className?: string }) => 
                 <div
                     ref={menuRef}
                     role="listbox"
+                    aria-label={t("Interface language")}
                     style={{ position: 'fixed', top: coords.top, right: coords.right, zIndex: 99999 }}
                     className="min-w-[10rem] bg-[#0f172a] border border-slate-700 rounded-xl overflow-hidden
                         shadow-[0_25px_60px_rgba(0,0,0,0.95)] ring-1 ring-white/10

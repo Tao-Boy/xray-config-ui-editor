@@ -1,3 +1,4 @@
+import { t } from '../../i18n';
 import validator from 'validator';
 import {
     XrayConfigSchema,
@@ -53,10 +54,10 @@ export const validateInbound = (data: any): ValidationError[] => {
     const errors: ValidationError[] = [];
 
     // Basic UI Validation checks
-    if (!data.tag) errors.push({ field: 'tag', message: 'Tag is required' });
-    if (!data.protocol) errors.push({ field: 'protocol', message: 'Protocol is required' });
+    if (!data.tag) errors.push({ field: 'tag', message: t("Tag is required") });
+    if (!data.protocol) errors.push({ field: 'protocol', message: t("Protocol is required") });
     if (data.protocol !== 'tun' && !isValidPort(data.port)) {
-        errors.push({ field: 'port', message: 'Invalid port number' });
+        errors.push({ field: 'port', message: t("Invalid port number") });
     }
 
     // Schema Validation via Zod
@@ -96,7 +97,7 @@ export const validateOutbound = (data: any): ValidationError[] => {
     // would report errors the user cannot fix here. See core/snippets.
     if (isSnippetRef(data)) return errors;
 
-    if (!data.tag) errors.push({ field: 'tag', message: 'Tag is required' });
+    if (!data.tag) errors.push({ field: 'tag', message: t("Tag is required") });
 
     const VALID_PROTOCOLS = [
         'vless', 'vmess', 'trojan', 'shadowsocks', 'socks', 'http',
@@ -106,7 +107,7 @@ export const validateOutbound = (data: any): ValidationError[] => {
     ];
 
     if (!VALID_PROTOCOLS.includes(data.protocol)) {
-        errors.push({ field: 'protocol', message: `Protocol "${data.protocol}" is not supported.` });
+        errors.push({ field: 'protocol', message: t("Protocol \"{value1}\" is not supported.", { value1: String(data.protocol) }) });
     }
 
     // Schema Validation via Zod
@@ -141,10 +142,10 @@ export const validateOutbound = (data: any): ValidationError[] => {
         }
 
         if (!address || !isValidAddress(address)) {
-            errors.push({ field: 'address', message: 'Invalid server address' });
+            errors.push({ field: 'address', message: t("Invalid server address") });
         }
         if (!port || !isValidPort(port)) {
-            errors.push({ field: 'port', message: 'Invalid server port' });
+            errors.push({ field: 'port', message: t("Invalid server port") });
         }
     }
 
@@ -166,16 +167,16 @@ export const validateOutbound = (data: any): ValidationError[] => {
     const reality = stream.security === 'reality' ? (stream.realitySettings || {}) : null;
 
     if (reality) {
-        if (!reality.publicKey) errors.push({ field: 'reality', message: 'Reality Public Key is required' });
+        if (!reality.publicKey) errors.push({ field: 'reality', message: t("Reality Public Key is required") });
         if (reality.shortId && reality.shortId.length % 2 !== 0) {
-            errors.push({ field: 'reality', message: 'ShortID must be hex string with even length' });
+            errors.push({ field: 'reality', message: t("ShortID must be hex string with even length") });
         }
     }
 
     if (stream.network === 'xhttp') {
         const x = stream.xhttpSettings || {};
         if (x.mode === 'stream-up' && stream.security === 'none') {
-            errors.push({ field: 'xhttp', message: 'WARNING: stream-up mode is intended for TLS/REALITY.' });
+            errors.push({ field: 'xhttp', message: t("WARNING: stream-up mode is intended for TLS/REALITY.") });
         }
     }
 
@@ -187,7 +188,7 @@ export const validateWireguard = (data: any): ValidationError[] => {
     const settings = data.settings || {};
 
     if (!settings.secretKey) {
-        errors.push({ field: 'secretKey', message: 'Secret Key is required' });
+        errors.push({ field: 'secretKey', message: t("Secret Key is required") });
     }
 
     const result = WireguardOutboundSettingsSchema.safeParse(settings);
@@ -211,7 +212,7 @@ export const validateWireguard = (data: any): ValidationError[] => {
     }
 
     if (!settings.peers || settings.peers.length === 0) {
-        errors.push({ field: 'peers', message: 'At least one peer is required' });
+        errors.push({ field: 'peers', message: t("At least one peer is required") });
     }
 
     return errors;
@@ -225,9 +226,9 @@ export const validateBalancer = (balancer: any): string[] => {
     if (isSnippetRef(balancer)) return [];
     if (balancer.tag === 'TORRENT') return [];
     const errors: string[] = [];
-    if (!balancer.tag) errors.push('Balancer tag is missing');
+    if (!balancer.tag) errors.push(t("Balancer tag is missing"));
     if (!balancer.selector || balancer.selector.length === 0) {
-        errors.push(`Balancer [${balancer.tag}] has no selectors`);
+        errors.push(t("Balancer [{value1}] has no selectors", { value1: String(balancer.tag) }));
     }
     return errors;
 };
@@ -262,8 +263,8 @@ export const getCriticalRuleErrors = (rule: any): ValidationError[] => {
     // `domain: []` counts for nothing.
     const hasMatcher = RULE_CONDITIONS.some(key => isCondition(rule[key]));
 
-    if (!hasMatcher) errs.push({ field: 'matchers', message: 'Rule has no matchers.' });
-    if (!rule.outboundTag && !rule.balancerTag) errs.push({ field: 'target', message: 'Rule must have a destination.' });
+    if (!hasMatcher) errs.push({ field: 'matchers', message: t("Rule has no matchers.") });
+    if (!rule.outboundTag && !rule.balancerTag) errs.push({ field: 'target', message: t("Rule must have a destination.") });
     return errs;
 };
 
@@ -300,7 +301,7 @@ export const checkInboundDuplication = (current: any, all: any[], currentIndex: 
 export const validateFullConfig = (config: any): ValidationError[] => {
     const errors: ValidationError[] = [];
     if (!config || typeof config !== 'object') {
-        errors.push({ field: 'config', message: 'Config must be an object' });
+        errors.push({ field: 'config', message: t("Config must be an object") });
         return errors;
     }
 
@@ -336,7 +337,7 @@ export const validateFullConfig = (config: any): ValidationError[] => {
             const outboundErrors = validateOutbound(outbound);
             const wgErrors = outbound.protocol === 'wireguard' ? validateWireguard(outbound) : [];
             const allOutboundErrors = [...outboundErrors, ...wgErrors];
-            
+
             allOutboundErrors.forEach(err => {
                 errors.push({
                     field: `outbounds.[${index}].${err.field}`,

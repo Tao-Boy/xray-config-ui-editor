@@ -96,7 +96,7 @@ export const GeoViewerModal = ({ onClose }: { onClose: () => void }) => {
         if (displayData.length === 0) return toast.warning(t("Nothing to copy"));
         const prefix = activeTab === 'geosite' ? 'geosite:' : activeTab === 'geoip' ? 'geoip:' : '';
         const textToCopy = displayData.map(d => `${prefix}${d.code}`).join('\n');
-        
+
         try {
             if (navigator.clipboard && window.isSecureContext) await navigator.clipboard.writeText(textToCopy);
             else {
@@ -112,7 +112,7 @@ export const GeoViewerModal = ({ onClose }: { onClose: () => void }) => {
         const isText = activeTab === 'custom' && customFormat === 'text';
         const isActive = viewTag?.code === item.code;
         return (
-            <div 
+            <div
                 key={item.code}
                 onClick={() => {
                     if (isText) return;
@@ -176,7 +176,7 @@ export const GeoViewerModal = ({ onClose }: { onClose: () => void }) => {
             }
         >
             <div className="flex-1 min-h-0 flex flex-col gap-4 relative">
-                
+
                 {activeTab === 'custom' && (
                     <div className="flex flex-col gap-3 bg-slate-900 p-3 rounded-xl border border-slate-800 shrink-0 animate-in fade-in slide-in-from-top-2">
                         {/* The source picker is half a phone screen, and once a
@@ -205,8 +205,8 @@ export const GeoViewerModal = ({ onClose }: { onClose: () => void }) => {
                         </div>
 
                         <div className="flex flex-col md:flex-row gap-2">
-                            <Select 
-                                value={customFormat} 
+                            <Select
+                                value={customFormat}
                                 onChange={val => setCustomFormat(val as any)}
                                 options={[
                                     { value: "geoip", label: t("GeoIP (.dat)") },
@@ -215,13 +215,13 @@ export const GeoViewerModal = ({ onClose }: { onClose: () => void }) => {
                                 ]}
                                 className="w-full md:w-48"
                             />
-                            
+
                             <div className="flex-1 flex gap-2">
                                 <div className="flex-1 relative h-11">
                                     <Icon name="Link" className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
                                     <input className="w-full h-full bg-slate-950 border border-slate-700 rounded-lg pl-9 pr-3 text-sm text-white focus:border-emerald-500 outline-none transition-colors font-mono" placeholder={t("Paste URL or select local file...")} value={customUrl} onChange={e => setCustomUrl(e.target.value)} onKeyDown={e => e.key === 'Enter' && fetchCustomList()} />
                                 </div>
-                                
+
                                 <input type="file" ref={fileInputRef} className="hidden" accept=".dat,.txt" onChange={handleFileUpload} />
                                 <Button variant="secondary" onClick={() => fileInputRef.current?.click()} className="shrink-0 h-11 w-11 p-0" title={t("Upload Local File")}>
                                     <Icon name="UploadSimple" />
@@ -241,16 +241,16 @@ export const GeoViewerModal = ({ onClose }: { onClose: () => void }) => {
                     <div className="flex-1 relative w-full flex items-center gap-2">
                         <div className="relative flex-1 h-11">
                             <Icon name="MagnifyingGlass" className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-                            <input 
-                                className="w-full h-full bg-slate-950 border border-slate-700 rounded-lg pl-9 pr-9 text-sm text-white focus:border-indigo-500 outline-none transition-colors" 
-                                placeholder={isDeepSearch ? "Search INSIDE domains/IPs..." : t("Search in {source} categories...", { source: activeTab })} 
-                                value={search} 
-                                onChange={e => setSearch(e.target.value)} 
+                            <input
+                                className="w-full h-full bg-slate-950 border border-slate-700 rounded-lg pl-9 pr-9 text-sm text-white focus:border-indigo-500 outline-none transition-colors"
+                                placeholder={isDeepSearch ? t("Search INSIDE domains/IPs...") : t("Search in {source} categories...", { source: activeTab })}
+                                value={search}
+                                onChange={e => setSearch(e.target.value)}
                             />
                             {deepSearchLoading && <Icon name="Spinner" className="absolute right-3 top-1/2 -translate-y-1/2 text-indigo-500 animate-spin" />}
                         </div>
                         {activeTab !== 'custom' || customFormat !== 'text' ? (
-                            <button 
+                            <button
                                 onClick={() => setIsDeepSearch(!isDeepSearch)}
                                 className={`px-4 h-11 text-xs font-bold rounded-lg border transition-all flex items-center gap-2 shrink-0 ${isDeepSearch ? 'bg-indigo-600/20 border-indigo-500 text-indigo-300' : 'bg-slate-950 border-slate-700 text-slate-400 hover:border-slate-500 hover:bg-slate-900'}`}
                                 title={t("Search inside domains/IPs instead of category names")}
@@ -260,15 +260,14 @@ export const GeoViewerModal = ({ onClose }: { onClose: () => void }) => {
                         ) : null}
                     </div>
                     <div className="flex items-center gap-3 w-full md:w-auto justify-between h-11">
-                        <div className="text-xs text-slate-400 font-mono bg-slate-950 px-4 h-full flex items-center rounded-lg border border-slate-800">
-                            Showing: <span className="text-white font-bold ml-1">{displayData.length}</span>
+                        <div className="text-xs text-slate-400 font-mono bg-slate-950 px-4 h-full flex items-center rounded-lg border border-slate-800"> {t("Showing:")} <span className="text-white font-bold ml-1">{displayData.length}</span>
                         </div>
                         <Button variant="secondary" onClick={handleCopyAll} icon="Copy" className="h-full px-4">{t("Copy All")}</Button>
                     </div>
                 </div>
 
                 <div className="flex-1 flex flex-col md:flex-row gap-4 min-h-0 overflow-hidden">
-                    <div ref={gridRef} className={`${viewTag ? 'hidden md:block' : 'block'} flex-1 bg-slate-950 rounded-xl border border-slate-800 relative min-w-0`}>
+                    <div ref={gridRef} className={`${viewTag ? "hidden md:block" : 'block'} flex-1 bg-slate-950 rounded-xl border border-slate-800 relative min-w-0`}>
                         {loading && activeTab !== 'custom' ? (
                             <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-500 z-10 bg-slate-950/50 backdrop-blur-sm">
                                 <Icon name="Spinner" className="text-4xl animate-spin mb-4 text-indigo-500" />

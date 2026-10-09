@@ -42,8 +42,8 @@ export const OutputPane = ({
                         key={key}
                         onClick={() => b.setOutputMode(key)}
                         title={key === 'config'
-                            ? 'A finished config for one person: nodes baked in'
-                            : 'An Xray JSON template the panel renders per subscriber, injecting its own hosts as the balanced nodes'}
+                            ? t("A finished config for one person: nodes baked in")
+                            : t("An Xray JSON template the panel renders per subscriber, injecting its own hosts as the balanced nodes")}
                         className={`flex-1 px-3 py-1.5 text-[11px] font-bold rounded-md transition-all ${
                             b.outputMode === key ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-slate-200'
                         }`}
@@ -60,8 +60,8 @@ export const OutputPane = ({
                             key={key}
                             onClick={() => switchTemplateView(key)}
                             title={key === 'form'
-                                ? 'Edit the template through the fields'
-                                : 'Edit the template body directly — the same JSON the panel stores'}
+                                ? t("Edit the template through the fields")
+                                : t("Edit the template body directly — the same JSON the panel stores")}
                             className={`flex-1 px-3 py-1.5 text-[11px] font-bold rounded-md transition-all ${
                                 templateView === key ? 'bg-slate-700 text-white' : 'text-slate-400 hover:text-slate-200'
                             }`}
@@ -93,7 +93,7 @@ export const OutputPane = ({
                         <Badge variant="primary" size="sm" icon="Scales">
                             {b.preview.summary.balanced
                                 ? `${b.preview.summary.nodeCount} nodes → ${b.preview.summary.balancerTag}`
-                                : 'single node, no balancer'}
+                                : t("single node, no balancer")}
                         </Badge>
                         {b.preview.summary.balanced && (
                             <Badge variant="info" size="sm" icon="Broadcast">{b.preview.summary.probe}</Badge>
@@ -257,7 +257,7 @@ export const OutputPane = ({
                                 onChange={v => b.setOption({ socksPort: v ?? null })}
                                 min={1}
                                 max={65535}
-                                placeholder="off"
+                                placeholder={t("off")}
                             />
                         </div>
                         <div>
@@ -267,7 +267,7 @@ export const OutputPane = ({
                                 onChange={v => b.setOption({ httpPort: v ?? null })}
                                 min={1}
                                 max={65535}
-                                placeholder="off"
+                                placeholder={t("off")}
                             />
                         </div>
                     </div>
@@ -313,8 +313,7 @@ export const OutputPane = ({
                         {selectorType === 'uuids' && (
                             <div className="flex items-center gap-2">
                                 <Badge variant={'values' in b.inject.selector && b.inject.selector.values.length > 0 ? 'success' : 'warning'} size="sm">
-                                    {'values' in b.inject.selector ? b.inject.selector.values.length : 0} host(s)
-                                </Badge>
+                                    {'values' in b.inject.selector ? b.inject.selector.values.length : 0} {t("host(s)")} </Badge>
                                 <Button variant="secondary" size="sm" icon="Check" className="text-[10px]" onClick={b.useSelectedHostsAsSelector}>
                                     {t("Use panel selection")}
                                     </Button>
@@ -431,7 +430,7 @@ export const OutputPane = ({
                                 label={t("Remark")}
                                 value={b.entryRemark}
                                 onChange={(e: any) => b.setEntryRemark(e.target.value)}
-                                placeholder="🇳🇱 ⚡ Нидерланды"
+                                placeholder={t("🇳🇱 ⚡ Нидерланды")}
                             />
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                                 <div className="sm:col-span-2">

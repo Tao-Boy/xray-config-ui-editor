@@ -1,3 +1,4 @@
+import { t } from '../../../../i18n';
 // ============================================================
 // Hysteria Transport — `HysteriaConfig` in infra/conf
 // ============================================================
@@ -59,7 +60,7 @@ export const HysteriaTransportSchema = z.object({
    */
   udpIdleTimeout: z.number().int().refine(
     value => value === 0 || (value >= 2 && value <= 600),
-    { message: '0 (default 60) or 2-600 seconds' },
+    { error: () => t("0 (default 60) or 2-600 seconds") },
   ).optional(),
   masquerade: HysteriaMasqueradeSchema.optional(),
 }).passthrough();

@@ -31,6 +31,8 @@ mock.module('./src/utils/proto-worker.ts', () => ({
 }));
 
 GlobalRegistrator.register({ width: 1280, height: 800, url: 'http://localhost/' });
+// Existing fixtures assert English wording; locale-specific tests switch explicitly.
+localStorage.setItem('xray-ui-lang', 'en');
 
 // The config store persists through IndexedDB, which happy-dom does not
 // implement; without a stand-in every mount logs a wall of storage errors.

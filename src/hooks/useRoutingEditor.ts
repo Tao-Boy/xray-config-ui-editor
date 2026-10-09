@@ -21,7 +21,7 @@ export const useRoutingEditor = (onClose: () => void) => {
     // the memos below it actually memoise.
     const rules = useMemo(() => config?.routing?.rules || [], [config?.routing?.rules]);
     const balancers = useMemo(() => config?.routing?.balancers || [], [config?.routing?.balancers]);
-    
+
     const outboundTags = useMemo(() => (config?.outbounds || []).map((o: any) => o.tag).filter(Boolean), [config?.outbounds]);
     const inboundTags = useMemo(() => (config?.inbounds || []).map((i: any) => i.tag).filter(Boolean), [config?.inbounds]);
     const balancerTags = useMemo(() => balancers.map((b: any) => b.tag).filter(Boolean), [balancers]);
@@ -126,7 +126,7 @@ export const useRoutingEditor = (onClose: () => void) => {
         if (activeRuleIdx === null) return;
         const def = snippets.find(d => d.name === name);
         if (!def || !Array.isArray(def.snippet) || def.snippet.length === 0) {
-            toast.error(`Snippet "${name}" has no loaded body to inline`);
+            toast.error(t("Snippet \"{value1}\" has no loaded body to inline", { value1: String(name) }));
             return;
         }
         const entries = JSON.parse(JSON.stringify(def.snippet));
@@ -135,7 +135,7 @@ export const useRoutingEditor = (onClose: () => void) => {
         reorderRules(next);
         setActiveRuleIdx(null);
         setMobileEditMode(false);
-        toast.success(`Inlined ${entries.length} rule(s) from "${name}"`, {
+        toast.success(t("Inlined {value1} rule(s) from \"{value2}\"", { value1: String(entries.length), value2: String(name) }), {
             description: t("This copy no longer follows the panel snippet."),
         });
     }, [activeRuleIdx, snippets, rules, reorderRules]);
@@ -145,7 +145,7 @@ export const useRoutingEditor = (onClose: () => void) => {
         if (activeBalancerIdx === null) return;
         const def = snippets.find(d => d.name === name);
         if (!def || !Array.isArray(def.snippet) || def.snippet.length === 0) {
-            toast.error(`Snippet "${name}" has no loaded body to inline`);
+            toast.error(t("Snippet \"{value1}\" has no loaded body to inline", { value1: String(name) }));
             return;
         }
         const entries = JSON.parse(JSON.stringify(def.snippet));
@@ -154,7 +154,7 @@ export const useRoutingEditor = (onClose: () => void) => {
         updateSection('routing', { ...config?.routing, balancers: next });
         setActiveBalancerIdx(null);
         setMobileEditMode(false);
-        toast.success(`Inlined ${entries.length} balancer(s) from "${name}"`, {
+        toast.success(t("Inlined {value1} balancer(s) from \"{value2}\"", { value1: String(entries.length), value2: String(name) }), {
             description: t("This copy no longer follows the panel snippet."),
         });
     }, [activeBalancerIdx, snippets, balancers, config?.routing, updateSection]);

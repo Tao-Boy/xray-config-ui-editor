@@ -34,9 +34,9 @@ export const SectionJsonModal = ({ title, data, onClose, onSave, schemaMode }: S
     };
 
     return (
-        <Modal 
-            title={title} 
-            onClose={onClose} 
+        <Modal
+            title={title}
+            onClose={onClose}
             onSave={() => {
                 onSave(localData, localRawText || undefined);
                 onClose();
@@ -52,7 +52,7 @@ export const SectionJsonModal = ({ title, data, onClose, onSave, schemaMode }: S
                 rawText={localRawText}
                 rawConfigText={rawConfigText}
                 onSaveShortcut={() => useConfigStore.getState().saveActiveProfile()}
-                onCommitShortcut={() => useConfigStore.getState().recordSnapshot("Manual Commit (Ctrl+Shift+S)")}
+                onCommitShortcut={() => useConfigStore.getState().recordSnapshot(t("Manual Commit (Ctrl+Shift+S)"))}
             />
         </Modal>
     );

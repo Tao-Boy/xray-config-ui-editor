@@ -143,7 +143,7 @@ export const AppNav = ({
                                 <Button
                                     variant="danger"
                                     onClick={() => {
-                                        if (confirm("Clear config?")) onClearConfig();
+                                        if (confirm(t("Clear config?"))) onClearConfig();
                                     }}
                                     icon="XCircle"
                                     className="h-9 px-2 sm:px-3 text-xs rounded-lg shadow-none bg-rose-600 hover:bg-rose-500 text-white font-bold"
@@ -371,7 +371,7 @@ export const AppNav = ({
                                     <button
                                         onClick={() => {
                                             setMobileMenuOpen(false);
-                                            if (confirm("Clear config?")) onClearConfig();
+                                            if (confirm(t("Clear config?"))) onClearConfig();
                                         }}
                                         className="p-3 bg-slate-950 border border-slate-800 hover:border-rose-500/50 rounded-2xl flex flex-col items-center gap-1.5 text-rose-400 hover:text-rose-200 transition-all group"
                                     >

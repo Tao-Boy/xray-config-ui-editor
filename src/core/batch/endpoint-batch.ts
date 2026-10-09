@@ -1,3 +1,4 @@
+import { t } from '../../i18n';
 // ============================================================
 // Applying one change to many inbounds or outbounds
 // ============================================================
@@ -132,7 +133,7 @@ export const applyBatch = <T extends Endpoint>(
         // ── Transport ───────────────────────────────────────────────────────
         if (patch.network !== undefined || patch.security !== undefined) {
             if (NO_TRANSPORT.has(protocol)) {
-                skip('streamSettings', `${protocol} carries no transport settings`);
+                skip('streamSettings', t("{value1} carries no transport settings", { value1: String(protocol) }));
             } else {
                 if (!item.streamSettings) item.streamSettings = {};
                 if (patch.network !== undefined) {
@@ -156,9 +157,9 @@ export const applyBatch = <T extends Endpoint>(
         // ── Inbound-only ────────────────────────────────────────────────────
         if (patch.sniffing !== undefined) {
             if (direction !== 'inbound') {
-                skip('sniffing', 'sniffing belongs to inbounds');
+                skip('sniffing', t("sniffing belongs to inbounds"));
             } else if (NO_SNIFFING.has(protocol)) {
-                skip('sniffing', `${protocol} has nothing to sniff`);
+                skip('sniffing', t("{value1} has nothing to sniff", { value1: String(protocol) }));
             } else {
                 const before = item.sniffing?.enabled;
                 item.sniffing = {
@@ -172,9 +173,9 @@ export const applyBatch = <T extends Endpoint>(
 
         if (patch.port !== undefined) {
             if (direction !== 'inbound') {
-                skip('port', 'an outbound has no listening port');
+                skip('port', t("an outbound has no listening port"));
             } else if (NO_PORT.has(protocol)) {
-                skip('port', `${protocol} does not listen on a port`);
+                skip('port', t("{value1} does not listen on a port", { value1: String(protocol) }));
             } else {
                 // Stepping keeps a renumbered block free of collisions, which
                 // is the only reason to renumber several at once.
@@ -187,7 +188,7 @@ export const applyBatch = <T extends Endpoint>(
         // ── Outbound-only ───────────────────────────────────────────────────
         if (patch.mux !== undefined) {
             if (direction !== 'outbound') {
-                skip('mux', 'Mux belongs to outbounds');
+                skip('mux', t("Mux belongs to outbounds"));
             } else {
                 const before = item.mux?.enabled;
                 item.mux = { ...item.mux, enabled: patch.mux };
@@ -198,12 +199,12 @@ export const applyBatch = <T extends Endpoint>(
 
         if (patch.dialerProxy !== undefined) {
             if (direction !== 'outbound') {
-                skip('dialerProxy', 'chaining belongs to outbounds');
+                skip('dialerProxy', t("chaining belongs to outbounds"));
             } else if (patch.dialerProxy === originalTag) {
                 // An outbound dialling itself is a loop the core will not run.
-                skip('dialerProxy', 'an outbound cannot dial through itself');
+                skip('dialerProxy', t("an outbound cannot dial through itself"));
             } else if (NO_TRANSPORT.has(protocol)) {
-                skip('dialerProxy', `${protocol} carries no transport settings`);
+                skip('dialerProxy', t("{value1} carries no transport settings", { value1: String(protocol) }));
             } else {
                 if (!item.streamSettings) item.streamSettings = {};
                 if (!item.streamSettings.sockopt) item.streamSettings.sockopt = {};
@@ -215,7 +216,7 @@ export const applyBatch = <T extends Endpoint>(
 
         if (patch.targetStrategy !== undefined) {
             if (direction !== 'outbound') {
-                skip('targetStrategy', 'target resolution belongs to outbounds');
+                skip('targetStrategy', t("target resolution belongs to outbounds"));
             } else {
                 note('targetStrategy', item.targetStrategy, patch.targetStrategy);
                 item.targetStrategy = patch.targetStrategy;

@@ -30,9 +30,10 @@ export default defineConfig({
       // `scope` and `start_url` are derived from `base`; setting them by hand
       // is how a project-page deployment ends up claiming the whole origin.
       manifest: {
-        name: 'Xray Config UI Editor',
-        short_name: 'Xray Editor',
-        description: 'Visual editor for Xray-core configs, with Remnawave panel sync.',
+        name: 'Xray 配置编辑器',
+        short_name: 'Xray 编辑器',
+        description: 'Xray-core 可视化配置编辑器，支持 Remnawave 面板同步。',
+        lang: 'zh-CN',
         theme_color: '#020617',
         background_color: '#020617',
         display: 'standalone',
@@ -84,7 +85,7 @@ export default defineConfig({
       devOptions: { enabled: false },
     }),
   ],
-  base: '/xray-config-ui-editor/', 
+  base: '/xray-config-ui-editor/',
   define: {
     __APP_VERSION__: JSON.stringify(appVersion)
   },

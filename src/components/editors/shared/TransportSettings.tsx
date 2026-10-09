@@ -258,9 +258,7 @@ export const TransportSettings = ({ streamSettings = {}, onChange, isClient = fa
             {sec === 'reality' && (
                 <div className="space-y-4 border-t border-slate-800 pt-4 animate-in fade-in">
                     <div className="flex justify-between items-center">
-                        <span className="text-xs font-bold text-purple-400 flex items-center">
-                            REALITY Keys
-                            <Help>{t("Reality: A TLS extension for mimicking popular websites to bypass firewalls.")}</Help>
+                        <span className="text-xs font-bold text-purple-400 flex items-center"> {t("REALITY Keys")} <Help>{t("Reality: A TLS extension for mimicking popular websites to bypass firewalls.")}</Help>
                         </span>
                     </div>
 

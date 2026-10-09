@@ -26,12 +26,21 @@ const checkText = (id: string): string => ({
 }[id] ?? id);
 
 /** Detail codes the core reports; anything else is already technical. */
-const detailText = (detail: string): string => ({
+const detailText = (detail: string): string => {
+    const icons = /^(\d+) declared, none ≥ (\d+)px with purpose any$/.exec(detail);
+    if (icons) return t("{count} icons declared; none is at least {size}px with purpose any", { count: icons[1], size: icons[2] });
+    if (detail.endsWith(' → no type')) return detail.replace('no type', t("Missing content type"));
+    return ({
     'restored:stripped-here': t("The server sends it, but something in this browser removed it — put back."),
     'restored:not-served': t("The page as served has no manifest link — put back."),
     'restored:unknown': t("It was missing — put back."),
     'cannot-add': t("It is missing and could not be added."),
+    'not set': t("Not set"),
+    'not registered': t("Not registered"),
+    'unsupported': t("Not supported by this browser"),
+    'installing': t("Installing"),
 }[detail] ?? detail);
+};
 
 const Row = ({ check }: { check: Check }) => {
     const tone = check.status === 'pass' ? 'text-emerald-400'

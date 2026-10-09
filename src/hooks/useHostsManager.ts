@@ -135,7 +135,7 @@ export const useHostsManager = (initialHostUuid?: string) => {
     const save = useCallback(async () => {
         if (!draft || saving) return;
         if (missing.length > 0) {
-            toast.error(`Still needed: ${missing.join(', ')}`);
+            toast.error(t("Still needed: {value1}", { value1: String(missing.join(', ')) }));
             return;
         }
         setSaving(true);

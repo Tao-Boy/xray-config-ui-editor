@@ -371,7 +371,7 @@ export const buildLocalBalancerConfig = (
     const usable = (nodes || []).filter(n => isProxyOutbound(n?.outbound));
 
     if (usable.length === 0) {
-        throw new Error('No proxy outbounds to build a config from');
+        throw new Error(t("No proxy outbounds to build a config from"));
     }
 
     const balanced = usable.length > 1 || options.forceBalancer;
@@ -524,7 +524,7 @@ export interface ParsedLocalBalancer {
 export const parseLocalBalancer = (input: any): ParsedLocalBalancer => {
     const notes: string[] = [];
     if (!input || typeof input !== 'object') {
-        throw new Error('Not a JSON object');
+        throw new Error(t("Not a JSON object"));
     }
 
     const routing = input.routing || {};
@@ -570,8 +570,8 @@ export const parseLocalBalancer = (input: any): ParsedLocalBalancer => {
         // balancer on the next save.
         const catchAllTarget = rules.at(-1)?.outboundTag;
         notes.push(catchAllTarget
-            ? `This one routes to "${catchAllTarget}" directly, with no balancer — saving from here adds one`
-            : 'No balancer found — options were read from the rest of it');
+            ? t("This one routes to \"{value1}\" directly, with no balancer — saving from here adds one", { value1: String(catchAllTarget) })
+            : t("No balancer found — options were read from the rest of it"));
     }
 
     // --- probe ---
@@ -600,7 +600,7 @@ export const parseLocalBalancer = (input: any): ParsedLocalBalancer => {
     if (listen) options.listen = listen;
     options.sniffing = !!(socks?.sniffing?.enabled || http?.sniffing?.enabled);
     if (inbounds.some(i => i.protocol !== 'socks' && i.protocol !== 'http')) {
-        notes.push('Inbounds other than SOCKS/HTTP were dropped — the builder only writes those two');
+        notes.push(t("Inbounds other than SOCKS/HTTP were dropped — the builder only writes those two"));
     }
 
     // --- bypass & DNS ---
@@ -624,17 +624,17 @@ export const parseLocalBalancer = (input: any): ParsedLocalBalancer => {
         const lastBypassAt = domains.reduce((acc, d, i) => (bypassSet.has(d) ? i : acc), -1);
         const firstExtraAt = domains.findIndex(d => !bypassSet.has(d));
         if (firstExtraAt !== -1 && firstExtraAt < lastBypassAt) {
-            notes.push('Extra DNS domains will be rewritten after the bypass list (same set, different order)');
+            notes.push(t("Extra DNS domains will be rewritten after the bypass list (same set, different order)"));
         }
     } else {
         options.dnsExtraDomains = [];
     }
     if (dnsServers.some(srv => typeof srv === 'object' && srv?.address !== 'localhost')) {
-        notes.push('Custom DNS server entries were dropped — the builder writes one localhost entry plus plain upstreams');
+        notes.push(t("Custom DNS server entries were dropped — the builder writes one localhost entry plus plain upstreams"));
     }
 
     if (input.routing?.domainMatcher !== undefined) {
-        notes.push('routing.domainMatcher was dropped — no supported Xray core reads it');
+        notes.push(t("routing.domainMatcher was dropped — no supported Xray core reads it"));
     }
     if (input.routing?.domainStrategy) options.domainStrategy = input.routing.domainStrategy;
     if (typeof input.remarks === 'string') options.remarks = input.remarks;
@@ -648,7 +648,7 @@ export const parseLocalBalancer = (input: any): ParsedLocalBalancer => {
         : undefined;
 
     if (injector && !injectEntry) {
-        notes.push('The template has a remnawave block with no injectHosts entry');
+        notes.push(t("The template has a remnawave block with no injectHosts entry"));
     }
 
     return { kind, options, inject, notes };

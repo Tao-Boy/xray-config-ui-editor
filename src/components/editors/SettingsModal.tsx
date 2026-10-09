@@ -88,7 +88,7 @@ export const SettingsModal = ({ onClose }: { onClose: () => void }) => {
             tabs={tabs}
             rawConfigText={rawConfigText}
             onSaveShortcut={() => useConfigStore.getState().saveActiveProfile()}
-            onCommitShortcut={() => useConfigStore.getState().recordSnapshot("Manual Commit (Ctrl+Shift+S)")}
+            onCommitShortcut={() => useConfigStore.getState().recordSnapshot(t("Manual Commit (Ctrl+Shift+S)"))}
         >
             <div className="max-w-3xl mx-auto space-y-6">
                 {activeTab === 'general' && (
@@ -111,7 +111,7 @@ export const SettingsModal = ({ onClose }: { onClose: () => void }) => {
                                     }))}
                                 />
                                 <FormField label={t("WARP Worker URL")} help={t("Optional: Your private Cloudflare Worker URL for CORS-safe registration.")}>
-                                    <input 
+                                    <input
                                         className="input-base"
                                         placeholder="https://your-worker.workers.dev"
                                         value={warpWorkerUrl}
@@ -124,13 +124,13 @@ export const SettingsModal = ({ onClose }: { onClose: () => void }) => {
                         <SpiderPathsEditor />
 
                         <LogEditor
-                            log={config?.log} 
-                            onChange={(v: any) => updateSection('log', v)} 
-                            onToggle={(d: any) => toggleSection('log', d)} 
+                            log={config?.log}
+                            onChange={(v: any) => updateSection('log', v)}
+                            onToggle={(d: any) => toggleSection('log', d)}
                         />
-                        
-                        <ApiStatsEditor 
-                            api={config?.api} 
+
+                        <ApiStatsEditor
+                            api={config?.api}
                             stats={config?.stats}
                             onUpdateApi={(v: any) => updateSection('api', v)}
                             onToggleApi={(d: any) => toggleSection('api', d)}
@@ -140,8 +140,8 @@ export const SettingsModal = ({ onClose }: { onClose: () => void }) => {
                 )}
 
                 {activeTab === 'policy' && (
-                    <PolicyEditor 
-                        policy={config?.policy} 
+                    <PolicyEditor
+                        policy={config?.policy}
                         onChange={(v: any) => updateSection('policy', v)}
                         onToggle={(d: any) => toggleSection('policy', d)}
                     />
@@ -153,15 +153,15 @@ export const SettingsModal = ({ onClose }: { onClose: () => void }) => {
                             <Icon name="Info" className="shrink-0 mt-0.5" />
                             <span>{t("Use Observatory for steady periodic checks, or Burst Observatory for randomised stealth checks. Pick one based on how your balancers are set up.")}</span>
                         </div>
-                        
-                        <ObservatoryEditor 
+
+                        <ObservatoryEditor
                             observatory={config?.observatory}
                             outboundTags={outboundTags}
                             onChange={(v: any) => updateSection('observatory', v)}
                             onToggle={(d: any) => toggleSection('observatory', d)}
                         />
-                        
-                        <BurstObservatoryEditor 
+
+                        <BurstObservatoryEditor
                             burstObservatory={config?.burstObservatory}
                             outboundTags={outboundTags}
                             onChange={(v: any) => updateSection('burstObservatory', v)}

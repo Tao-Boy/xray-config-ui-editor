@@ -312,8 +312,8 @@ export const ConfigInspectorModal = ({ onClose, setModal, openSectionJson }: {
                                         key={i}
                                         onClick={() => { setSelectedIndex(i); setMobilePane('board'); }}
                                         className={`w-full text-left p-4 rounded-2xl transition-all border ${
-                                            selectedIndex === i 
-                                            ? 'bg-gradient-to-br from-indigo-600 to-indigo-700 border-indigo-500 text-white shadow-xl scale-[1.02]' 
+                                            selectedIndex === i
+                                            ? 'bg-gradient-to-br from-indigo-600 to-indigo-700 border-indigo-500 text-white shadow-xl scale-[1.02]'
                                             : 'bg-slate-950/40 border-slate-800/50 text-slate-400 hover:border-slate-600 hover:bg-slate-900/60'
                                         }`}
                                     >
@@ -356,11 +356,9 @@ export const ConfigInspectorModal = ({ onClose, setModal, openSectionJson }: {
                                     </div>
                                     <div>
                                         <h3 className="text-2xl font-black text-white italic tracking-tighter truncate leading-none">
-                                            {selectedConfig?.remarks || "Harvester Target"}
+                                            {selectedConfig?.remarks || t("Harvester Target")}
                                         </h3>
-                                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">
-                                            Source #{selectedIndex + 1} • {parsedConfigs.length} total
-                                        </p>
+                                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1"> {t("Source #")}{selectedIndex + 1} • {parsedConfigs.length} {t("total")} </p>
                                     </div>
                                 </div>
                                 <div className="flex gap-2.5">
@@ -376,7 +374,7 @@ export const ConfigInspectorModal = ({ onClose, setModal, openSectionJson }: {
                                     >
                                         {t("Copy Analyzed Response")}
                                         </Button>
-                                    <Button variant="secondary" className="px-4 bg-slate-800 border-slate-700 text-xs font-bold" onClick={() => openSectionJson('full', 'Source JSON', selectedConfig)} icon="Code">
+                                    <Button variant="secondary" className="px-4 bg-slate-800 border-slate-700 text-xs font-bold" onClick={() => openSectionJson('full', t("Source JSON"), selectedConfig)} icon="Code">
                                         {t("RAW JSON")}
                                         </Button>
                                     <Button variant="success" className="px-6 shadow-lg shadow-emerald-500/10 text-xs font-black uppercase" onClick={extractAllFromSelected} icon="DownloadSimple">
@@ -469,7 +467,7 @@ export const ConfigInspectorModal = ({ onClose, setModal, openSectionJson }: {
                                                             </div>
                                                         </div>
                                                         <div className="flex items-center gap-1.5 opacity-60 group-hover:opacity-100 transition-all translate-x-2 group-hover:translate-x-0">
-                                                            <button onClick={() => openSectionJson('rule', 'Rule JSON', rule)} title="JSON" className="p-2 rounded-md bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700"><Icon name="Code" weight="bold" /></button>
+                                                            <button onClick={() => openSectionJson('rule', t("Rule JSON"), rule)} title="JSON" className="p-2 rounded-md bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700"><Icon name="Code" weight="bold" /></button>
                                                             <button onClick={() => importRoutingItem('rules', rule)} title={t("Steal to Top")} className="p-2 rounded-md bg-purple-500/20 text-purple-400 hover:bg-purple-500 hover:text-white"><Icon name="ArrowCircleUp" weight="bold" /></button>
                                                         </div>
                                                     </div>
@@ -496,7 +494,7 @@ export const ConfigInspectorModal = ({ onClose, setModal, openSectionJson }: {
                                                         <div className="text-[9px] font-bold text-slate-500 uppercase tracking-tighter">{t("STRATEGY:")} {bal.strategy?.type}</div>
                                                     </div>
                                                     <div className="flex items-center gap-1.5 opacity-60 group-hover:opacity-100 transition-all translate-x-2 group-hover:translate-x-0">
-                                                        <button onClick={() => openSectionJson('balancer', 'Balancer JSON', bal)} title="JSON" className="p-2 rounded-md bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700"><Icon name="Code" weight="bold" /></button>
+                                                        <button onClick={() => openSectionJson('balancer', t("Balancer JSON"), bal)} title="JSON" className="p-2 rounded-md bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700"><Icon name="Code" weight="bold" /></button>
                                                         <button onClick={() => importRoutingItem('balancers', bal)} title={t("Import Balancer")} className="p-2 rounded-md bg-amber-500/20 text-amber-400 hover:bg-amber-500 hover:text-white"><Icon name="ArrowCircleUp" weight="bold" /></button>
                                                     </div>
                                                 </div>

@@ -32,19 +32,19 @@ export const TopologyModal = ({ onClose }: { onClose: () => void }) => {
             className="md:h-[88vh] md:max-h-[92dvh] overflow-hidden"
             extraButtons={
                 <div className="flex flex-wrap items-center gap-2 bg-slate-950 p-1 px-2 rounded-lg border border-slate-800">
-                    <Switch 
+                    <Switch
                         checked={hideUnused}
                         onChange={setHideUnused}
                         label={<span className="text-[10px] font-bold text-slate-400 uppercase group-hover:text-slate-200 transition-colors">{t("Hide Unused")}</span>}
                     />
-                    
+
                     <div className="w-px h-4 bg-slate-800 mx-1 hidden sm:block"></div>
-                    
-                    <button 
+
+                    <button
                         onClick={() => setDirection(direction === 'TB' ? 'LR' : 'TB')}
                         className="flex items-center gap-2 px-2 py-0.5 hover:bg-slate-800 rounded transition-colors"
                     >
-                        <span className="text-[10px] font-bold text-slate-400 uppercase">{direction === 'TB' ? 'Vertical' : 'Horizontal'}</span>
+                        <span className="text-[10px] font-bold text-slate-400 uppercase">{direction === 'TB' ? t("Vertical") : t("Horizontal")}</span>
                         <div className="text-indigo-400"><Icon name={direction === 'TB' ? "ArrowDown" : "ArrowRight"} weight="bold" /></div>
                     </button>
 
@@ -57,6 +57,13 @@ export const TopologyModal = ({ onClose }: { onClose: () => void }) => {
         >
             <div className="flex-1 min-h-0 h-full w-full bg-[#0B1120] rounded-xl border border-slate-800 overflow-hidden relative shadow-inner group/flow">
                 <ReactFlow
+                    ariaLabelConfig={{
+                        'controls.zoomIn.ariaLabel': t("Zoom in"),
+                        'controls.zoomOut.ariaLabel': t("Zoom out"),
+                        'controls.fitView.ariaLabel': t("Fit view"),
+                        'node.a11yDescription.default': t("Select a node with Enter or Space. Use arrow keys to move it; Delete removes it and Escape cancels selection."),
+                        'edge.a11yDescription.default': t("Select a connection with Enter or Space. Delete removes it and Escape cancels selection."),
+                    }}
                     nodes={nodes}
                     edges={edges}
                     nodeTypes={nodeTypes}
@@ -74,9 +81,9 @@ export const TopologyModal = ({ onClose }: { onClose: () => void }) => {
                     }}
                 >
                     <Background color="#334155" gap={30} size={1} variant={BackgroundVariant.Lines} className="opacity-20" />
-                    <Controls 
+                    <Controls
                         showInteractive={false}
-                        className="!bg-slate-900 !border-slate-700 !shadow-2xl !rounded-lg !overflow-hidden !m-4" 
+                        className="!bg-slate-900 !border-slate-700 !shadow-2xl !rounded-lg !overflow-hidden !m-4"
                     />
                 </ReactFlow>
 
@@ -106,9 +113,9 @@ export const TopologyModal = ({ onClose }: { onClose: () => void }) => {
                 {/* Map Legend & Category Toggles */}
                 <div className="absolute bottom-4 right-4 max-h-[35dvh] overflow-y-auto custom-scroll bg-slate-900/95 p-2.5 sm:p-4 rounded-xl border border-slate-700/50 backdrop-blur-md shadow-2xl text-[10px] space-y-1.5 sm:space-y-2 pointer-events-auto z-10 border-t-indigo-500/30">
                     <div className="font-bold text-slate-400 uppercase tracking-[0.15em] text-[9px] mb-1">{t("Toggle Map Layers")}</div>
-                    
+
                     {/* Inbounds */}
-                    <div 
+                    <div
                         onClick={() => toggleCategory('inbound')}
                         className={`flex items-center justify-between gap-3 p-1.5 rounded-lg cursor-pointer transition-all border select-none ${
                             !hiddenCategories.has('inbound')
@@ -125,7 +132,7 @@ export const TopologyModal = ({ onClose }: { onClose: () => void }) => {
                     </div>
 
                     {/* Rules */}
-                    <div 
+                    <div
                         onClick={() => toggleCategory('rule')}
                         className={`flex items-center justify-between gap-3 p-1.5 rounded-lg cursor-pointer transition-all border select-none ${
                             !hiddenCategories.has('rule')
@@ -142,7 +149,7 @@ export const TopologyModal = ({ onClose }: { onClose: () => void }) => {
                     </div>
 
                     {/* Balancers */}
-                    <div 
+                    <div
                         onClick={() => toggleCategory('balancer')}
                         className={`flex items-center justify-between gap-3 p-1.5 rounded-lg cursor-pointer transition-all border select-none ${
                             !hiddenCategories.has('balancer')
@@ -159,7 +166,7 @@ export const TopologyModal = ({ onClose }: { onClose: () => void }) => {
                     </div>
 
                     {/* Outbounds */}
-                    <div 
+                    <div
                         onClick={() => toggleCategory('outbound')}
                         className={`flex items-center justify-between gap-3 p-1.5 rounded-lg cursor-pointer transition-all border select-none ${
                             !hiddenCategories.has('outbound')

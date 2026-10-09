@@ -41,10 +41,10 @@ export const XhttpSettingsEditor = ({ xhttpSettings = {}, onChange, isClient = f
             )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Select 
+                    <Select
                         label={t("Mode")}
-                        hint="auto: TLS H2 -> stream-up, Reality -> stream-one, else packet-up. packet-up: Highest compatibility (split uploads). stream-up: Full duplex streaming (recommended for gRPC/CF). stream-one: Single HTTP request for both directions."
-                        value={xhttpSettings.mode || "auto"} 
+                        hint={t("auto: TLS H2 -> stream-up, Reality -> stream-one, else packet-up. packet-up: Highest compatibility (split uploads). stream-up: Full duplex streaming (recommended for gRPC/CF). stream-one: Single HTTP request for both directions.")}
+                        value={xhttpSettings.mode || "auto"}
                         onChange={val => update(['mode'], val)}
                         options={[
                             { value: "auto", label: t("AUTO"), description: t("Recommended") },
@@ -55,25 +55,25 @@ export const XhttpSettingsEditor = ({ xhttpSettings = {}, onChange, isClient = f
                     />
                 <div>
                     <label className="label-xs">{t("Path")}</label>
-                    <input className="input-base font-mono" 
-                        placeholder="/yourpath" 
-                        value={xhttpSettings.path || ""} 
-                        onChange={e => update(['path'], e.target.value)} 
+                    <input className="input-base font-mono"
+                        placeholder="/yourpath"
+                        value={xhttpSettings.path || ""}
+                        onChange={e => update(['path'], e.target.value)}
                     />
                 </div>
                 <div className="md:col-span-2">
                     <label className="label-xs flex items-center">{t("Host")} <Help position="bottom">{t("Override Host header. Priority: host > serverName > address.")}</Help></label>
-                    <input className="input-base font-mono" 
-                        placeholder={t("example.com")} 
-                        value={xhttpSettings.host || ""} 
-                        onChange={e => update(['host'], e.target.value)} 
+                    <input className="input-base font-mono"
+                        placeholder={t("example.com")}
+                        value={xhttpSettings.host || ""}
+                        onChange={e => update(['host'], e.target.value)}
                     />
                 </div>
             </div>
 
             {/* --- EXTRA SETTINGS --- */}
             <div className="border-t border-slate-800 pt-4">
-                <button 
+                <button
                     onClick={() => setShowExtra(!showExtra)}
                     className="flex items-center gap-2 text-[10px] font-bold uppercase text-slate-400 hover:text-white transition-colors"
                 >
@@ -86,18 +86,18 @@ export const XhttpSettingsEditor = ({ xhttpSettings = {}, onChange, isClient = f
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label className="label-xs flex items-center">{t("Header Padding")} <Help>{t("Range like \"100-1000\". Random bytes added to headers to mask length.")}</Help></label>
-                                <input className="input-base font-mono" 
-                                    placeholder="100-1000" 
-                                    value={extra.xPaddingBytes || ""} 
-                                    onChange={e => update(['extra', 'xPaddingBytes'], e.target.value)} 
+                                <input className="input-base font-mono"
+                                    placeholder="100-1000"
+                                    value={extra.xPaddingBytes || ""}
+                                    onChange={e => update(['extra', 'xPaddingBytes'], e.target.value)}
                                 />
                             </div>
                             <div>
                                 <label className="label-xs flex items-center">{t("Stream-Up Keep-Alive (s)")} <Help>{t("Server sends padding every N seconds to keep CF/CDN alive. e.g. \"20-80\".")}</Help></label>
-                                <input className="input-base font-mono" 
-                                    placeholder="20-80" 
-                                    value={extra.scStreamUpServerSecs || ""} 
-                                    onChange={e => update(['extra', 'scStreamUpServerSecs'], e.target.value)} 
+                                <input className="input-base font-mono"
+                                    placeholder="20-80"
+                                    value={extra.scStreamUpServerSecs || ""}
+                                    onChange={e => update(['extra', 'scStreamUpServerSecs'], e.target.value)}
                                 />
                             </div>
                         </div>
@@ -125,13 +125,13 @@ export const XhttpSettingsEditor = ({ xhttpSettings = {}, onChange, isClient = f
                                 <div>
                                     <label className="label-xs text-[10px]">{t("Max POST Bytes")}</label>
                                     <input className="input-base text-xs font-mono" placeholder="1000000"
-                                        value={extra.scMaxEachPostBytes || ""} 
+                                        value={extra.scMaxEachPostBytes || ""}
                                         onChange={e => update(['extra', 'scMaxEachPostBytes'], e.target.value)} />
                                 </div>
                                 <div>
                                     <label className="label-xs text-[10px]">{t("Min Post Interval")}</label>
                                     <DurationInput placeholder="30"
-                                        value={extra.scMinPostsIntervalMs} 
+                                        value={extra.scMinPostsIntervalMs}
                                         onChange={val => update(['extra', 'scMinPostsIntervalMs'], val)}
                                         defaultUnit="ms"
                                         mode="number"
@@ -142,7 +142,7 @@ export const XhttpSettingsEditor = ({ xhttpSettings = {}, onChange, isClient = f
                                 <div>
                                     <label className="label-xs text-[10px]">{t("Max Buffered Posts")}</label>
                                     <input type="number" className="input-base text-xs font-mono" placeholder="30"
-                                        value={extra.scMaxBufferedPosts || ""} 
+                                        value={extra.scMaxBufferedPosts || ""}
                                         onChange={e => update(['extra', 'scMaxBufferedPosts'], parseInt(e.target.value))} />
                                 </div>
                             </div>
@@ -150,7 +150,7 @@ export const XhttpSettingsEditor = ({ xhttpSettings = {}, onChange, isClient = f
 
                         {/* XMUX SETTINGS */}
                         <div className="border-t border-slate-800/50 pt-2">
-                            <button 
+                            <button
                                 onClick={() => setShowXmux(!showXmux)}
                                 className="flex items-center gap-2 text-[10px] font-bold uppercase text-blue-400 hover:text-blue-300 transition-colors"
                             >
@@ -166,37 +166,37 @@ export const XhttpSettingsEditor = ({ xhttpSettings = {}, onChange, isClient = f
                                     <div>
                                         <label className="label-xs flex items-center">{t("Max Concurrency")} <Help>{t("Concurrent requests per connection. e.g. \"16-32\".")}</Help></label>
                                         <input className="input-base font-mono" placeholder="16-32"
-                                            value={xmux.maxConcurrency || ""} 
+                                            value={xmux.maxConcurrency || ""}
                                             onChange={e => update(['extra', 'xmux', 'maxConcurrency'], e.target.value)} />
                                     </div>
                                     <div>
                                         <label className="label-xs flex items-center">{t("Max Connections")} <Help>{t("If set, opens new connection for each request until limit.")}</Help></label>
                                         <input className="input-base font-mono" placeholder="0"
-                                            value={xmux.maxConnections || ""} 
+                                            value={xmux.maxConnections || ""}
                                             onChange={e => update(['extra', 'xmux', 'maxConnections'], e.target.value)} />
                                     </div>
                                     <div>
                                         <label className="label-xs flex items-center">{t("Reuse Times")} <Help>{t("How many times a connection can be reused.")}</Help></label>
                                         <input className="input-base font-mono" placeholder="0"
-                                            value={xmux.cMaxReuseTimes || ""} 
+                                            value={xmux.cMaxReuseTimes || ""}
                                             onChange={e => update(['extra', 'xmux', 'cMaxReuseTimes'], e.target.value)} />
                                     </div>
                                     <div>
                                         <label className="label-xs flex items-center">{t("Max Request Times")} <Help>{t("Nginx limit is 1000. Core default is \"600-900\".")}</Help></label>
                                         <input className="input-base font-mono" placeholder="600-900"
-                                            value={xmux.hMaxRequestTimes || ""} 
+                                            value={xmux.hMaxRequestTimes || ""}
                                             onChange={e => update(['extra', 'xmux', 'hMaxRequestTimes'], e.target.value)} />
                                     </div>
                                     <div>
                                         <label className="label-xs flex items-center">{t("Max Reusable Secs")} <Help>{t("Nginx limit is 1h. Core default is \"1800-3000\".")}</Help></label>
                                         <input className="input-base font-mono" placeholder="1800-3000"
-                                            value={xmux.hMaxReusableSecs || ""} 
+                                            value={xmux.hMaxReusableSecs || ""}
                                             onChange={e => update(['extra', 'xmux', 'hMaxReusableSecs'], e.target.value)} />
                                     </div>
                                     <div>
                                         <label className="label-xs flex items-center">{t("Keep-Alive")} <Help>{t("0 for auto. -1 to disable.")}</Help></label>
                                         <DurationInput placeholder="0"
-                                            value={xmux.hKeepAlivePeriod} 
+                                            value={xmux.hKeepAlivePeriod}
                                             onChange={val => update(['extra', 'xmux', 'hKeepAlivePeriod'], val)}
                                             defaultUnit="s"
                                             mode="number"
@@ -214,7 +214,7 @@ export const XhttpSettingsEditor = ({ xhttpSettings = {}, onChange, isClient = f
             {/* --- DOWNLOAD SETTINGS (ASYMMETRIC) --- */}
             {isClient && !isDownload && (
                 <div className="border-t border-slate-800 pt-4">
-                    <button 
+                    <button
                         onClick={() => setShowDownload(!showDownload)}
                         className="flex items-center gap-2 text-[10px] font-bold uppercase text-purple-400 hover:text-purple-300 transition-colors"
                     >
@@ -251,7 +251,7 @@ export const XhttpSettingsEditor = ({ xhttpSettings = {}, onChange, isClient = f
 {t("Download Security")}
 </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <Select 
+                                        <Select
                                             value={extra.downloadSettings?.security || "tls"}
                                             onChange={val => update(['extra', 'downloadSettings', 'security'], val)}
                                             options={[
@@ -273,7 +273,7 @@ export const XhttpSettingsEditor = ({ xhttpSettings = {}, onChange, isClient = f
                                         value={extra.downloadSettings?.xhttpSettings?.path || ""}
                                         onChange={e => update(['extra', 'downloadSettings', 'xhttpSettings', 'path'], e.target.value)} />
                                 </div>
-                                
+
                                 <div className="bg-slate-900/50 p-2 rounded text-[10px] text-slate-500 italic">
                                     {t("Note: You can further customize downloadSettings JSON for full asymmetric split.")}
                                     </div>

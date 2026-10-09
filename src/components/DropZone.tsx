@@ -16,7 +16,7 @@ export const DropZone = ({ onFileLoaded }: DropZoneProps) => {
             try {
                 onFileLoaded(parseJsonc(e.target?.result as string));
             } catch {
-                alert("Invalid JSON");
+                alert(t("Invalid JSON"));
             }
         };
         reader.readAsText(file);
@@ -44,8 +44,7 @@ export const DropZone = ({ onFileLoaded }: DropZoneProps) => {
             <p className="mb-6">{t("Drop config.json here")}</p>
             <div className="flex gap-4">
                 <label className="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-2 rounded-lg cursor-pointer font-bold transition-colors flex items-center gap-2">
-                    <Icon name="FolderOpen" /> Open File
-                    <input type="file" className="hidden" accept={CONFIG_FILE_ACCEPT}
+                    <Icon name="FolderOpen" /> {t("Open File")} <input type="file" className="hidden" accept={CONFIG_FILE_ACCEPT}
                            onChange={e => e.target.files?.[0] && handleFile(e.target.files[0])} />
                 </label>
                 <Button variant="secondary" onClick={createEmpty} icon="PlusCircle">{t("Create Empty")}</Button>

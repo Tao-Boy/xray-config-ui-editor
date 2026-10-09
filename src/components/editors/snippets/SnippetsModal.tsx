@@ -40,8 +40,7 @@ const EntryRow = ({ entry, active, onClick }: { entry: SnippetEntry; active: boo
         <span className="min-w-0 flex-1">
             <span className="block font-bold text-slate-200 truncate">{entry.name}</span>
             <span className="block text-[10px] text-slate-500 font-mono truncate">
-                {Array.isArray(entry.snippet) ? entry.snippet.length : 0} entry(ies)
-                {entry.usage > 0 && <span className="text-emerald-400"> · used {entry.usage}×</span>}
+                {Array.isArray(entry.snippet) ? entry.snippet.length : 0} {t("entry(ies)")} {entry.usage > 0 && <span className="text-emerald-400"> {t("· used")} {entry.usage}×</span>}
             </span>
         </span>
     </button>
@@ -162,7 +161,7 @@ export const SnippetsModal = ({ onClose }: { onClose: () => void }) => {
                         {lib.filteredEntries.length === 0 && (
                             <div className="text-center text-slate-600 py-8 italic text-[11px] px-3">
                                 {lib.tab === 'panel'
-                                    ? 'No panel snippets loaded — press Refresh, or New to create the first one.'
+                                    ? t("No panel snippets loaded — press Refresh, or New to create the first one.")
                                     : t("No templates in this browser yet. Create one to reuse blocks across configs.")}
                             </div>
                         )}
@@ -296,7 +295,7 @@ export const SnippetsModal = ({ onClose }: { onClose: () => void }) => {
                                     disabled={!lib.canSave || (draft.source === 'panel' && !lib.connected)}
                                     onClick={lib.saveDraft}
                                     title={lib.saveBlockedReason
-                                        || (draft.source === 'panel' && !lib.connected ? 'Connect to Remnawave to write to the panel' : undefined)}
+                                        || (draft.source === 'panel' && !lib.connected ? t("Connect to Remnawave to write to the panel") : undefined)}
                                 >
                                     {lib.confirmEmpty
                                         ? t("Confirm: empty “{name}”", { name: draft.name })
@@ -380,8 +379,8 @@ export const SnippetsModal = ({ onClose }: { onClose: () => void }) => {
                                         onClick={lib.insertRef}
                                         disabled={!draft.name.trim() || !!lib.draftNameError || !draft.originalName}
                                         title={draft.originalName
-                                            ? 'Add a { snippet: NAME } reference the panel will expand'
-                                            : 'Save the snippet first — a reference to an unsaved name expands to nothing'}
+                                            ? t("Add a { snippet: NAME } reference the panel will expand")
+                                            : t("Save the snippet first — a reference to an unsaved name expands to nothing")}
                                     >
                                         {t("Insert reference")}
                                         </Button>
@@ -391,8 +390,8 @@ export const SnippetsModal = ({ onClose }: { onClose: () => void }) => {
                                         onClick={lib.insertCopy}
                                         disabled={!draft.originalName || draft.body.length === 0}
                                         title={draft.originalName
-                                            ? 'Paste the body in as ordinary items — no longer linked to the snippet'
-                                            : 'Save this draft first — the copy is taken from the saved body'}
+                                            ? t("Paste the body in as ordinary items — no longer linked to the snippet")
+                                            : t("Save this draft first — the copy is taken from the saved body")}
                                     >
                                         {t("Insert a detached copy")}
                                         </Button>

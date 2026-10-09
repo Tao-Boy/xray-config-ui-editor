@@ -69,7 +69,7 @@ export const getPresets = (): Preset[] => {
 
     return [
         {
-            name: 'WARP Profile A',
+            name: t("WARP Profile A"),
             description: t("Cloudflare WARP connectivity with standard AmneziaWG optimization."),
             icon: 'Cloud',
             config: {
@@ -93,7 +93,7 @@ export const getPresets = (): Preset[] => {
             }
         },
         {
-            name: 'WARP Profile B',
+            name: t("WARP Profile B"),
             description: t("Cloudflare WARP connectivity with alternative AmneziaWG optimization."),
             icon: 'CloudCheck',
             config: {
@@ -117,7 +117,7 @@ export const getPresets = (): Preset[] => {
             }
         },
         {
-            name: 'WARP Profile C',
+            name: t("WARP Profile C"),
             description: t("Cloudflare WARP connectivity with aggressive AmneziaWG optimization."),
             icon: 'CloudFog',
             config: {
@@ -141,7 +141,7 @@ export const getPresets = (): Preset[] => {
             }
         },
         {
-            name: 'Minimal (Skeleton)',
+            name: t("Minimal (Skeleton)"),
             description: t("Basic structure with Direct & Block outbounds. Best for starting from scratch."),
             icon: 'Square',
             config: {
@@ -159,7 +159,7 @@ export const getPresets = (): Preset[] => {
             },
         },
         {
-            name: 'Standard Client',
+            name: t("Standard Client"),
             description: t("Socks5/HTTP inbounds + VLESS Proxy. Includes basic routing rules."),
             icon: 'Laptop',
             config: {
@@ -218,7 +218,7 @@ export const getPresets = (): Preset[] => {
             },
         },
         {
-            name: 'Reality Server',
+            name: t("Reality Server"),
             description: t("VLESS-Reality Inbound configuration for server side."),
             icon: 'HardDrives',
             config: {

@@ -19,26 +19,25 @@ export const DnsHosts = ({ hosts = {}, onChange }: any) => {
                     {t("Add Host")}
                     </Button>
             </div>
-            
+
             <div className="flex-1 overflow-y-auto custom-scroll space-y-4 pr-2 pb-10">
                 {entries.map((host, hIdx) => {
                     const domainIsInvalid = host.domain !== "" && !isValidDomain(host.domain);
-                    
+
                     return (
-                        <div key={hIdx} className={`bg-slate-900/50 border rounded-xl p-4 relative group transition-all duration-200 
+                        <div key={hIdx} className={`bg-slate-900/50 border rounded-xl p-4 relative group transition-all duration-200
                             ${domainIsInvalid ? 'border-rose-500/50 bg-rose-500/5' : 'border-slate-800 hover:border-slate-700 shadow-lg'}`}>
-                            
+
                             <button onClick={() => removeHost(hIdx)} className="absolute top-4 right-4 text-slate-600 hover:text-rose-500 transition-colors">
                                 <Icon name="Trash" size={18} />
                             </button>
 
                             <div className="grid grid-cols-1 md:grid-cols-12 gap-4 mt-2">
                                 <div className="md:col-span-5">
-                                    <label className={`label-xs mb-1.5 block ${domainIsInvalid ? 'text-rose-400' : 'text-slate-500'}`}>
-                                        Domain Name {domainIsInvalid && "(Invalid)"}
+                                    <label className={`label-xs mb-1.5 block ${domainIsInvalid ? 'text-rose-400' : 'text-slate-500'}`}> {t("Domain Name")} {domainIsInvalid && "(Invalid)"}
                                     </label>
-                                    <input 
-                                        className={`input-base text-sm font-bold ${domainIsInvalid ? 'border-rose-500 text-rose-200 bg-rose-950' : 'text-white'}`} 
+                                    <input
+                                        className={`input-base text-sm font-bold ${domainIsInvalid ? 'border-rose-500 text-rose-200 bg-rose-950' : 'text-white'}`}
                                         placeholder={t("example.com")}
                                         value={host.domain}
                                         onChange={e => updateDomain(hIdx, e.target.value)}
@@ -48,9 +47,9 @@ export const DnsHosts = ({ hosts = {}, onChange }: any) => {
                                 <div className="md:col-span-7 space-y-2">
                                     <label className="label-xs text-slate-500 mb-1.5 block">{t("IP Addresses")}</label>
                                     {host.ips.map((ip, ipIdx) => (
-                                        <input 
+                                        <input
                                             key={ipIdx}
-                                            className="input-base text-xs font-mono text-emerald-400" 
+                                            className="input-base text-xs font-mono text-emerald-400"
                                             placeholder="1.2.3.4"
                                             value={ip}
                                             onChange={e => updateIpValue(hIdx, ipIdx, e.target.value)}

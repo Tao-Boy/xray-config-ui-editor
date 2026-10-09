@@ -126,7 +126,7 @@ export const useTemplatesLibrary = () => {
             JSON.parse(draft.text);
             return null;
         } catch (e: any) {
-            return e?.message || 'Invalid JSON';
+            return e?.message || t("Invalid JSON");
         }
     }, [draft]);
 

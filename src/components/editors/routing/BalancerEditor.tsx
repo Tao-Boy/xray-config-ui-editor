@@ -61,14 +61,14 @@ export const BalancerEditor = ({
                     rawText={localRawText}
                     rawConfigText={rawConfigText}
                     onSaveShortcut={() => useConfigStore.getState().saveActiveProfile()}
-                    onCommitShortcut={() => useConfigStore.getState().recordSnapshot("Manual Commit (Ctrl+Shift+S)")}
+                    onCommitShortcut={() => useConfigStore.getState().recordSnapshot(t("Manual Commit (Ctrl+Shift+S)"))}
                 />
             </div>
         );
     }
 
     const currentSelector = balancer.selector || [];
-    
+
     const errors = validateBalancer(balancer);
 
     const update = (field: string | null, val: any) => {
@@ -81,10 +81,10 @@ export const BalancerEditor = ({
 
     return (
         <div className="flex-1 min-h-0 w-full overflow-y-auto custom-scroll p-6 space-y-6 bg-slate-950/30 h-full">
-            
+
             <div className="flex justify-end mb-4">
                  <button onClick={() => {
-                     if (confirm("Delete this balancer?")) {
+                     if (confirm(t("Delete this balancer?"))) {
                          onChange(null);
                      }
                  }} className="text-xs text-rose-500 hover:text-rose-400 font-bold flex items-center gap-1 bg-rose-950/20 px-3 py-1.5 rounded-lg border border-rose-900/50 hover:bg-rose-900/30">
@@ -125,11 +125,11 @@ export const BalancerEditor = ({
                         }}
                     />
                 </div>
-                
+
                 <div className="border-t border-slate-800/50 pt-4 relative z-10">
-                    <Select 
+                    <Select
                         label={t("Strategy")}
-                        value={balancer.strategy?.type || "random"} 
+                        value={balancer.strategy?.type || "random"}
                         onChange={val => update('strategy', { ...balancer.strategy, type: val })}
                         options={[
                             { value: "random", label: t("Random"), description: t("Standard load balancing") },
@@ -150,7 +150,7 @@ export const BalancerEditor = ({
                 colorScheme="purple"
                 maxGridHeight="max-h-[300px]"
             />
-            
+
             {(balancer.strategy?.type === 'leastPing' || balancer.strategy?.type === 'leastLoad') && (
                 <div className="p-3 rounded-lg bg-yellow-900/20 border border-yellow-700/50 text-xs text-yellow-200 flex gap-2 items-start">
                     <Icon name="Warning" className="mt-0.5 shrink-0" weight="fill" />
@@ -178,7 +178,7 @@ export const BalancerEditor = ({
                             },
                             maxRTT: {
                                 label: t("Max RTT"),
-                                help: 'Maximum acceptable RTT (e.g. "1s", "500ms").',
+                                help: t("Maximum acceptable RTT (e.g. \"1s\", \"500ms\")."),
                                 placeholder: '1s'
                             },
                             tolerance: {

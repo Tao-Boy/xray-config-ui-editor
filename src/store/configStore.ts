@@ -42,7 +42,7 @@ export type {
 } from '../core/types';
 
 import type { XrayConfig, RoutingRule } from '../core/types';
-import { t } from '../i18n';
+import { t, tn, getLang } from '../i18n';
 
 export interface LocalProfile {
     id: string;
@@ -212,7 +212,7 @@ interface ConfigState {
      */
     coreVersion: CoreVersionId;
     setCoreVersion: (version: string) => void;
-    
+
     // Profiles & History State
     profiles: LocalProfile[];
     activeProfileId: string;
@@ -239,7 +239,7 @@ interface ConfigState {
     deduplicateHistory: () => void;
     setHistoryLimit: (limit: number) => void;
     setAutoSave: (enabled: boolean) => void;
-    
+
     // UI & Generator Settings
     warpWorkerUrl: string;
     setWarpWorkerUrl: (url: string) => void;
@@ -272,7 +272,7 @@ interface ConfigState {
      * leaving the session connected — nothing is lost until the page reloads.
      */
     setRemnawaveAccountRemember: (id: string, remember: boolean) => void;
-    
+
     // Standard CRUD Actions
     updateSection: (section: keyof XrayConfig, data: any, rawText?: string) => void;
     toggleSection: (section: keyof XrayConfig, defaultValue: any) => void;
@@ -282,7 +282,7 @@ interface ConfigState {
     deleteItems: (section: 'inbounds' | 'outbounds', indices: number[]) => void;
     moveItem: (section: 'inbounds' | 'outbounds', fromIndex: number, toIndex: number) => void;
     addOutbounds: (items: any[]) => void;
-    
+
     reorderRules: (newRules: RoutingRule[]) => void;
     updateRoutingRule: (index: number, rule: RoutingRule, rawText?: string | null) => void;
     updateBalancer: (index: number, balancer: any, rawText?: string | null) => void;
@@ -386,7 +386,7 @@ export const useConfigStore = create(
             rawConfigText: null,
             coreVersion: DEFAULT_CORE_VERSION,
             setCoreVersion: (version: string) => set({ coreVersion: coreVersionId(version) }),
-            
+
             warpWorkerUrl: '',
             setWarpWorkerUrl: (url: string) => set({ warpWorkerUrl: url }),
             spiderPaths: [],
@@ -449,9 +449,9 @@ export const useConfigStore = create(
                         state.panelCatalog.fetchedAt = Date.now();
                         state.panelCatalog.error = null;
                     }));
-                    toast.success(`Loaded ${hosts.length} host(s) from the panel`);
+                    toast.success(t("Loaded {value1} host(s) from the panel", { value1: String(hosts.length) }));
                 } catch (e: any) {
-                    const message = e?.message || 'Unknown error';
+                    const message = e?.message || t("Unknown error");
                     set(produce((state: any) => {
                         state.panelCatalog.loading = false;
                         state.panelCatalog.error = message;
@@ -471,10 +471,10 @@ export const useConfigStore = create(
                 try {
                     const host = await client.createHost(payload);
                     await get().fetchPanelCatalog();
-                    toast.success(`Host "${payload.remark}" created`);
+                    toast.success(t("Host \"{value1}\" created", { value1: String(payload.remark) }));
                     return host;
                 } catch (e: any) {
-                    toast.error(t("Failed to create the host"), { description: e?.message || 'Unknown error' });
+                    toast.error(t("Failed to create the host"), { description: e?.message || t("Unknown error") });
                     return null;
                 }
             },
@@ -498,14 +498,14 @@ export const useConfigStore = create(
                         await client.updateHost(update);
                         done++;
                     } catch (e: any) {
-                        failures.push(e?.message || 'Unknown error');
+                        failures.push(e?.message || t("Unknown error"));
                     }
                 }
                 await get().fetchPanelCatalog();
                 if (failures.length > 0) {
-                    toast.error(`${failures.length} host update(s) failed`, { description: failures[0] });
+                    toast.error(t("{value1} host update(s) failed", { value1: String(failures.length) }), { description: failures[0] });
                 } else {
-                    toast.success(`Updated ${done} host(s)`);
+                    toast.success(t("Updated {value1} host(s)", { value1: String(done) }));
                 }
                 return done;
             },
@@ -524,7 +524,7 @@ export const useConfigStore = create(
                     toast.success(t("Host saved"));
                     return true;
                 } catch (e: any) {
-                    toast.error(t("Failed to save the host"), { description: e?.message || 'Unknown error' });
+                    toast.error(t("Failed to save the host"), { description: e?.message || t("Unknown error") });
                     return false;
                 }
             },
@@ -543,7 +543,7 @@ export const useConfigStore = create(
                     toast.info(t("Host deleted"));
                     return true;
                 } catch (e: any) {
-                    toast.error(t("Failed to delete the host"), { description: e?.message || 'Unknown error' });
+                    toast.error(t("Failed to delete the host"), { description: e?.message || t("Unknown error") });
                     return false;
                 }
             },
@@ -568,7 +568,7 @@ export const useConfigStore = create(
                         state.panelTemplates.loading = false;
                     }));
                 } catch (e: any) {
-                    const message = e?.message || 'Unknown error';
+                    const message = e?.message || t("Unknown error");
                     set(produce((state: any) => {
                         state.panelTemplates.loading = false;
                         state.panelTemplates.error = message;
@@ -588,7 +588,7 @@ export const useConfigStore = create(
                 try {
                     return await client.getSubscriptionTemplate(uuid);
                 } catch (e: any) {
-                    toast.error(t("Failed to load the template"), { description: e?.message || 'Unknown error' });
+                    toast.error(t("Failed to load the template"), { description: e?.message || t("Unknown error") });
                     return null;
                 }
             },
@@ -604,10 +604,10 @@ export const useConfigStore = create(
                 try {
                     const created = await client.createSubscriptionTemplate(name.trim(), templateType);
                     await get().fetchSubscriptionTemplates();
-                    toast.success(`Template "${name}" created`);
+                    toast.success(t("Template \"{value1}\" created", { value1: String(name) }));
                     return created?.uuid || null;
                 } catch (e: any) {
-                    toast.error(t("Failed to create the template"), { description: e?.message || 'Unknown error' });
+                    toast.error(t("Failed to create the template"), { description: e?.message || t("Unknown error") });
                     return null;
                 }
             },
@@ -628,7 +628,7 @@ export const useConfigStore = create(
                     });
                     return true;
                 } catch (e: any) {
-                    toast.error(t("Failed to save the template"), { description: e?.message || 'Unknown error' });
+                    toast.error(t("Failed to save the template"), { description: e?.message || t("Unknown error") });
                     return false;
                 }
             },
@@ -647,7 +647,7 @@ export const useConfigStore = create(
                     toast.info(t("Template deleted"));
                     return true;
                 } catch (e: any) {
-                    toast.error(t("Failed to delete the template"), { description: e?.message || 'Unknown error' });
+                    toast.error(t("Failed to delete the template"), { description: e?.message || t("Unknown error") });
                     return false;
                 }
             },
@@ -670,9 +670,9 @@ export const useConfigStore = create(
                     if (mode === 'create') {
                         const created = await client.createSubscriptionTemplate((name || '').trim(), 'XRAY_JSON');
                         targetUuid = created?.uuid;
-                        if (!targetUuid) throw new Error('Panel did not return a template uuid');
+                        if (!targetUuid) throw new Error(t("Panel did not return a template uuid"));
                     }
-                    if (!targetUuid) throw new Error('No template selected');
+                    if (!targetUuid) throw new Error(t("No template selected"));
 
                     await client.updateSubscriptionTemplate(targetUuid, { templateJson });
                     await get().fetchSubscriptionTemplates();
@@ -686,17 +686,17 @@ export const useConfigStore = create(
                     ).length;
 
                     toast.success(mode === 'create'
-                        ? `Template "${name}" created in the panel`
-                        : 'Template updated in the panel', {
+                        ? t("Template \"{value1}\" created in the panel", { value1: String(name) })
+                        : t("Template updated in the panel"), {
                         description: mode === 'create'
-                            ? 'Next: create an entry host that points at it.'
+                            ? t("Next: create an entry host that points at it.")
                             : usedBy > 0
-                                ? `${usedBy} host(s) already point at it — their subscribers get this on the next refresh.`
-                                : 'No host points at it yet — create an entry host to hand it to subscribers.',
+                                ? t("{value1} host(s) already point at it — their subscribers get this on the next refresh.", { value1: String(usedBy) })
+                                : t("No host points at it yet — create an entry host to hand it to subscribers."),
                     });
                     return targetUuid;
                 } catch (e: any) {
-                    toast.error(t("Failed to save the template"), { description: e?.message || 'Unknown error' });
+                    toast.error(t("Failed to save the template"), { description: e?.message || t("Unknown error") });
                     return null;
                 }
             },
@@ -834,8 +834,8 @@ export const useConfigStore = create(
 
             fetchRemnawaveProfiles: async () => {
                 const { url, token } = get().remnawave;
-                if (!url || !token) throw new Error("Not authenticated");
-                
+                if (!url || !token) throw new Error(t("Not authenticated"));
+
                 const client = new RemnawaveClient(url);
                 client.setToken(token);
                 try {
@@ -868,7 +868,7 @@ export const useConfigStore = create(
                     const configData = await client.getConfigProfile(uuid);
                     const profile = get().remnawave.profiles.find(p => p.uuid === uuid);
                     const rawStr = typeof configData === 'string' ? configData : stringifyJsonc(configData, 2);
-                    get().loadConfig(configData, `Loaded Profile (${profile?.name || 'Cloud'})`, true, rawStr);
+                    get().loadConfig(configData, t("Loaded Profile ({value1})", { value1: String(profile?.name || 'Cloud') }), true, rawStr);
                     toast.success(t("Profile config loaded"));
 
                     // A panel profile may reference snippets the config does
@@ -900,7 +900,7 @@ export const useConfigStore = create(
 
                 if (invalidBalancer) {
                     toast.error(t("Push Blocked!"), {
-                        description: `Balancer "${invalidBalancer.tag}" has no target outbounds. Node will crash if you push this.`,
+                        description: t("Balancer \"{value1}\" has no target outbounds. Node will crash if you push this.", { value1: String(invalidBalancer.tag) }),
                         duration: 6000
                     });
                     return;
@@ -915,7 +915,7 @@ export const useConfigStore = create(
                 const firstIssue = criticalIssues[0];
                 if (firstIssue) {
                     toast.error(t("Push Blocked!"), {
-                        description: `${criticalIssues.length} critical issue(s) found: ${firstIssue.message}${criticalIssues.length > 1 ? ` (+${criticalIssues.length - 1} more — see Diagnostics)` : ''}`,
+                        description: t("{value1} critical issue(s) found: {value2}{value3}", { value1: String(criticalIssues.length), value2: String(firstIssue.message), value3: String(criticalIssues.length > 1 ? t(" (+{n} more — see Diagnostics)", { n: criticalIssues.length - 1 }) : '') }),
                         duration: 6000
                     });
                     return;
@@ -929,7 +929,7 @@ export const useConfigStore = create(
                     toast.success(t("Cloud Profile Updated!"));
                 } catch (e: any) {
                     toast.error(t("Failed to push config to cloud"), {
-                        description: e?.message || 'Unknown error',
+                        description: e?.message || t("Unknown error"),
                     });
                 }
             },
@@ -953,7 +953,7 @@ export const useConfigStore = create(
             hasHydrated: false,
             setHasHydrated: (value) => set({ hasHydrated: value }),
 
-            recordSnapshot: (label = "Config Edit") => {
+            recordSnapshot: (label = t("Config Edit")) => {
                 const { config, rawConfigText, histories, historyLimit, activeProfileId, remnawave } = get();
                 if (!config) return null;
 
@@ -984,7 +984,7 @@ export const useConfigStore = create(
                 const inbounds = config.inbounds?.length || 0;
                 const outbounds = config.outbounds?.length || 0;
                 const rules = config.routing?.rules?.length || 0;
-                const summary = `${inbounds} Inbounds, ${outbounds} Outbounds, ${rules} Rules`;
+                const summary = t("{inbounds} inbounds, {outbounds} outbounds, {rules} rules", { inbounds, outbounds, rules });
 
                 const snapshot: ConfigHistorySnapshot = {
                     id: Math.random().toString(36).substring(2, 9),
@@ -1013,7 +1013,7 @@ export const useConfigStore = create(
                     const restored = parseJsonc(stringifyJsonc(found.config));
                     const text = found.rawConfigText || stringifyJsonc(restored, 2);
                     set({ config: restored, rawConfigText: text });
-                    toast.success(`✓ Restored to commit ${id.substring(0, 7)} (${new Date(found.timestamp).toLocaleTimeString()})`);
+                    toast.success(t("✓ Restored to commit {value1} ({value2})", { value1: String(id.substring(0, 7)), value2: String(new Date(found.timestamp).toLocaleTimeString(getLang())) }));
                 }
             },
 
@@ -1025,7 +1025,7 @@ export const useConfigStore = create(
                 const history = histories[key] || [];
                 const filtered = history.filter(h => h.id !== id);
                 set({ histories: { ...histories, [key]: filtered } });
-                toast.success(`Deleted commit ${id.substring(0, 7)}`);
+                toast.success(t("Deleted commit {value1}", { value1: String(id.substring(0, 7)) }));
             },
 
             clearHistory: () => {
@@ -1052,7 +1052,7 @@ export const useConfigStore = create(
                 const removed = history.length - deduped.length;
                 set({ histories: { ...histories, [key]: deduped } });
                 if (removed > 0) {
-                    toast.success(`Removed ${removed} duplicate snapshot${removed > 1 ? 's' : ''}`);
+                    toast.success(tn(removed, "Removed {n} duplicate snapshot", "Removed {n} duplicate snapshots"));
                 } else {
                     toast.info(t("No duplicates found"));
                 }
@@ -1086,7 +1086,7 @@ export const useConfigStore = create(
                     : (get().rawConfigText || stringifyJsonc(cfg, 2));
                 const newProfile: LocalProfile = {
                     id: newId,
-                    name: name.trim() || 'New Profile',
+                    name: name.trim() || t("New Profile"),
                     updatedAt: Date.now(),
                     config: parseJsonc(stringifyJsonc(cfg)),
                     rawConfigText: text
@@ -1099,8 +1099,8 @@ export const useConfigStore = create(
                     state.baselineConfigJson = stringifyJsonc(newProfile.config);
                     state.remnawave.activeProfileUuid = null;
                 }));
-                get().recordSnapshot(`Created Profile (${newProfile.name})`);
-                toast.success(`Created profile "${newProfile.name}"`);
+                get().recordSnapshot(t("Created Profile ({value1})", { value1: String(newProfile.name) }));
+                toast.success(t("Created profile \"{value1}\"", { value1: String(newProfile.name) }));
             },
 
             switchProfile: (id) => {
@@ -1116,7 +1116,7 @@ export const useConfigStore = create(
                     state.baselineConfigJson = stringifyJsonc(target.config);
                     state.remnawave.activeProfileUuid = null;
                 }));
-                toast.info(`Switched to "${target.name}"`);
+                toast.info(t("Switched to \"{value1}\"", { value1: String(target.name) }));
             },
 
             renameProfile: (id, newName) => {
@@ -1164,7 +1164,7 @@ export const useConfigStore = create(
                 if (!config) return;
                 // If a cloud profile is active, do not overwrite the local profile
                 if (remnawave.activeProfileUuid) {
-                    get().recordSnapshot("Profile Saved");
+                    get().recordSnapshot(t("Profile Saved"));
                     return;
                 }
                 set(produce((state) => {
@@ -1176,7 +1176,7 @@ export const useConfigStore = create(
                     }
                     state.baselineConfigJson = stringifyJsonc(config);
                 }));
-                get().recordSnapshot("Profile Saved");
+                get().recordSnapshot(t("Profile Saved"));
 
                 // Local save is never blocked (the user might be mid-edit), but a
                 // config with critical issues (dangling routing targets, missing
@@ -1185,7 +1185,7 @@ export const useConfigStore = create(
                 const criticalCount = runFullDiagnostics(config, [], get().coreVersion).filter(d => d.severity === 'critical').length;
                 if (criticalCount > 0) {
                     toast.warning(t("Local Profile Saved (with issues)"), {
-                        description: `${criticalCount} critical diagnostic issue(s) remain — open Diagnostics before pushing this config.`,
+                        description: t("{value1} critical diagnostic issue(s) remain — open Diagnostics before pushing this config.", { value1: String(criticalCount) }),
                     });
                 } else {
                     toast.success(t("Local Profile Saved!"));
@@ -1210,7 +1210,7 @@ export const useConfigStore = create(
             },
 
             // --- Standard CRUD Actions ---
-            
+
             setConfig: (config, rawText) => set((state) => {
                 let newRawText = rawText;
                 if (newRawText === undefined) {
@@ -1275,7 +1275,7 @@ export const useConfigStore = create(
                         active.updatedAt = Date.now();
                     }
                 }));
-                get().recordSnapshot(label || "Loaded Config");
+                get().recordSnapshot(label || t("Loaded Config"));
             },
 
             updateSection: (section, data, rawText) => set((state) => {
@@ -1322,19 +1322,19 @@ export const useConfigStore = create(
                 const fullObj = resolveMutableConfig(state, { inbounds: [], outbounds: [] });
                 if (!fullObj.outbounds) fullObj.outbounds = [];
                 const existingTags = new Set(fullObj.outbounds.map((o: any) => o.tag));
-                
+
                 const cleanItems = items.map((item) => {
                     let tag = item.tag || `${item.protocol}-${Math.floor(Math.random() * 1000)}`;
-                    
+
                     if (existingTags.has(tag)) {
                         const suffix = Math.random().toString(36).substring(2, 5);
                         tag = `${tag}-${suffix}`;
                     }
-                    
+
                     existingTags.add(tag);
                     return { ...item, tag };
                 });
-                
+
                 fullObj.outbounds.push(...cleanItems);
                 const newText = stringifyJsonc(fullObj, 2);
                 return { config: fullObj, rawConfigText: newText };
@@ -1384,13 +1384,13 @@ export const useConfigStore = create(
                 const newText = stringifyJsonc(fullObj, 2);
                 return { config: fullObj, rawConfigText: newText };
             }),
-            
+
             moveItem: (section, fromIndex, toIndex) => set((state) => {
                 const fullObj = resolveMutableConfig(state);
                 if (!fullObj[section]) return state;
                 const list = fullObj[section];
                 if (toIndex < 0 || toIndex >= list.length) return state;
-                
+
                 const [movedItem] = list.splice(fromIndex, 1);
                 list.splice(toIndex, 0, movedItem);
                 const newText = stringifyJsonc(fullObj, 2);
@@ -1492,9 +1492,9 @@ export const useConfigStore = create(
                         state.snippetLibrary.supported = true;
                         state.snippetLibrary.error = null;
                     }));
-                    if (!silent) toast.success(`Loaded ${list.length} snippet(s) from the panel`);
+                    if (!silent) toast.success(t("Loaded {value1} snippet(s) from the panel", { value1: String(list.length) }));
                 } catch (e: any) {
-                    const message = e?.message || 'Unknown error';
+                    const message = e?.message || t("Unknown error");
                     const unsupported = message.includes('404');
                     set(produce((state: any) => {
                         state.snippetLibrary.loading = false;
@@ -1503,8 +1503,8 @@ export const useConfigStore = create(
                     }));
                     if (!silent) {
                         toast.error(unsupported
-                            ? "This panel has no snippets API"
-                            : "Failed to load snippets", { description: message });
+                            ? t("This panel has no snippets API")
+                            : t("Failed to load snippets"), { description: message });
                     }
                 }
             },
@@ -1542,7 +1542,7 @@ export const useConfigStore = create(
                     if (idx >= 0) list[idx] = entry;
                     else list.push(entry);
                 }));
-                toast.success(`Template "${trimmed}" saved`);
+                toast.success(t("Template \"{value1}\" saved", { value1: String(trimmed) }));
                 return true;
             },
 
@@ -1552,7 +1552,7 @@ export const useConfigStore = create(
                         (snippet: SnippetDefinition) => snippet.name !== name
                     );
                 }));
-                toast.info(`Template "${name}" deleted`);
+                toast.info(t("Template \"{value1}\" deleted", { value1: String(name) }));
             },
 
             pushSnippetToPanel: async (name, snippet) => {
@@ -1583,12 +1583,12 @@ export const useConfigStore = create(
                     else await client.createSnippet(trimmed, snippet);
                     await get().fetchSnippets({ silent: true });
                     toast.success(exists
-                        ? `Snippet "${trimmed}" updated in the panel`
-                        : `Snippet "${trimmed}" created in the panel`);
+                        ? t("Snippet \"{value1}\" updated in the panel", { value1: String(trimmed) })
+                        : t("Snippet \"{value1}\" created in the panel", { value1: String(trimmed) }));
                     return true;
                 } catch (e: any) {
                     toast.error(t("Failed to save snippet to the panel"), {
-                        description: e?.message || 'Unknown error',
+                        description: e?.message || t("Unknown error"),
                     });
                     return false;
                 }
@@ -1605,9 +1605,9 @@ export const useConfigStore = create(
                 try {
                     await client.deleteSnippet(name);
                     await get().fetchSnippets({ silent: true });
-                    toast.success(`Snippet "${name}" deleted from the panel`);
+                    toast.success(t("Snippet \"{value1}\" deleted from the panel", { value1: String(name) }));
                 } catch (e: any) {
-                    toast.error(t("Failed to delete snippet"), { description: e?.message || 'Unknown error' });
+                    toast.error(t("Failed to delete snippet"), { description: e?.message || t("Unknown error") });
                 }
             },
 
@@ -1621,11 +1621,11 @@ export const useConfigStore = create(
                 client.setToken(token);
                 try {
                     await client.syncSnippet(name);
-                    toast.success(`Snippet "${name}" synced`, {
+                    toast.success(t("Snippet \"{value1}\" synced", { value1: String(name) }), {
                         description: t("Panel is re-applying it to every profile that references it."),
                     });
                 } catch (e: any) {
-                    toast.error(t("Failed to sync snippet"), { description: e?.message || 'Unknown error' });
+                    toast.error(t("Failed to sync snippet"), { description: e?.message || t("Unknown error") });
                 }
             },
 
@@ -1651,17 +1651,17 @@ export const useConfigStore = create(
                     }
                     return { config: fullObj, rawConfigText: stringifyJsonc(fullObj, 2) };
                 });
-                toast.success(`Snippet reference "${trimmed}" added`, {
+                toast.success(t("Snippet reference \"{value1}\" added", { value1: String(trimmed) }), {
                     description: section === 'rules'
-                        ? 'Placed at the top of the rules list - drag it into position.'
-                        : `Appended to ${section}.`,
+                        ? t("Placed at the top of the rules list - drag it into position.")
+                        : t("Appended to {value1}.", { value1: String(section) }),
                 });
             },
 
             insertSnippetBody: (name, section) => {
                 const def = get().getSnippetDefs().find(d => d.name === name);
                 if (!def || !Array.isArray(def.snippet) || def.snippet.length === 0) {
-                    toast.error(`Snippet "${name}" has no loaded body to insert`);
+                    toast.error(t("Snippet \"{value1}\" has no loaded body to insert", { value1: String(name) }));
                     return;
                 }
                 const entries = JSON.parse(JSON.stringify(def.snippet));
@@ -1681,7 +1681,7 @@ export const useConfigStore = create(
                     }
                     return { config: fullObj, rawConfigText: stringifyJsonc(fullObj, 2) };
                 });
-                toast.success(`Inserted ${entries.length} item(s) from "${name}"`, {
+                toast.success(t("Inserted {value1} item(s) from \"{value2}\"", { value1: String(entries.length), value2: String(name) }), {
                     description: t("These are a copy - they no longer follow the panel snippet."),
                 });
             },
@@ -1754,7 +1754,7 @@ export const useConfigStore = create(
                     snippetLibrary: { ...current.snippetLibrary, ...(saved.snippetLibrary ?? {}) },
                 } as ConfigState;
             },
-            partialize: (state) => ({ 
+            partialize: (state) => ({
                 config: state.config,
                 rawConfigText: state.rawConfigText,
                 coreVersion: state.coreVersion,

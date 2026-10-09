@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Icon } from './ui/Icon';
 import { Button } from './ui/Button';
 import { useBackToClose } from '../hooks/useBackToClose';
-import { t } from '../i18n';
+import { t, getLang } from '../i18n';
 
 interface Commit {
     sha: string;
@@ -38,7 +38,7 @@ export const AboutModal = ({ onClose }: { onClose: () => void }) => {
     useEffect(() => {
         if (cached) return;
 
-        fetch('https://api.github.com/repos/bropines/xray-config-ui-editor/commits?per_page=10')
+        fetch('https://api.github.com/repos/Tao-Boy/xray-config-ui-editor/commits?per_page=10')
             .then(res => res.json())
             .then(data => {
                 if (Array.isArray(data)) {
@@ -56,7 +56,7 @@ export const AboutModal = ({ onClose }: { onClose: () => void }) => {
 
     const formatDate = (dateStr: string) => {
         const date = new Date(dateStr);
-        return date.toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+        return date.toLocaleDateString(getLang(), { day: 'numeric', month: 'short' });
     };
 
     return (
@@ -70,8 +70,7 @@ export const AboutModal = ({ onClose }: { onClose: () => void }) => {
                         </div>
                         <div>
                             <div className="font-black text-white text-xl tracking-tight uppercase leading-none">{t("Xray GUI")}</div>
-                            <div className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">
-                                Version {typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'v1.0.0-dev'}
+                            <div className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1"> {t("Version")} {typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'v1.0.0-dev'}
                             </div>
                         </div>
                     </div>
@@ -83,7 +82,7 @@ export const AboutModal = ({ onClose }: { onClose: () => void }) => {
                 {/* Content */}
                 <div className="flex-1 overflow-y-auto custom-scroll space-y-6 pr-1">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 shrink-0">
-                        <a href="https://github.com/bropines/xray-config-ui-editor" target="_blank" className="bg-slate-950 border border-slate-800 rounded-2xl p-3 flex flex-col items-center gap-1.5 hover:border-indigo-500/50 transition-all hover:bg-indigo-500/5 group">
+                        <a href="https://github.com/Tao-Boy/xray-config-ui-editor" target="_blank" className="bg-slate-950 border border-slate-800 rounded-2xl p-3 flex flex-col items-center gap-1.5 hover:border-indigo-500/50 transition-all hover:bg-indigo-500/5 group">
                             <Icon name="GithubLogo" className="text-2xl text-slate-400 group-hover:text-white transition-colors" />
                             <span className="text-[10px] font-bold text-slate-500 group-hover:text-slate-200">{t("Repository")}</span>
                         </a>
@@ -111,7 +110,7 @@ export const AboutModal = ({ onClose }: { onClose: () => void }) => {
                             <Icon name="GitCommit" className="text-indigo-400" />
                             <span className="text-xs font-black uppercase text-slate-400 tracking-wider">{t("What's New (Changelog)")}</span>
                         </div>
-                        
+
                         <div className="bg-slate-950/50 border border-slate-800/50 rounded-2xl overflow-hidden">
                             {loading ? (
                                 <div className="p-10 flex flex-col items-center justify-center gap-3 opacity-50">
@@ -134,8 +133,7 @@ export const AboutModal = ({ onClose }: { onClose: () => void }) => {
                                                 <div className="text-[9px] font-mono text-slate-500 bg-slate-900 px-1.5 py-0.5 rounded border border-slate-800 group-hover:border-indigo-500/30 transition-colors">
                                                     {c.sha.substring(0, 7)}
                                                 </div>
-                                                <div className="text-[9px] text-slate-600 italic">
-                                                    by {c.commit.author.name}
+                                                <div className="text-[9px] text-slate-600 italic"> {t("by")} {c.commit.author.name}
                                                 </div>
                                             </div>
                                         </a>

@@ -104,18 +104,18 @@ config,
             if (rule.domain) conditions.push(`${rule.domain.length} dom`);
             if (rule.ip) conditions.push(`${rule.ip.length} ip`);
             if (rule.port) conditions.push("port");
-            if (rule.sourcePort) conditions.push("src port");
+            if (rule.sourcePort) conditions.push(t("src port"));
             if (rule.protocol) conditions.push("proto");
             if (rule.network) conditions.push(String(rule.network));
             if (rule.inboundTag) conditions.push("inbound");
-            if (rule.source) conditions.push("src ip");
+            if (rule.source) conditions.push(t("src ip"));
             if (rule.user) conditions.push("user");
             if (rule.attrs) conditions.push("attrs");
-            if (conditions.length === 0) conditions.push("match all");
-            
+            if (conditions.length === 0) conditions.push(t("match all"));
+
             const isBalancer = !!rule.balancerTag;
             const target = rule.outboundTag || rule.balancerTag || "null";
-            
+
             return (
               <div
                 key={i}
@@ -154,9 +154,7 @@ config,
             );
           })}
         {(config.routing?.rules || []).length === 0 && (
-          <div className="text-center text-slate-600 py-8 italic text-xs">
-            No routing rules.
-            <br />
+          <div className="text-center text-slate-600 py-8 italic text-xs"> {t("No routing rules.")} <br />
             {t("Traffic will follow the first outbound.")}
             </div>
         )}
