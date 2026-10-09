@@ -139,7 +139,16 @@ bun run build
 bun run preview
 ```
 
-默认开发端口为 `3000`，页面路径为 `/xray-config-ui-editor/`。部署到其他路径时，请同步修改 `vite.config.ts` 的 `base`。现有 GitHub Actions 支持手动部署或推送版本标签时部署至 GitHub Pages。
+默认开发端口为 `3000`，页面路径为 `/xray-config-ui-editor/`。部署到其他路径时，请同步修改 `vite.config.ts` 的 `base`。
+
+### 发布到 GitHub Pages
+
+1. 打开仓库 **Settings → Pages**，在 **Build and deployment → Source** 中选择 **GitHub Actions**。首次启用 Pages 需要仓库管理员完成此设置。
+2. 如果 fork 的 **Actions** 尚未启用，先在 Actions 页面启用工作流。
+3. 推送到 `main` 后，`Deploy to GitHub Pages & Release` 工作流会自动运行测试、类型检查、代码检查、翻译检查和生产构建，然后发布网站。
+4. 也可在 **Actions → Deploy to GitHub Pages & Release → Run workflow** 中选择 `main` 手动部署。推送 `v*` 版本标签仍会部署并创建 GitHub Release。
+
+部署成功后，访问 [简体中文版网站](https://tao-boy.github.io/xray-config-ui-editor/)。Pages 使用 `github-pages` 部署环境，Actions 的部署记录会显示网站地址。
 
 ### 翻译维护
 
