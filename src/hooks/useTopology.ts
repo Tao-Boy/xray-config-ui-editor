@@ -34,7 +34,7 @@ export const useTopology = () => {
 
         // 0. ПРЕДВАРИТЕЛЬНЫЙ АНАЛИЗ ИСПОЛЬЗОВАНИЯ
         const usedOutboundTags = new Set<string>();
-        
+
         // Первый аутбаунд всегда используется
         if (config.outbounds?.[0]?.tag) usedOutboundTags.add(config.outbounds[0].tag);
 
@@ -59,7 +59,7 @@ export const useTopology = () => {
                 nodes.push({
                     id: `in-${inbound.tag || i}`,
                     type: 'custom',
-                    data: { type: 'inbound', labelType: 'Inbound', label: inbound.tag || `in-${i}`, details: `${inbound.protocol}:${inbound.port}` },
+                    data: { type: 'inbound', labelType: t("Inbound"), label: inbound.tag || `in-${i}`, details: `${inbound.protocol}:${inbound.port}` },
                     position: { x: 0, y: 0 }
                 });
             });
@@ -81,7 +81,7 @@ export const useTopology = () => {
                 nodes.push({
                     id: id,
                     type: 'custom',
-                    data: { type: 'outbound', labelType: 'Outbound', label: outbound.tag || `out-${i}`, details: outbound.protocol },
+                    data: { type: 'outbound', labelType: t("Outbound"), label: outbound.tag || `out-${i}`, details: outbound.protocol },
                     position: { x: 0, y: 0 }
                 });
             });
@@ -96,7 +96,7 @@ export const useTopology = () => {
                 nodes.push({
                     id: id,
                     type: 'custom',
-                    data: { type: 'balancer', labelType: 'Balancer', label: bal.tag, details: bal.strategy?.type || 'random' },
+                    data: { type: 'balancer', labelType: t("Balancer"), label: bal.tag, details: bal.strategy?.type || 'random' },
                     position: { x: 0, y: 0 }
                 });
 
@@ -117,12 +117,12 @@ export const useTopology = () => {
         if (showRules) {
             config.routing?.rules?.forEach((rule, i) => {
                 const ruleId = `rule-${i}`;
-                let detail = "Match All";
-                
-                if (rule.domain) detail = `Domain (${rule.domain.length})`;
-                else if (rule.ip) detail = `IP (${rule.ip.length})`;
-                else if (rule.port) detail = `Port: ${rule.port}`;
-                else if (rule.inboundTag) detail = `In: ${rule.inboundTag.join(', ')}`;
+                let detail = t("Match All");
+
+                if (rule.domain) detail = t("Domain ({n})", { n: rule.domain.length });
+                else if (rule.ip) detail = t("IP ({n})", { n: rule.ip.length });
+                else if (rule.port) detail = t("Port: {port}", { port: rule.port });
+                else if (rule.inboundTag) detail = t("In: {tags}", { tags: rule.inboundTag.join(", ") });
 
                 // A snippet reference is a placeholder the panel expands, not
                 // a rule with matchers - label it as such instead of showing
@@ -135,13 +135,13 @@ export const useTopology = () => {
                     data: snippetName
                         ? {
                             type: 'rule',
-                            labelType: 'Snippet',
+                            labelType: t("Snippet"),
                             label: snippetName,
-                            details: 'expanded by the panel',
+                            details: t("expanded by the panel"),
                         }
                         : {
                             type: 'rule',
-                            labelType: rule.ruleTag ? 'Named Rule' : 'Rule',
+                            labelType: rule.ruleTag ? t("Named Rule") : t("Rule"),
                             label: rule.ruleTag || `#${i + 1}`,
                             details: detail
                         },
@@ -183,7 +183,7 @@ export const useTopology = () => {
                 nodes.push({
                     id: defaultId,
                     type: 'custom',
-                    data: { type: 'rule', labelType: 'Fallback', label: t("Default Route"), details: 'If no match' },
+                    data: { type: 'rule', labelType: t("Fallback"), label: t("Default Route"), details: t("If no match") },
                     position: { x: 0, y: 0 }
                 });
 

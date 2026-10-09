@@ -72,7 +72,7 @@ export const DnsModal = ({ onClose }: any) => {
                         rawText={localRawText}
                         rawConfigText={rawConfigText}
                         onSaveShortcut={() => useConfigStore.getState().saveActiveProfile()}
-                        onCommitShortcut={() => useConfigStore.getState().recordSnapshot("Manual Commit (Ctrl+Shift+S)")}
+                        onCommitShortcut={() => useConfigStore.getState().recordSnapshot(t("Manual Commit (Ctrl+Shift+S)"))}
                     />
                 </div>
             </Modal>
@@ -139,7 +139,7 @@ export const DnsModal = ({ onClose }: any) => {
                         )}
 
                         {/* List Column (Hidden on mobile if editing) */}
-                        <div className={`${mobileEditMode ? 'hidden md:block' : 'block'} ${editingServerIdx !== null ? 'w-full md:w-1/3' : 'w-full max-w-2xl mx-auto'} transition-all duration-300 h-full overflow-hidden flex flex-col`}>
+                        <div className={`${mobileEditMode ? "hidden md:block" : 'block'} ${editingServerIdx !== null ? 'w-full md:w-1/3' : 'w-full max-w-2xl mx-auto'} transition-all duration-300 h-full overflow-hidden flex flex-col`}>
                             <DnsServers
                                 servers={dns.servers}
                                 activeIndex={editingServerIdx}
@@ -152,7 +152,7 @@ export const DnsModal = ({ onClose }: any) => {
 
                         {/* Editor Column (Hidden on mobile if NOT editing) */}
                         {editingServerIdx !== null && (
-                            <div className={`${mobileEditMode ? 'block' : 'hidden md:block'} flex-1 animate-in slide-in-from-right-4 fade-in duration-300 h-full overflow-hidden flex flex-col`}>
+                            <div className={`${mobileEditMode ? 'block' : "hidden md:block"} flex-1 animate-in slide-in-from-right-4 fade-in duration-300 h-full overflow-hidden flex flex-col`}>
                                 <DnsServerEditor
                                     server={dns.servers?.[editingServerIdx]}
                                     onChange={handleUpdateServer}

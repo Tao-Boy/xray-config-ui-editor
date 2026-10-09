@@ -82,8 +82,7 @@ export const CommitModal: React.FC<CommitModalProps> = ({ onClose, onCommitSucce
 
                 {/* Commit Message Input */}
                 <div className="space-y-1.5">
-                    <label className="block text-xs font-bold text-slate-300">
-                        Commit Message <span className="text-rose-400">*</span>
+                    <label className="block text-xs font-bold text-slate-300"> {t("Commit Message")} <span className="text-rose-400">*</span>
                     </label>
                     <textarea
                         required

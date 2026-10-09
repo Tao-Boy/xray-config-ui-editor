@@ -1,8 +1,11 @@
 import { describe, expect, it } from 'bun:test';
 import { readdirSync, readFileSync, statSync } from 'fs';
 import { join } from 'path';
-import { getLang, setLang, t, tn } from './index';
-import { ru } from './ru';
+import { detectLang, dictionaryFor, getLang, LANGUAGES, perLanguage, setLang, t, tn } from './index';
+import { lintValue } from '../core/xray/json-lint';
+import { runFullDiagnostics } from '../core/diagnostics';
+import { getPresets } from '../core/presets';
+import { codeMirrorPhrases } from '../components/ui/code-mirror-phrases';
 import { UNTRANSLATED } from './untranslated';
 
 const sourceFiles = (dir: string): string[] => {
@@ -165,10 +168,12 @@ describe('i18n imports', () => {
     });
 });
 
-describe('russian coverage', () => {
+for (const lang of LANGUAGES.filter(language => language.code !== 'en')) {
+const dictionary = dictionaryFor(lang.code);
+describe(`${lang.code} coverage`, () => {
     it('translates every string the app renders', () => {
         const missing = [...usedKeys().keys()]
-            .filter(key => !(key in ru) && !UNTRANSLATED.has(key))
+            .filter(key => !(key in dictionary) && !UNTRANSLATED.has(key))
             .sort();
         // Printed rather than summarised: the list is the actionable part when
         // someone adds a string and forgets the translation.
@@ -177,14 +182,14 @@ describe('russian coverage', () => {
 
     it('has no entries for strings the app no longer uses', () => {
         const used = usedKeys();
-        const stale = Object.keys(ru).filter(key => !used.has(key)).sort();
+        const stale = Object.keys(dictionary).filter(key => !used.has(key)).sort();
         expect(stale).toEqual([]);
     });
 
     it('keeps every placeholder that the English side declares', () => {
         const used = usedKeys();
         const broken: string[] = [];
-        for (const [key, value] of Object.entries(ru)) {
+        for (const [key, value] of Object.entries(dictionary)) {
             if (!used.has(key)) continue;
             const vars = (s: string) => (s.match(/\{\w+\}/g) ?? []).sort().join(',');
             // Plural keys hold pipe-separated forms; each form repeats the vars.
@@ -194,5 +199,58 @@ describe('russian coverage', () => {
             }
         }
         expect(broken).toEqual([]);
+    });
+});
+}
+
+describe('Chinese localization', () => {
+    it('defaults to Chinese while preserving an explicit saved choice', () => {
+        withStorage({ getItem: () => null, setItem: () => {} }, () => {
+            expect(detectLang()).toBe('zh-CN');
+        });
+        withStorage({ getItem: () => 'ru', setItem: () => {} }, () => {
+            expect(detectLang()).toBe('ru');
+        });
+        withStorage({ getItem: () => 'invalid', setItem: () => {} }, () => {
+            expect(detectLang()).toBe('zh-CN');
+        });
+        withStorage({ getItem: () => { throw new Error('blocked'); }, setItem: () => {} }, () => {
+            expect(detectLang()).toBe('zh-CN');
+        });
+    });
+
+    it('switches labels, plural counts, metadata and cached tables together', () => {
+        const labels = perLanguage(() => t('Add Inbound'));
+        try {
+            setLang('zh-CN');
+            expect(labels()).toBe('添加入站');
+            for (const n of [0, 1, 2, 21, 100]) {
+                expect(tn(n, '{n} config', '{n} configs')).toBe(`${n} 份配置`);
+            }
+            expect(t('Switched to {panel}', { panel: 'Test' })).toBe('已切换到 Test');
+            expect(document.documentElement.lang).toBe('zh-CN');
+            expect(document.title).toBe('Xray 配置编辑器');
+            setLang('en');
+            expect(labels()).toBe('Add Inbound');
+        } finally {
+            setLang('en');
+        }
+    });
+
+    it('localizes schema errors and diagnostics without altering config values', () => {
+        const config = { outbounds: [{ tag: 'proxy', protocol: 'vless', streamSettings: { network: 'grpc' } }] };
+        const original = JSON.stringify(config);
+        try {
+            setLang('zh-CN');
+            expect(lintValue('inbound', { protocol: 'vless', port: [] })[0]?.message).toMatch(/[\u4e00-\u9fff]/);
+            expect(runFullDiagnostics(config)[0]?.message).toBe('gRPC 必须设置 serviceName。');
+            expect(JSON.stringify(config)).toBe(original);
+            const preset = getPresets().find(item => item.name === t('WARP Profile A'));
+            expect(preset?.config.outbounds?.[0]?.protocol).toBe('wireguard');
+            expect(codeMirrorPhrases().Search).toBe('搜索');
+            expect(codeMirrorPhrases()['replaced $ matches']).toContain('$');
+        } finally {
+            setLang('en');
+        }
     });
 });

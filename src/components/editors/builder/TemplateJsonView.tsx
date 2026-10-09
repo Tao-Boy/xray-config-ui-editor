@@ -1,3 +1,4 @@
+import { t } from '../../../i18n';
 import { JsonEditor } from '../../ui/JsonEditor';
 import type { useTemplatesLibrary } from '../../../hooks/useTemplatesLibrary';
 
@@ -26,7 +27,7 @@ export const TemplateJsonView = ({
         <div className="flex-1 min-h-0 flex flex-col">
             <div className="flex justify-between items-end mb-1.5 gap-2">
                 <span className="label-xs">
-                    {isExisting ? `Template JSON — ${tpl.draft?.name || ''}` : 'Template JSON (from the form)'}
+                    {isExisting ? t("Template JSON — {value1}", { value1: String(tpl.draft?.name || '') }) : t("Template JSON (from the form)")}
                 </span>
                 {tpl.parseError && (
                     <span className="text-[10px] text-rose-400 truncate max-w-[55%]">{tpl.parseError}</span>
@@ -49,8 +50,8 @@ export const TemplateJsonView = ({
 
             <p className="text-[10px] text-slate-500 mt-1.5">
                 {isExisting
-                    ? 'Edits here are saved to the panel as-is. Switch back to Form to read them into the fields.'
-                    : 'Read-only until the template exists: save it from the Form view first, then edit the JSON directly.'}
+                    ? t("Edits here are saved to the panel as-is. Switch back to Form to read them into the fields.")
+                    : t("Read-only until the template exists: save it from the Form view first, then edit the JSON directly.")}
             </p>
         </div>
     );

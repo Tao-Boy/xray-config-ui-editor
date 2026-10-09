@@ -3,6 +3,7 @@
 // ============================================================
 
 import { z } from 'zod';
+import { getLang } from '../../i18n';
 import {
     inboundSettingsSchemaFor,
     outboundSettingsSchemaFor,
@@ -82,6 +83,8 @@ const article = (word: string) => (/^[aeiou]/i.test(word) ? 'an' : 'a');
 const describe = (issue: z.core.$ZodIssue, path: (string | number)[]): string => {
     const where = formatPath(path);
     const field = where ? `${where}: ` : '';
+    // Zod's locale follows the active language; keep paths and enum values intact.
+    if (getLang() !== 'en') return `${field}${issue.message}`;
 
     switch (issue.code) {
         case 'invalid_type': {

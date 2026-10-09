@@ -42,7 +42,7 @@ export const InboundModal = ({ data, onSave, onClose }: any) => {
             schemaMode="inbound"
             rawConfigText={rawConfigText}
             onSaveShortcut={() => useConfigStore.getState().saveActiveProfile()}
-            onCommitShortcut={() => useConfigStore.getState().recordSnapshot("Manual Commit (Ctrl+Shift+S)")}
+            onCommitShortcut={() => useConfigStore.getState().recordSnapshot(t("Manual Commit (Ctrl+Shift+S)"))}
         >
             <div className="space-y-8 pb-8">
                 {/* What the chosen core refuses or ignores here — read first, fixed in place. */}

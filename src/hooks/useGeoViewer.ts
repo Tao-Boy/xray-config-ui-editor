@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { getSharedProtoWorker } from '../utils/proto-worker';
-import { binaryCache, loadCachedData, saveCachedData, getDefaultGeoList } from '../utils/geo-data';
+import { binaryCache, loadCachedData, saveCachedData, getDefaultGeoList, describeGeoError } from '../utils/geo-data';
 import { t } from '../i18n';
 
 export interface GeoItem { code: string; count: number; }
@@ -12,19 +12,19 @@ export const useGeoViewer = () => {
     const [activeTab, setActiveTab] = useState<'geosite' | 'geoip' | 'custom'>(() => (localStorage.getItem('geo_tab') as any) || 'geosite');
     const [customUrl, setCustomUrl] = useState(() => localStorage.getItem('geo_url') || "");
     const [customFormat, setCustomFormat] = useState<'text' | 'geosite' | 'geoip'>(() => (localStorage.getItem('geo_format') as any) || 'geoip');
-    
+
     const [customFileBuffer, setCustomFileBuffer] = useState<ArrayBuffer | null>(null);
     const [customData, setCustomData] = useState<GeoItem[]>([]);
-    
+
     const [geoSites, setGeoSites] = useState<GeoItem[]>([]);
     const [geoIps, setGeoIps] = useState<GeoItem[]>([]);
     // The first render already has a fetch in flight.
     const [loading, setLoading] = useState(true);
     const [customLoading, setCustomLoading] = useState(false);
-    
+
     const [search, setSearch] = useState("");
     const [debouncedSearch, setDebouncedSearch] = useState("");
-    
+
     const [isDeepSearch, setIsDeepSearch] = useState(false);
     const [deepSearchLoading, setDeepSearchLoading] = useState(false);
     const [deepSearchResults, setDeepSearchResults] = useState<GeoItem[] | null>(null);
@@ -74,7 +74,7 @@ export const useGeoViewer = () => {
             loadCachedData(customUrl).then(cache => {
                 if (cache?.data) {
                     setCustomData(cache.data);
-                } else if (!customFileBuffer) { 
+                } else if (!customFileBuffer) {
                     setCustomData([]);
                 }
             });
@@ -95,12 +95,12 @@ export const useGeoViewer = () => {
         let isCancelled = false;
         setDeepSearchLoading(true);
 
-        const currentUrl = activeTab === 'geosite' 
-            ? "https://cdn.jsdelivr.net/gh/v2fly/domain-list-community@release/dlc.dat" 
-            : activeTab === 'geoip' 
-                ? "https://cdn.jsdelivr.net/gh/v2fly/geoip@release/geoip.dat" 
+        const currentUrl = activeTab === 'geosite'
+            ? "https://cdn.jsdelivr.net/gh/v2fly/domain-list-community@release/dlc.dat"
+            : activeTab === 'geoip'
+                ? "https://cdn.jsdelivr.net/gh/v2fly/geoip@release/geoip.dat"
                 : customUrl;
-        
+
         const format = activeTab === 'custom' ? customFormat : activeTab;
 
         if (format === 'text') {
@@ -111,7 +111,7 @@ export const useGeoViewer = () => {
 
         const loadDeepSearch = async () => {
             let buffer = customFileBuffer || binaryCache.get(currentUrl);
-            
+
             if (!buffer) {
                 const cached = await loadCachedData(currentUrl + "_raw");
                 const cachedBuffer: ArrayBuffer | undefined = cached?.buffer;
@@ -131,7 +131,7 @@ export const useGeoViewer = () => {
                     setDeepSearchLoading(false);
                     worker.removeEventListener('message', handleMessage);
                 } else if (e.data.error) {
-                    toast.error(t("Deep search error"), { description: e.data.error });
+                    toast.error(t("Deep search error"), { description: describeGeoError(e.data.error) });
                     setDeepSearchLoading(false);
                     worker.removeEventListener('message', handleMessage);
                 }
@@ -158,7 +158,7 @@ export const useGeoViewer = () => {
         if (!file) return;
 
         setCustomLoading(true);
-        setCustomUrl(file.name); 
+        setCustomUrl(file.name);
         setCustomFileBuffer(null);
 
         try {
@@ -168,7 +168,7 @@ export const useGeoViewer = () => {
                 const formattedData = lines.map(line => ({ code: line, count: 1 }));
                 setCustomData(formattedData);
                 setViewTag(null);
-                toast.success(`Loaded ${formattedData.length} items from local file`);
+                toast.success(t("Loaded {value1} items from local file", { value1: String(formattedData.length) }));
                 setCustomLoading(false);
             } else {
                 const buffer = await file.arrayBuffer();
@@ -176,11 +176,11 @@ export const useGeoViewer = () => {
 
                 const worker = getSharedProtoWorker();
                 const handleMessage = (evt: MessageEvent) => {
-                    if (evt.data.error) toast.error(t("Failed to parse DAT"), { description: evt.data.error });
+                    if (evt.data.error) toast.error(t("Failed to parse DAT"), { description: describeGeoError(evt.data.error) });
                     else if (evt.data.type === 'success') {
                         setCustomData(evt.data.data);
                         setViewTag(null);
-                        toast.success(`Loaded ${evt.data.data.length} categories from local file`);
+                        toast.success(t("Loaded {value1} categories from local file", { value1: String(evt.data.data.length) }));
                     }
                     setCustomLoading(false);
                     worker.removeEventListener('message', handleMessage);
@@ -197,11 +197,11 @@ export const useGeoViewer = () => {
     };
 
     const fetchCustomList = async () => {
-        if (!customUrl || customUrl.includes('.')) { 
+        if (!customUrl || customUrl.includes('.')) {
             if (customFileBuffer) return toast.info(t("Local file already loaded"));
         }
         if (!customUrl.startsWith('http')) return toast.error(t("Please enter a valid URL"));
-        
+
         setCustomLoading(true);
         setCustomFileBuffer(null);
 
@@ -215,25 +215,25 @@ export const useGeoViewer = () => {
             } else {
                 targets = [customUrl, myProxy];
             }
-            
+
             let res;
-            for (const target of targets) { 
-                try { 
+            for (const target of targets) {
+                try {
                     res = await fetch(target);
                     if (res.ok) break;
-                } catch {} 
+                } catch {}
             }
-            if (!res || !res.ok) throw new Error("Failed to fetch list from URL");
+            if (!res || !res.ok) throw new Error(t("Failed to fetch list from URL"));
 
             if (customFormat === 'text') {
                 const text = await res.text();
                 const lines = text.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#') && !l.startsWith('//'));
                 const formattedData = lines.map(line => ({ code: line, count: 1 }));
-                
+
                 await saveCachedData(customUrl, formattedData, { size: text.length });
                 setCustomData(formattedData);
                 setViewTag(null);
-                toast.success(`Loaded ${formattedData.length} items`);
+                toast.success(t("Loaded {value1} items", { value1: String(formattedData.length) }));
                 setCustomLoading(false);
             } else {
                 const buffer = await res.arrayBuffer();
@@ -242,12 +242,12 @@ export const useGeoViewer = () => {
 
                 const worker = getSharedProtoWorker();
                 const handleMessage = async (e: MessageEvent) => {
-                    if (e.data.error) toast.error(t("Failed to parse DAT"), { description: e.data.error });
+                    if (e.data.error) toast.error(t("Failed to parse DAT"), { description: describeGeoError(e.data.error) });
                     else if (e.data.type === 'success') {
                         await saveCachedData(customUrl, e.data.data, e.data.meta || { timestamp: Date.now() });
                         setCustomData(e.data.data);
                         setViewTag(null);
-                        toast.success(`Loaded ${e.data.data.length} categories`);
+                        toast.success(t("Loaded {value1} categories", { value1: String(e.data.data.length) }));
                     }
                     setCustomLoading(false);
                     worker.removeEventListener('message', handleMessage);

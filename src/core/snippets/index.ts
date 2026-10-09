@@ -1,3 +1,4 @@
+import { t } from '../../i18n';
 // ============================================================
 // Snippets — src/core/snippets/index.ts
 // ============================================================
@@ -131,10 +132,10 @@ export const collectSnippetNames = (config: any): string[] => {
  */
 export const validateSnippetName = (name: string): string | null => {
     const trimmed = (name || '').trim();
-    if (trimmed.length < SNIPPET_NAME_MIN) return `Name must be at least ${SNIPPET_NAME_MIN} characters`;
-    if (trimmed.length > SNIPPET_NAME_MAX) return `Name must be at most ${SNIPPET_NAME_MAX} characters`;
+    if (trimmed.length < SNIPPET_NAME_MIN) return t("Name must be at least {value1} characters", { value1: String(SNIPPET_NAME_MIN) });
+    if (trimmed.length > SNIPPET_NAME_MAX) return t("Name must be at most {value1} characters", { value1: String(SNIPPET_NAME_MAX) });
     if (!SNIPPET_NAME_REGEX.test(trimmed)) {
-        return 'Only letters, digits, spaces, "_", "-" and "/" are allowed';
+        return t("Only letters, digits, spaces, \"_\", \"-\" and \"/\" are allowed");
     }
     return null;
 };
@@ -145,9 +146,9 @@ export const validateSnippetName = (name: string): string | null => {
  * time) is rejected there with an opaque error, so catch it here.
  */
 export const validateSnippetBody = (body: any): string | null => {
-    if (!Array.isArray(body)) return 'Snippet body must be a JSON array — wrap it in [ ]';
+    if (!Array.isArray(body)) return t("Snippet body must be a JSON array — wrap it in [ ]");
     if (body.some(entry => !entry || typeof entry !== 'object' || Array.isArray(entry))) {
-        return 'Every entry of a snippet must be a JSON object';
+        return t("Every entry of a snippet must be a JSON object");
     }
     return null;
 };

@@ -87,7 +87,7 @@ const standardFieldConfigs = perLanguage((): Record<string, FieldConfig> => ({
     // Duration / Interval / Timeout settings
     probeInterval: {
         label: t("Probe Interval"),
-        help: 'Probe interval (e.g. "10s", "1m", "2h").',
+        help: t("Probe interval (e.g. \"10s\", \"1m\", \"2h\")."),
         placeholder: '1m',
         type: 'duration',
         defaultUnit: 'm',
@@ -111,7 +111,7 @@ const standardFieldConfigs = perLanguage((): Record<string, FieldConfig> => ({
     },
     maxRTT: {
         label: t("Max RTT"),
-        help: 'Maximum acceptable RTT (e.g. "1s", "500ms").',
+        help: t("Maximum acceptable RTT (e.g. \"1s\", \"500ms\")."),
         placeholder: '1s',
         type: 'duration',
         defaultUnit: 's',
@@ -443,7 +443,7 @@ export const SchemaForm = ({
                         const fieldSchema = shape[key];
                         const customConfig = fieldConfigs[key] || {};
                         const standardConfig = standardFieldConfigs()[key] || {};
-                        
+
                         const label = customConfig.label ?? standardConfig.label;
                         const help = customConfig.help ?? standardConfig.help ?? (fieldSchema._def?.description);
 
@@ -476,7 +476,7 @@ export const SchemaForm = ({
                         const fieldSchema = shape[key];
                         const customConfig = fieldConfigs[key] || {};
                         const standardConfig = standardFieldConfigs()[key] || {};
-                        
+
                         const label = customConfig.label ?? standardConfig.label;
                         const help = customConfig.help ?? standardConfig.help ?? (fieldSchema._def?.description);
                         const placeholder = customConfig.placeholder ?? standardConfig.placeholder;

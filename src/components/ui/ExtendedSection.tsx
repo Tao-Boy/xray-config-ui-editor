@@ -1,3 +1,4 @@
+import { t } from '../../i18n';
 import React, { useState } from 'react';
 import { Icon } from './Icon';
 
@@ -13,9 +14,9 @@ interface ExtendedSectionProps {
 }
 
 export const ExtendedSection: React.FC<ExtendedSectionProps> = ({
-    title = "Extended / Experimental Settings",
-    description = "Advanced parameters, kernel optimizations and low-level protocol tweaks.",
-    badgeText = "Advanced",
+    title = t("Extended / Experimental Settings"),
+    description = t("Advanced parameters, kernel optimizations and low-level protocol tweaks."),
+    badgeText = t("Advanced"),
     activeCount,
     defaultOpen = false,
     hasActiveValues = false,
@@ -52,8 +53,7 @@ export const ExtendedSection: React.FC<ExtendedSectionProps> = ({
                             )}
                             {activeCount !== undefined && activeCount > 0 && (
                                 <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 animate-in fade-in">
-                                    {activeCount} active
-                                </span>
+                                    {activeCount} {t("active")} </span>
                             )}
                         </div>
                         {description && (

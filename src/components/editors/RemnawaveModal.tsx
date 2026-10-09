@@ -123,9 +123,9 @@ export const RemnawaveModal = ({ onClose }: { onClose: () => void }) => {
     );
 
     return (
-        <Modal 
-            title={step === 'login' ? t("Connect Remnawave") : t("Select Profile")} 
-            onClose={onClose} 
+        <Modal
+            title={step === 'login' ? t("Connect Remnawave") : t("Select Profile")}
+            onClose={onClose}
             className="max-w-md"
             onSave={onClose}
         >
@@ -135,10 +135,7 @@ export const RemnawaveModal = ({ onClose }: { onClose: () => void }) => {
                         {savedPanels}
                         <div className="bg-slate-800/40 p-3 rounded-xl border border-slate-700 text-[11px] text-slate-400 mb-3 flex gap-3">
                             <Icon name="Key" className="text-xl shrink-0 text-slate-500" />
-                            <p>
-                                Password login is disabled for security reasons.
-                                Please use an <b>{t("API Token")}</b>
-{t("from your panel settings.")}
+                            <p> {t("Password login is disabled. Use the API token from your panel settings.")}
 </p>
                         </div>
 
@@ -147,17 +144,17 @@ export const RemnawaveModal = ({ onClose }: { onClose: () => void }) => {
                         <div className="space-y-4">
                             <div>
                                 <label className="label-xs">{t("Panel URL")}</label>
-                                <input className="input-base" 
-                                    placeholder="https://panel.example.com" 
-                                    value={url} onChange={e => setUrl(e.target.value)} 
+                                <input className="input-base"
+                                    placeholder="https://panel.example.com"
+                                    value={url} onChange={e => setUrl(e.target.value)}
                                 />
                             </div>
 
                             <div>
                                 <label className="label-xs">{t("API Token")}</label>
-                                <input className="input-base font-mono text-xs" 
+                                <input className="input-base font-mono text-xs"
                                     type="password"
-                                    placeholder={t("Paste your token here...")} 
+                                    placeholder={t("Paste your token here...")}
                                     value={apiToken} onChange={e => setApiToken(e.target.value)}
                                 />
                             </div>
@@ -170,7 +167,7 @@ export const RemnawaveModal = ({ onClose }: { onClose: () => void }) => {
                             />
 
                             <Button className="w-full mt-2 py-3" onClick={handleConnect} disabled={loading}>
-                                {loading ? <Icon name="Spinner" className="animate-spin" /> : "Connect & Fetch Profiles"}
+                                {loading ? <Icon name="Spinner" className="animate-spin" /> : t("Connect & Fetch Profiles")}
                             </Button>
                         </div>
                     </div>
@@ -198,14 +195,14 @@ export const RemnawaveModal = ({ onClose }: { onClose: () => void }) => {
                                 <Icon name="ArrowsClockwise" className={loading ? "animate-spin" : ""} />
                             </button>
                         </div>
-                        
+
                         <div className="space-y-2 max-h-[300px] overflow-y-auto custom-scroll pr-1">
                             {profiles.map(p => (
-                                <div key={p.uuid} 
+                                <div key={p.uuid}
                                     onClick={() => handleSelectProfile(p.uuid)}
                                     className={`p-3 border rounded-xl cursor-pointer transition-all flex justify-between items-center group
-                                        ${remnawave.activeProfileUuid === p.uuid 
-                                            ? 'bg-indigo-600/20 border-indigo-500 shadow-[0_0_15px_rgba(79,70,229,0.1)]' 
+                                        ${remnawave.activeProfileUuid === p.uuid
+                                            ? 'bg-indigo-600/20 border-indigo-500 shadow-[0_0_15px_rgba(79,70,229,0.1)]'
                                             : 'bg-slate-900 border-slate-800 hover:border-slate-600'}
                                     `}
                                 >

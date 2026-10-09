@@ -90,13 +90,7 @@ export const OutboundImport = ({ onImport }: any) => {
     return (
         <div className="bg-slate-950 border border-slate-800 p-4 rounded-xl mb-6 space-y-3">
             <div className="flex justify-between items-center">
-                <label className="label-xs flex items-center gap-2">
-                    Import from Link or WG Config
-                    <Help>
-                        Paste a link or a .conf file. 
-                        <b>{t("Direct")}</b>: Finalmask inside WG (Xray 1.26+).
-                        <b>{t("Chained")}</b>: Separate Freedom obfuscator (Legacy/Stale cores).
-                    </Help>
+                <label className="label-xs flex items-center gap-2"> {t("Import from Link or WG Config")} <Help> {t("Paste a link or a .conf file.")} <b>{t("Direct")}</b>{t(": Finalmask inside WG (Xray 1.26+).")} <b>{t("Chained")}</b>{t(": Separate Freedom obfuscator (Legacy/Stale cores).")} </Help>
                 </label>
                 {isAWGDetected && (
                     <span className="flex items-center gap-1.5 text-[10px] text-emerald-400 font-bold animate-pulse">
@@ -106,45 +100,45 @@ export const OutboundImport = ({ onImport }: any) => {
                 )}
             </div>
             <div className="flex flex-col gap-2">
-                <textarea 
-                    className={`w-full bg-slate-900 border rounded-lg p-2.5 text-white text-[11px] focus:border-indigo-500 outline-none transition-all font-mono min-h-[100px] custom-scroll ${isAWGDetected ? 'border-emerald-500/50 shadow-[0_0_15px_rgba(16,185,129,0.05)]' : 'border-slate-800'}`} 
-                    placeholder={t("Paste vless://... or [Interface]... config here")} 
-                    value={input} 
-                    onChange={e => setInput(e.target.value)} 
+                <textarea
+                    className={`w-full bg-slate-900 border rounded-lg p-2.5 text-white text-[11px] focus:border-indigo-500 outline-none transition-all font-mono min-h-[100px] custom-scroll ${isAWGDetected ? 'border-emerald-500/50 shadow-[0_0_15px_rgba(16,185,129,0.05)]' : 'border-slate-800'}`}
+                    placeholder={t("Paste vless://... or [Interface]... config here")}
+                    value={input}
+                    onChange={e => setInput(e.target.value)}
                 />
                 <div className="flex flex-wrap gap-2">
                     {isAWGDetected ? (
                         <>
-                            <Button 
-                                variant="success" 
-                                className="flex-1 text-xs py-2 shadow-lg min-w-[140px]" 
-                                onClick={() => handleImport('direct')} 
+                            <Button
+                                variant="success"
+                                className="flex-1 text-xs py-2 shadow-lg min-w-[140px]"
+                                onClick={() => handleImport('direct')}
                                 icon="Lightning"
                             >
                                 {t("Modern (Direct)")}
                                 </Button>
-                            <Button 
-                                variant="primary" 
-                                className="flex-1 text-xs py-2 shadow-lg min-w-[140px]" 
-                                onClick={() => handleImport('chained')} 
+                            <Button
+                                variant="primary"
+                                className="flex-1 text-xs py-2 shadow-lg min-w-[140px]"
+                                onClick={() => handleImport('chained')}
                                 icon="Link"
                             >
                                 {t("Legacy (Chained)")}
                                 </Button>
-                            <Button 
-                                variant="secondary" 
-                                className="text-[10px] py-2 border-emerald-500/30 hover:bg-emerald-500/10 text-emerald-400" 
-                                onClick={() => handleImport('only-obfuscator')} 
+                            <Button
+                                variant="secondary"
+                                className="text-[10px] py-2 border-emerald-500/30 hover:bg-emerald-500/10 text-emerald-400"
+                                onClick={() => handleImport('only-obfuscator')}
                                 icon="ShieldCheck"
                             >
                                 {t("Obfuscator Only")}
                                 </Button>
                         </>
                     ) : (
-                        <Button 
-                            variant="primary" 
-                            className="w-full text-xs py-2 shadow-lg" 
-                            onClick={() => handleImport('direct')} 
+                        <Button
+                            variant="primary"
+                            className="w-full text-xs py-2 shadow-lg"
+                            onClick={() => handleImport('direct')}
                             icon="DownloadSimple"
                         >
                             {t("Import & Parse")}

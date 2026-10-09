@@ -175,8 +175,7 @@ export const InboundClients = ({ inbound, onChange, errors = {} as any }: any) =
             <div className="space-y-4 mt-4">
                 <div className="bg-slate-900/50 p-4 rounded-xl border border-slate-800">
                     <h4 className="text-xs font-bold text-slate-400 uppercase mb-3 flex items-center gap-2">
-                        <Icon name="Gear" /> {proto.toUpperCase()} Settings
-                    </h4>
+                        <Icon name="Gear" /> {proto.toUpperCase()} {t("Settings")} </h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {proto === 'socks' && (
                             <Select
@@ -220,8 +219,7 @@ export const InboundClients = ({ inbound, onChange, errors = {} as any }: any) =
                     <div className="bg-slate-900/50 p-4 rounded-xl border border-slate-800">
                         <div className="flex justify-between items-center mb-4">
                             <h4 className="text-xs font-bold text-slate-400 uppercase flex items-center gap-2">
-                                <Icon name="Users" /> {proto.toUpperCase()} Accounts
-                            </h4>
+                                <Icon name="Users" /> {proto.toUpperCase()} {t("Accounts")} </h4>
                             <Button variant="ghost" size="sm" className="!py-0.5 !px-2 !text-[10px]" onClick={() => accounts.add({ user: 'admin', pass: generateShortId() })} icon="Plus">{t("Add Account")}</Button>
                         </div>
                         <div className="space-y-3 max-h-[250px] overflow-y-auto custom-scroll pr-1">

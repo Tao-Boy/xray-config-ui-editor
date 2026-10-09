@@ -17,15 +17,15 @@ export const BatchOutboundModal = ({ onClose }: { onClose: () => void }) => {
     const { config, addOutbounds } = useConfigStore(useShallow(state => ({ config: state.config, addOutbounds: state.addOutbounds })));
     const [mode, setMode] = useState<'import' | 'export'>('import');
     const [text, setText] = useState("");
-    
+
     // Подписка
     const [subUrl, setSubUrl] = useState("");
     const [isFetching, setIsFetching] = useState(false);
-    
+
     // Advanced Headers
     const [showAdvanced, setShowAdvanced] = useState(false);
     const [customUA, setCustomUA] = useState("v2rayNG/1.8.5");
-    
+
     // Состояние HWID
     const [customClientId, setCustomClientId] = useState(() => {
         const saved = localStorage.getItem(HWID_STORAGE_KEY);
@@ -112,7 +112,7 @@ const handleFetchSub = async () => {
                 // If Remnawave returned limit headers
                 if (res.headers.get('x-hwid-max-devices-reached') === 'true' || res.headers.get('x-hwid-limit') === 'true') {
                     toast.error(t("Panel rejected this device (HWID)"), {
-                        description: "Device limit reached. Check 'Active Devices' in the panel."
+                        description: t("Device limit reached. Check 'Active Devices' in the panel.")
                     });
                     setIsFetching(false);
                     return;
@@ -151,12 +151,12 @@ const handleFetchSub = async () => {
         }
 
         if (!rawText) {
-            throw new Error("Unable to fetch subscription. Check URL or internet connection.");
+            throw new Error(t("Unable to fetch subscription. Check URL or internet connection."));
         }
 
         if (resHeaders && (resHeaders.get('x-hwid-max-devices-reached') === 'true' || resHeaders.get('x-hwid-limit') === 'true')) {
             toast.error(t("Panel rejected this device (HWID)"), {
-                description: "Device limit reached. Check 'Active Devices' in the panel."
+                description: t("Device limit reached. Check 'Active Devices' in the panel.")
             });
             setIsFetching(false);
             return;
@@ -192,7 +192,7 @@ const handleFetchSub = async () => {
 };
 
     const regenerateHwid = () => {
-        if (confirm("Regenerate HWID? The panel will see this as a NEW device.")) {
+        if (confirm(t("Regenerate HWID? The panel will see this as a NEW device."))) {
             const newId = generateUUID();
             setCustomClientId(newId);
             localStorage.setItem(HWID_STORAGE_KEY, newId);
@@ -216,14 +216,12 @@ const handleFetchSub = async () => {
                                 <input className="w-full bg-slate-950 border border-slate-700 rounded-lg pl-9 pr-3 py-2 text-sm text-white focus:border-indigo-500 outline-none transition-colors" placeholder={t("Subscription URL...")} value={subUrl} onChange={e => setSubUrl(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleFetchSub()}/>
                             </div>
                             <Button variant="secondary" onClick={handleFetchSub} disabled={isFetching || !subUrl}>
-                                {isFetching ? <Icon name="Spinner" className="animate-spin" /> : <Icon name="CloudArrowDown" />}
-                                Fetch
-                            </Button>
+                                {isFetching ? <Icon name="Spinner" className="animate-spin" /> : <Icon name="CloudArrowDown" />} {t("Fetch")} </Button>
                         </div>
-                        
+
                         <div className="flex justify-between items-center px-1">
                             <button onClick={() => setShowAdvanced(!showAdvanced)} className="text-[10px] text-slate-500 hover:text-indigo-400 flex items-center gap-1 uppercase font-bold transition-colors">
-                                <Icon name={showAdvanced ? "CaretUp" : "CaretDown"} /> 
+                                <Icon name={showAdvanced ? "CaretUp" : "CaretDown"} />
                                 {showAdvanced ? t("Hide Details") : t("Device Info (HWID)")}
                             </button>
                             {showAdvanced && (
@@ -253,13 +251,13 @@ const handleFetchSub = async () => {
                 )}
 
                 <textarea className={`w-full bg-slate-950 border border-slate-700 rounded-lg p-4 text-xs font-mono text-white focus:border-indigo-500 outline-none resize-none leading-relaxed custom-scroll ${mode === 'import' ? 'h-[30dvh] md:h-[280px]' : 'h-[38dvh] md:h-[380px]'}`} placeholder={t("Nodes will appear here after Fetching or Paste manual links...")} value={shownText} onChange={e => setText(e.target.value)} readOnly={mode === 'export'} />
-                
+
                 {mode === 'import' && text.trim() && (
                     <Button className="w-full" onClick={() => {
                         // Сначала пробуем построчный парсинг ссылок
                         const lines = text.split(/\n/).filter(l => l.trim());
                         let obs: any[] = lines.map(l => parseXrayLink(l.trim())).filter(Boolean);
-                        
+
                         // Если ничего не вышло, пробуем распарсить весь текст как JSON-подписку
                         if (obs.length === 0) {
                             obs = parseJsonSubscription(text);

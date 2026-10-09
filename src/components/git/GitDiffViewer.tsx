@@ -21,8 +21,8 @@ interface FlatLine {
 
 export const GitDiffViewer: React.FC<GitDiffViewerProps> = ({
     changes,
-    titleOld = "Previous Version",
-    titleNew = "New Version",
+    titleOld = t("Previous Version"),
+    titleNew = t("New Version"),
     contextSize = 10
 }) => {
     const [viewMode, setViewMode] = useState<'hunks' | 'full'>('hunks');

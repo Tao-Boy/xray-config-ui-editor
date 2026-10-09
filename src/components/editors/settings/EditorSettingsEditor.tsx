@@ -9,7 +9,7 @@ import { Switch } from '../../ui/Switch';
 import { useConfigStore } from '../../../store/configStore';
 import { useShallow } from 'zustand/react/shallow';
 import { toast } from 'sonner';
-import { t } from '../../../i18n';
+import { t, getLang } from '../../../i18n';
 
 export const EditorSettingsEditor = ({ onOpenHistory }: { onOpenHistory?: () => void }) => {
     const {
@@ -103,14 +103,13 @@ export const EditorSettingsEditor = ({ onOpenHistory }: { onOpenHistory?: () => 
                                 <div className="min-w-0">
                                     <div className="flex items-center gap-2">
                                         <span className="text-xs font-bold text-white truncate">
-                                            {remnawave.profiles?.find(p => p.uuid === remnawave.activeProfileUuid)?.name || 'Remnawave Cloud'}
+                                            {remnawave.profiles?.find(p => p.uuid === remnawave.activeProfileUuid)?.name || t("Remnawave Cloud")}
                                         </span>
                                         <span className="text-[9px] bg-sky-600/30 text-sky-300 border border-sky-500/30 px-1.5 py-0.2 rounded font-mono font-bold uppercase">
                                             {t("ACTIVE CLOUD")}
                                             </span>
                                     </div>
-                                    <p className="text-[10px] text-slate-400 font-mono mt-0.5">
-                                        Remnawave Cloud Profile ({remnawave.activeProfileUuid.substring(0, 8)})
+                                    <p className="text-[10px] text-slate-400 font-mono mt-0.5"> {t("Remnawave Cloud Profile (")}{remnawave.activeProfileUuid.substring(0, 8)})
                                     </p>
                                 </div>
                             </div>
@@ -177,7 +176,7 @@ export const EditorSettingsEditor = ({ onOpenHistory }: { onOpenHistory?: () => 
                                                 )}
                                             </div>
                                             <div className="text-[10px] text-slate-500 font-mono">
-                                                {inbounds} inbounds • {outbounds} outbounds • Updated {new Date(profile.updatedAt).toLocaleTimeString()}
+                                                {inbounds} {t("inbounds •")} {outbounds} {t("outbounds • Updated")} {new Date(profile.updatedAt).toLocaleTimeString(getLang())}
                                             </div>
                                         </div>
                                     )}
@@ -308,8 +307,7 @@ export const EditorSettingsEditor = ({ onOpenHistory }: { onOpenHistory?: () => 
 
                     <div className="pt-2 flex flex-wrap items-center justify-between border-t border-slate-800 gap-2">
                         <div className="text-xs text-slate-400 flex items-center gap-2">
-                            <Icon name="ClockCounterClockwise" className="text-indigo-400" />
-                            Current History Size: <b>{history.length} / {historyLimit}</b>
+                            <Icon name="ClockCounterClockwise" className="text-indigo-400" /> {t("Current History Size:")} <b>{history.length} / {historyLimit}</b>
 {t("snapshots stored.")}
 </div>
 
@@ -324,7 +322,7 @@ export const EditorSettingsEditor = ({ onOpenHistory }: { onOpenHistory?: () => 
                                     variant="secondary"
                                     className="text-xs py-1.5 text-rose-400 hover:text-rose-300"
                                     onClick={() => {
-                                        if (confirm("Clear all version history snapshots?")) {
+                                        if (confirm(t("Clear all version history snapshots?"))) {
                                             clearHistory();
                                         }
                                     }}

@@ -34,7 +34,7 @@ export function Select<T extends string = string>({
     error,
     hint,
     help,
-    placeholder = "Select option...",
+    placeholder = t("Select option..."),
     disabled = false,
     className = '',
     id,
@@ -202,8 +202,8 @@ export function Select<T extends string = string>({
                                 disabled={opt.disabled}
                                 className={`
                                     w-full text-left px-3 py-2 rounded-lg transition-all duration-200
-                                    ${isActive 
-                                        ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20 ring-1 ring-indigo-400/30' 
+                                    ${isActive
+                                        ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20 ring-1 ring-indigo-400/30'
                                         : 'text-slate-300 hover:bg-white/5 hover:text-white'}
                                     ${opt.disabled ? 'opacity-30 cursor-not-allowed' : ''}
                                 `}
@@ -235,7 +235,7 @@ export function Select<T extends string = string>({
                     {help && <Help>{help}</Help>}
                 </div>
             )}
-            
+
             <button
                 ref={buttonRef}
                 type="button"

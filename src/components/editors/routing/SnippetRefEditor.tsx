@@ -95,7 +95,7 @@ export const SnippetRefEditor = ({
                         {kind === 'outbounds'
                             ? tn(body.length, "{n} outbound", "{n} outbounds")
                             : tn(body.length, "{n} entry", "{n} entries")}
-                        {kind === 'mixed' && ` ${t("(mixed rules and outbounds)")}`}
+                        {kind === 'mixed' && t(" {value1}", { value1: String(t("(mixed rules and outbounds)")) })}
                     </span>
                 ) : (
                     <span>
@@ -155,9 +155,7 @@ export const SnippetRefEditor = ({
                 {onInlineCopy && body && (
                     confirmInline ? (
                         <>
-                            <Button variant="warning" icon="Warning" onClick={() => { onInlineCopy(name); setConfirmInline(false); }}>
-                                Confirm: inline {body.length} item(s) and drop the link
-                            </Button>
+                            <Button variant="warning" icon="Warning" onClick={() => { onInlineCopy(name); setConfirmInline(false); }}> {t("Confirm: inline {n} items and drop the link", { n: body.length })} </Button>
                             <Button variant="ghost" onClick={() => setConfirmInline(false)}>{t("Cancel")}</Button>
                         </>
                     ) : (

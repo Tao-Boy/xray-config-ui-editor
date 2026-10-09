@@ -249,15 +249,13 @@ config,
       {selectedIndices.size > 0 && (
         <div className="sticky top-0 z-20 flex items-center justify-between p-2 px-3 bg-blue-950/90 border border-blue-500/40 rounded-xl backdrop-blur-md shadow-lg mb-3 animate-in fade-in slide-in-from-top-1 duration-200">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-blue-300">
-              Selected: <span className="text-white font-mono">{selectedIndices.size}</span>
+            <span className="text-xs font-bold text-blue-300"> {t("Selected:")} <span className="text-white font-mono">{selectedIndices.size}</span>
             </span>
             <span className="text-slate-600">•</span>
             <button
               onClick={handleSelectAll}
               className="text-[11px] font-medium text-slate-300 hover:text-white underline decoration-slate-600 hover:decoration-white transition-colors"
-            >
-              Select All ({filteredOutbounds.length})
+            > {t("Select All (")}{filteredOutbounds.length})
             </button>
           </div>
           <div className="flex items-center gap-2">

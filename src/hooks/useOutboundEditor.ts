@@ -1,3 +1,4 @@
+import { t } from '../i18n';
 import { useXrayEditor } from './useXrayEditor';
 import { validateOutbound, validateWireguard, checkOutboundDuplication } from '../core/validators';
 import { createDefaultOutbound } from '../utils/protocol-factories';
@@ -21,7 +22,7 @@ export const useOutboundEditor = (data: Outbound, onSave: (data: Outbound, rawTe
             // Проверка дубликатов перед окончательным сохранением
             const duplicateTag = checkOutboundDuplication(local, config?.outbounds || [], index);
             if (duplicateTag) {
-                if (!confirm(`Duplicate detected! Similar configuration already exists in outbound tag: "${duplicateTag}". Save anyway?`)) {
+                if (!confirm(t("Duplicate detected! Similar configuration already exists in outbound tag: \"{value1}\". Save anyway?", { value1: String(duplicateTag) }))) {
                     return;
                 }
             }

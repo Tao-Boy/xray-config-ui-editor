@@ -140,7 +140,7 @@ export const RuleEditor = ({
                     rawText={localRawText}
                     rawConfigText={rawConfigText}
                     onSaveShortcut={() => useConfigStore.getState().saveActiveProfile()}
-                    onCommitShortcut={() => useConfigStore.getState().recordSnapshot("Manual Commit (Ctrl+Shift+S)")}
+                    onCommitShortcut={() => useConfigStore.getState().recordSnapshot(t("Manual Commit (Ctrl+Shift+S)"))}
                 />
             </div>
         );
@@ -153,8 +153,7 @@ export const RuleEditor = ({
                 <div className="p-3.5 bg-amber-950/40 border border-amber-500/50 rounded-xl flex items-start gap-2.5 animate-in fade-in">
                     <Icon name="Warning" weight="fill" className="text-amber-400 text-lg shrink-0 mt-0.5" />
                     <div className="flex-1 min-w-0 space-y-1.5">
-                        <p className="text-[11px] font-bold text-amber-300 uppercase tracking-wide">
-                            Conflicting Duplicate Matchers ({duplicateWarnings.length})
+                        <p className="text-[11px] font-bold text-amber-300 uppercase tracking-wide"> {t("Conflicting Duplicate Matchers (")}{duplicateWarnings.length})
                         </p>
                         <ul className="space-y-1.5 text-[11px] text-amber-200/80">
                             {duplicateWarnings.map((warn, i) => (
@@ -172,8 +171,7 @@ export const RuleEditor = ({
                                             onClick={() => onSelectRule(warn.otherIndex)}
                                             className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-200 hover:text-white bg-amber-800/60 hover:bg-amber-700/80 border border-amber-500/40 rounded px-2 py-0.5 transition-all shadow-sm"
                                             title={t("Jump to rule #{n}", { n: warn.otherIndex + 1 })}
-                                        >
-                                            View Rule #{warn.otherIndex + 1} <Icon name="ArrowRight" className="text-[9px]" />
+                                        > {t("View Rule #")}{warn.otherIndex + 1} <Icon name="ArrowRight" className="text-[9px]" />
                                         </button>
                                     )}
                                 </li>
@@ -321,9 +319,7 @@ export const RuleEditor = ({
                                 multi={true}
                             />
                             {hasMissingMatchers && (
-                                <p className="text-[10px] text-blue-400 mt-1">
-                                    ↑ Select tcp + udp for a proper catch-all
-                                </p>
+                                <p className="text-[10px] text-blue-400 mt-1"> {t("↑ Select tcp + udp for a proper catch-all")} </p>
                             )}
                         </div>
                         <div>
@@ -365,7 +361,7 @@ export const RuleEditor = ({
                                 fieldConfigs={{
                                     port: {
                                         label: t("Target Port"),
-                                        help: 'Destination port or port range, e.g. "80", "1-65535", "53,443".',
+                                        help: t("Destination port or port range, e.g. \"80\", \"1-65535\", \"53,443\"."),
                                         placeholder: 'e.g. 443'
                                     },
                                     sourcePort: {
@@ -423,8 +419,7 @@ export const RuleEditor = ({
                 >
                     <div className="space-y-4">
                         <div>
-                            <label className="label-xs text-slate-400 mb-1.5 block">
-                                Rule Tag / Alias <Help>{t("Custom identifier for this rule in stats and metrics.")}</Help>
+                            <label className="label-xs text-slate-400 mb-1.5 block"> {t("Rule Tag / Alias")} <Help>{t("Custom identifier for this rule in stats and metrics.")}</Help>
                             </label>
                             <input
                                 type="text"
@@ -437,14 +432,12 @@ export const RuleEditor = ({
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2 border-t border-slate-800/60">
                             <div className="flex flex-col gap-2 h-full">
-                                <label className="label-xs flex items-center gap-1.5 text-slate-400">
-                                    HTTP Attributes (JSON) <Help>{`e.g. {":method": "GET", ":path": "/test"}`}</Help>
+                                <label className="label-xs flex items-center gap-1.5 text-slate-400"> {t("HTTP Attributes (JSON)")} <Help>{`e.g. {":method": "GET", ":path": "/test"}`}</Help>
                                 </label>
                                 <AttrsEditor value={rule.attrs} onChange={(v: any) => update('attrs', v)} />
                             </div>
                             <div className="flex flex-col gap-2 h-full">
-                                <label className="label-xs flex items-center gap-1.5 text-slate-400">
-                                    Webhook Notification <Help>{t("Send HTTP POST notification on match.")}</Help>
+                                <label className="label-xs flex items-center gap-1.5 text-slate-400"> {t("Webhook Notification")} <Help>{t("Send HTTP POST notification on match.")}</Help>
                                 </label>
                                 <div className="flex flex-col gap-4 flex-1">
                                     <SchemaForm

@@ -10,8 +10,8 @@
        code editor forced JetBrains Mono, so a mono input and the editor beside
        it rendered in two different fonts. Both stacks end in faces that
        actually carry Cyrillic, so a fallback is still monospaced. */
-    --font-sans: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
-    --font-mono: 'JetBrains Mono', 'Cascadia Mono', Consolas, 'DejaVu Sans Mono', Menlo, monospace;
+    --font-sans: 'Inter', 'Segoe UI', system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', 'Noto Sans CJK SC', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Cascadia Mono', Consolas, 'DejaVu Sans Mono', Menlo, 'PingFang SC', 'Microsoft YaHei', 'Noto Sans CJK SC', monospace;
 }
 
 code, pre, .font-mono, .cm-editor {

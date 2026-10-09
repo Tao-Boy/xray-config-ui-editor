@@ -1,3 +1,4 @@
+import { t } from '../../i18n';
 // ============================================================
 // Server inbound -> client outbound — src/core/generators/client-outbound.ts
 // ============================================================
@@ -66,17 +67,17 @@ const SUPPORTED_PROTOCOLS = ['vless', 'vmess', 'trojan'];
  * Reported rather than thrown so a list of hosts can show each row's reason.
  */
 export const clientOutboundBlocker = (host: PanelHost, inbound: PanelInbound): string | null => {
-    if (!inbound?.protocol) return 'No inbound found for this host';
+    if (!inbound?.protocol) return t("No inbound found for this host");
     if (!SUPPORTED_PROTOCOLS.includes(inbound.protocol)) {
-        return `${inbound.protocol} needs a per-user secret the panel does not expose here`;
+        return t("{value1} needs a per-user secret the panel does not expose here", { value1: String(inbound.protocol) });
     }
-    if (!host?.address || !host?.port) return 'Host has no address or port';
+    if (!host?.address || !host?.port) return t("Host has no address or port");
 
     const security = effectiveSecurity(host, inbound);
     if (security === 'reality') {
         const reality = inbound.streamSettings?.realitySettings || {};
-        if (!reality.privateKey) return 'Inbound has no REALITY private key to derive the public key from';
-        if (!publicKeyFromPrivateKey(reality.privateKey)) return 'REALITY private key is not a valid X25519 key';
+        if (!reality.privateKey) return t("Inbound has no REALITY private key to derive the public key from");
+        if (!publicKeyFromPrivateKey(reality.privateKey)) return t("REALITY private key is not a valid X25519 key");
     }
     return null;
 };
@@ -164,7 +165,7 @@ export const buildClientOutbound = ({
         const shortIds: string[] = Array.isArray(reality.shortIds) ? reality.shortIds : [];
         const serverName = host.sni || firstOf(reality.serverNames) || '';
         if (!host.sni && !firstOf(reality.serverNames)) {
-            notes.push('No SNI on the host or the inbound — set serverName by hand');
+            notes.push(t("No SNI on the host or the inbound — set serverName by hand"));
         }
         outbound.streamSettings.security = 'reality';
         outbound.streamSettings.realitySettings = {
@@ -174,7 +175,7 @@ export const buildClientOutbound = ({
             ...(shortIds.length > 0 ? { shortId: shortIds[0] } : {}),
         };
         if (shortIds.length > 1) {
-            notes.push(`Inbound offers ${shortIds.length} shortIds — used the first one`);
+            notes.push(t("Inbound offers {value1} shortIds — used the first one", { value1: String(shortIds.length) }));
         }
         if (reality.spiderX) outbound.streamSettings.realitySettings.spiderX = reality.spiderX;
     } else if (security === 'tls') {
@@ -189,7 +190,7 @@ export const buildClientOutbound = ({
         // 2026-06-01, 26.7 and 26.9 outright). Writing it would hand the
         // subscriber a config that does not load, so it is left out and said.
         if (host.allowInsecure) {
-            notes.push('The host allows insecure TLS; no supported Xray core accepts allowInsecure any more — pin the certificate with pinnedPeerCertSha256 instead');
+            notes.push(t("The host allows insecure TLS; no supported Xray core accepts allowInsecure any more — pin the certificate with pinnedPeerCertSha256 instead"));
         }
     } else {
         outbound.streamSettings.security = 'none';
@@ -222,7 +223,7 @@ export const buildClientOutbound = ({
             serviceName,
             ...(grpc.multiMode ? { multiMode: true } : {}),
         };
-        if (!serviceName) notes.push('gRPC serviceName is empty — set it by hand');
+        if (!serviceName) notes.push(t("gRPC serviceName is empty — set it by hand"));
     } else if (network === 'httpupgrade') {
         const hu = stream.httpupgradeSettings || {};
         outbound.streamSettings.httpupgradeSettings = {

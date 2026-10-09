@@ -84,7 +84,7 @@ export const OutboundModal = ({ data, onSave, onClose, index }: any) => {
             extraButtons={extraButtons}
             rawConfigText={rawConfigText}
             onSaveShortcut={() => useConfigStore.getState().saveActiveProfile()}
-            onCommitShortcut={() => useConfigStore.getState().recordSnapshot("Manual Commit (Ctrl+Shift+S)")}
+            onCommitShortcut={() => useConfigStore.getState().recordSnapshot(t("Manual Commit (Ctrl+Shift+S)"))}
         >
             <div className="space-y-6 pb-10">
                 {/* A snippet reference occupies an outbound slot but has no
@@ -98,8 +98,7 @@ export const OutboundModal = ({ data, onSave, onClose, index }: any) => {
                     <div className="rounded-xl border border-fuchsia-500/30 bg-fuchsia-950/20 p-4 flex items-start gap-3">
                         <Icon name="BracketsCurly" weight="bold" className="text-fuchsia-300 text-xl shrink-0 mt-0.5" />
                         <div className="min-w-0">
-                            <p className="text-fuchsia-100 font-bold text-sm">
-                                Snippet reference: {getSnippetRefName(local)}
+                            <p className="text-fuchsia-100 font-bold text-sm"> {t("Snippet reference:")} {getSnippetRefName(local)}
                             </p>
                             <p className="text-[11px] text-fuchsia-200/70 mt-1">
                                 {t("Remnawave replaces this entry with the snippet's outbounds before the config reaches a node. Edit the body in Snippets — filling in the fields below would turn the reference into an ordinary outbound.")}
@@ -115,15 +114,15 @@ export const OutboundModal = ({ data, onSave, onClose, index }: any) => {
 
                 {/* Тег + протокол */}
                 <div className="relative z-40">
-                    <OutboundGeneral 
-                        outbound={local} 
-                        onChange={updateField} 
+                    <OutboundGeneral
+                        outbound={local}
+                        onChange={updateField}
                         onProtocolChange={handleProtocolChange}
                         errors={{ tag: getError('tag') }}
                         showSendThrough={shape.transport}
                     />
                 </div>
-                
+
                 {/* Редактор, зависящий от протокола */}
                 <div className="relative z-30">
                     {local.protocol === 'wireguard' ? (

@@ -8,8 +8,8 @@ export const LogEditor = ({ log, onChange, onToggle }: any) => {
     const localLog = log || { loglevel: "warning" };
 
     return (
-        <Card 
-            title={t("Log Configuration")} 
+        <Card
+            title={t("Log Configuration")}
             icon="TerminalWindow"
             headerExtra={<Switch checked={enabled} onChange={() => onToggle(enabled ? null : { loglevel: "warning" })} />}
         >
@@ -29,12 +29,12 @@ export const LogEditor = ({ log, onChange, onToggle }: any) => {
                             },
                             access: {
                                 label: t("Access Log Path"),
-                                help: 'Path to access log file. Empty = stdout, "none" = discard.',
+                                help: t("Path to access log file. Empty = stdout, \"none\" = discard."),
                                 placeholder: '/var/log/xray/access.log'
                             },
                             error: {
                                 label: t("Error Log Path"),
-                                help: 'Path to error log file. Empty = stdout, "none" = discard.',
+                                help: t("Path to error log file. Empty = stdout, \"none\" = discard."),
                                 placeholder: '/var/log/xray/error.log'
                             },
                             dnsLog: {

@@ -170,10 +170,10 @@ export const NodesPane = ({
                     {b.panelRows.length === 0 ? (
                         <div className="text-center text-slate-600 italic text-[11px] py-8 px-3">
                             {!b.panelConnected
-                                ? 'Connect to Remnawave in the header, then press Load hosts.'
+                                ? t("Connect to Remnawave in the header, then press Load hosts.")
                                 : b.panelError
                                     ? t("{error} — press Load hosts to retry.", { error: b.panelError })
-                                    : 'Load the panel hosts to pick nodes from them.'}
+                                    : t("Load the panel hosts to pick nodes from them.")}
                         </div>
                     ) : (
                         b.filteredPanelRows.map((row: any) => {
@@ -204,8 +204,7 @@ export const NodesPane = ({
                                             <span className="font-bold text-slate-200 truncate">{row.remark}</span>
                                             {row.disabled && <Badge variant="warning" size="sm">{t("off")}</Badge>}
                                             {row.isHidden && (
-                                                <Badge variant="info" size="sm">
-                                                    hidden{row.hostTag ? ` · ${row.hostTag}` : ''}
+                                                <Badge variant="info" size="sm"> {t("hidden")}{row.hostTag ? ` · ${row.hostTag}` : ''}
                                                 </Badge>
                                             )}
                                         </span>

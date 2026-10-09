@@ -1,114 +1,108 @@
-# 🚀 Xray Config UI Editor
+# 🚀 Xray 配置编辑器（简体中文版）
 
-<img width="1914" height="981" alt="msedge_KbKWtRK30y" src="https://github.com/user-attachments/assets/11c13d94-58d9-421f-af34-0f317e6ae086" />
+[简体中文](README.md) · [English](README.en.md)
 
-The most advanced, static web-based GUI for **Xray-core**. Manage your configurations with ease, visualize traffic flow, and sync directly with **Remnawave Panel**. No backend required — it runs entirely in your browser.
+用于 **Xray-core** 的静态网页配置编辑器。通过图形界面管理配置、查看流量拓扑，并直接与 **Remnawave 面板**同步。无需后端，编辑器在浏览器中运行。
+
+此仓库是 [bropines/xray-config-ui-editor](https://github.com/bropines/xray-config-ui-editor) 的中文本地化 fork。首次打开默认使用简体中文，也可从顶部语言菜单切换 English 或 Русский；手动选择的语言会保存在当前浏览器中。
+
+<img width="1914" height="981" alt="上游项目界面示例，截图中的语言为英文" src="https://github.com/user-attachments/assets/11c13d94-58d9-421f-af34-0f317e6ae086" />
+
+> 上图及下方截图来自上游项目，展示功能布局。此 fork 的实际界面支持简体中文。
 
 > [!IMPORTANT]
-> ### 🤝 Contributors Needed!
-> This project is built on **vibecoding** — almost the entire codebase was created using AI tools. The [`AGENTS.md`](AGENTS.md) file contains nearly all necessary instructions for AI agents.
-> If you want to add new features, fix bugs, or improve the UI/UX — feel free to fork the repository and submit a PR! Any contributions are welcome.
-> 
-> 💬 **Telegram Channel**: [https://t.me/xcue_dev](https://t.me/xcue_dev)
+> ### 🤝 欢迎参与
+> 上游项目采用 AI 辅助开发。开发约定见 [`agents.md`](agents.md) 和 [`.agents/AGENTS.md`](.agents/AGENTS.md)。欢迎改进功能、修复问题或完善翻译并提交 PR。
+>
+> 💬 **上游 Telegram 频道**：[xcue_dev](https://t.me/xcue_dev)
 
----
+## ✨ 功能
 
-## ✨ Features
+- 🛠 **完整配置管理**：入站、出站、路由、DNS、策略、日志、统计及 API。
+- ☁️ **Remnawave 集成**：通过 API 令牌连接面板，读取和保存配置、主机、订阅模板及配置片段。
+- 🕸 **可视化拓扑**：基于 React Flow 展示流量路径、路由规则与负载均衡节点。
+- 🛡 **REALITY 工具**：内置 X25519 密钥对和短 ID 生成器。
+- 📝 **双模式编辑**：在图形表单与 [CodeMirror 6](https://codemirror.net/) JSON 编辑器之间切换，支持 JSONC 注释、语法检查、补全及搜索替换。
+- 📂 **本地管理**：拖入 `config.json`、使用内置预设、保存多份配置，或备份整个工作区。
+- 🧩 **路由管理**：拖动规则排序，编辑匹配条件和负载均衡策略。
+- ⚖️ **本地负载均衡构建器**：从代理链接、订阅、当前配置或面板主机生成客户端配置，包含本地 SOCKS/HTTP 入站、代理节点池、健康探测与绕过列表；也可按地区分组生成配置。
+- 📡 **主机编辑器**：编辑 Remnawave 主机地址、传输参数、关联入站与模板，保存时仅发送修改过的字段。
+- 📄 **订阅模板**：在负载均衡构建器内通过表单或 JSON 编辑 `XRAY_JSON` 模板，使用 `remnawave.injectHosts` 为每个订阅用户注入节点。
+- 🧷 **配置片段与本地模板**：识别并管理 `{ "snippet": "NAME" }` 引用，支持插入引用或独立副本。
+- 🌐 **简体中文、英文与俄文**：界面、工具提示、诊断、校验错误、操作通知和编辑器内置控件支持本地化。Xray 配置字段、协议名称、枚举值、密钥及示例地址保留原始形式，保证配置兼容性。
+- 😇 **操作说明**：主要字段和功能附带用途及兼容性提示。
 
-- 🛠 **Full Config Support**: Complete management of Inbounds, Outbounds, Routing, DNS, and Policy.
-- ☁️ **Remnawave Integration**: Direct sync via API (Credentials or API Token). Load and save profiles to your cloud panel instantly.
-- 🕸 **Visual Topology**: Interactive traffic flow graph powered by React Flow.
-- 🛡 **Reality Tooling**: Built-in X25519 key generator for Reality security.
-- 📝 **Dual Mode Editing**: Switch between a user-friendly GUI and a raw JSON editor ([CodeMirror 6](https://code.haverbeke.berlin/codemirror/dev/)) with one click.
-- 📂 **Local Management**: Drag & Drop your `config.json` to edit locally or use built-in presets.
-- 🧩 **Smart Routing**: Advanced routing manager with Drag-and-Drop rule reordering.
-- ⚖️ **Local Balancer Builder**: paste links or a subscription — or pick nodes straight from your Remnawave panel — and get a ready client config — local SOCKS/HTTP inbounds, several proxies behind one balancer, a burst/observatory probe, and a bypass list for Russian sites and leak checkers. Groups a subscription into one config per location, and can emit a Remnawave `XRAY_JSON` subscription template (with `remnawave.injectHosts`) so the panel renders the balanced config for every subscriber — including creating the hosts that deliver it, and re-opening an existing balancer to edit it.
-- 📡 **Hosts editor**: edit your Remnawave hosts here — address, transport, the inbound they serve and the template they render — with saves that touch only the fields you changed.
-- 📄 **Subscription Templates**: edited inside the Local Balancer, as a form or as raw JSON — the same object, two views.
-- 🧷 **Snippets & Templates**: Remnawave snippet references (`{ "snippet": "NAME" }`) are recognised, resolved and editable — browse the panel's snippet library, keep your own local templates, and insert either as a reference or as an inline copy.
-- 🌐 **English and Russian**: the whole interface, down to toasts and validation messages, switches from the header. Xray's own vocabulary (inbound, outbound, REALITY, sockopt) and config enum values stay in English on purpose, so what you read still matches what the JSON says.
-- 😇 **Lots of tooltips**: As a developer, I know what it's like to be a stupid sunshine. Therefore, we have left hints on the main functions.
+## 🚀 使用
 
----
+1. 打开编辑器，拖入 `config.json`，或选择预设创建配置。
+2. 在图形界面中编辑入站、出站、路由和 DNS；需要直接修改字段时切换到 JSON 模式。
+3. 在内核设置中选择目标 Xray-core 版本，打开“系统诊断”检查兼容性。
+4. 下载配置到本地，或连接 Remnawave 后保存到云端配置。
 
-## 🧱 Issues
+编辑器会在浏览器本地保存工作区。“备份与恢复”可导出配置、历史、片段库和设置。安装为应用前，特别是在 iOS 上，请先导出备份，再在安装后的应用中导入。
 
-- Unfortunately, we cannot be certain that some parameters will not conflict with each other. If you encounter such a combination, please report it in an ISSUE, and we will simply adjust the configurator (or add a WASM validator...).
+## 🧱 已知限制
 
----
+Xray 的某些参数组合仍可能存在冲突。如果遇到编辑器未识别的兼容性问题，请通过 [Issues](https://github.com/Tao-Boy/xray-config-ui-editor/issues) 提供可复现的配置示例，并移除账号、令牌和私钥。
 
-## 📸 Screenshots
+负载均衡器内置的“俄罗斯网站直连”列表针对俄罗斯站点；它是可选预设，中文本地化不会改变其域名内容。可按需求选择列表或添加自定义绕过域名。
 
-### Remnawave Cloud Sync
+## 📸 功能示例
 
-<img width="413" height="455" alt="msedge_sYTtYMnxge" src="https://github.com/user-attachments/assets/3374f6b7-8605-47f5-bd0e-3bba4e9eeb96" />
+以下为上游项目截图。
 
-_Connect to your panel and manage profiles in real-time._
+### Remnawave 云端同步
 
-### Routing Manager
+<img width="413" height="455" alt="连接 Remnawave 面板并管理云端配置" src="https://github.com/user-attachments/assets/3374f6b7-8605-47f5-bd0e-3bba4e9eeb96" />
 
-<img width="1113" height="859" alt="msedge_jAldcIXP2L" src="https://github.com/user-attachments/assets/00386afe-d97d-42a2-ae56-cad40ec4e66a" />
+### 路由管理
 
-_Manage complex routing logic with simple Drag-and-Drop._
+<img width="1113" height="859" alt="通过拖动排序管理路由规则" src="https://github.com/user-attachments/assets/00386afe-d97d-42a2-ae56-cad40ec4e66a" />
 
-### Visual Topology
+### 流量拓扑
 
-<img width="1112" height="808" alt="msedge_ZkBhtJOeGs" src="https://github.com/user-attachments/assets/be7c017b-e0e7-4ed4-b6e3-125e8929b512" />
+<img width="1112" height="808" alt="可视化查看流量经过内核的路径" src="https://github.com/user-attachments/assets/be7c017b-e0e7-4ed4-b6e3-125e8929b512" />
 
-_Visualize how traffic moves through your core._
+### 地理数据查看器
 
-### GeoFile viewer
+<img width="1032" height="927" alt="通过链接或本地文件查看 GeoIP 与 GeoSite 数据" src="https://github.com/user-attachments/assets/863b26f8-b97a-44b4-9866-3e80ec0a51eb" />
 
-<img width="1032" height="927" alt="msedge_WVpvQf2m5D" src="https://github.com/user-attachments/assets/863b26f8-b97a-44b4-9866-3e80ec0a51eb" />
+### 入站与出站编辑
 
-_Allows you to view the contents of any geofile via a link or by uploading it from your PC_
+<img width="1105" height="795" alt="入站配置表单" src="https://github.com/user-attachments/assets/5ddcb432-f024-4038-8019-cad466823550" />
 
-### Inbound Editor
+<img width="1101" height="791" alt="出站配置表单及 AmneziaWG 导入" src="https://github.com/user-attachments/assets/50170d6b-dd8c-45e2-b1cd-cbffd20b62f4" />
 
-<img width="1105" height="795" alt="msedge_oY8cM3aVVx" src="https://github.com/user-attachments/assets/5ddcb432-f024-4038-8019-cad466823550" />
+### JSON 编辑
 
-_We tried to add as many options as possible to the UI for our littlest bread lovers..._
+<img width="1914" height="981" alt="JSON 配置编辑器" src="https://github.com/user-attachments/assets/b0c559a7-375f-4965-a44e-0141078dd1ff" />
 
-### Outbound editor
+图形界面未提供的字段可直接在 JSON 中编辑。编辑器会保留未知配置字段。
 
-<img width="1101" height="791" alt="msedge_ZvODgoqbK4" src="https://github.com/user-attachments/assets/50170d6b-dd8c-45e2-b1cd-cbffd20b62f4" />
+## ☁️ 连接 Remnawave（CORS 配置）
 
-_Our implementation of the Outbound parser allows you to import the configuration from Amnezia into the parameters for finalmask in just a few clicks._
+这是静态网页应用。浏览器访问 Remnawave 服务时，需要在面板反向代理中配置 **CORS**。
 
-### JSON editor
+以下示例用于从 `https://tao-boy.github.io` 访问面板。如果使用自定义域名或本地开发地址，请将两处 `Access-Control-Allow-Origin` 替换为实际编辑器页面的来源（协议、主机名及端口，不包含路径）。示例不表示此 fork 已部署到 GitHub Pages。
 
-<img width="1914" height="981" alt="msedge_piY5rBqkxX" src="https://github.com/user-attachments/assets/b0c559a7-375f-4965-a44e-0141078dd1ff" />
-
-_We have addressed the issue where, for some reason, certain settings are missing from our interface, so you are free to consult the documentation and enter whatever you want in the JSON editor. UI will not override unknown variables_
-
----
-
-## ☁️ Remnawave Connection (CORS Setup)
-
-Since this is a **static web application** (hosted on GitHub Pages), your browser will block requests to your Remnawave server unless **CORS** is properly configured.
-
-### Mandatory Nginx Configuration
-
-To allow this UI to communicate with your Remnawave API, add the following block inside your `location /` in your Nginx config:
+将以下内容加入 Nginx 配置的 `location /`：
 
 ```nginx
-# 1. Hide potential duplicate headers from the backend
+# 隐藏后端可能重复返回的响应头
 proxy_hide_header 'Access-Control-Allow-Origin';
 proxy_hide_header 'Access-Control-Allow-Methods';
 proxy_hide_header 'Access-Control-Allow-Headers';
 
-# 2. Allow this UI domain
-add_header 'Access-Control-Allow-Origin' 'https://bropines.github.io' always;
+# 允许编辑器页面的来源
+add_header 'Access-Control-Allow-Origin' 'https://tao-boy.github.io' always;
 
-# 3. Allow required methods (PATCH is critical for saving!)
+# PATCH 用于保存修改
 add_header 'Access-Control-Allow-Methods' 'GET, POST, PATCH, DELETE, OPTIONS' always;
-
-# 4. Allow required headers
 add_header 'Access-Control-Allow-Headers' 'Authorization, Content-Type, Cache-Control, X-Requested-With' always;
 
-# 5. Handle preflight (OPTIONS) requests
+# 处理 OPTIONS 预检请求
 if ($request_method = 'OPTIONS') {
-    add_header 'Access-Control-Allow-Origin' 'https://bropines.github.io' always;
+    add_header 'Access-Control-Allow-Origin' 'https://tao-boy.github.io' always;
     add_header 'Access-Control-Allow-Methods' 'GET, POST, PATCH, DELETE, OPTIONS' always;
     add_header 'Access-Control-Allow-Headers' 'Authorization, Content-Type, Cache-Control, X-Requested-With' always;
     add_header 'Access-Control-Max-Age' 1728000;
@@ -118,62 +112,69 @@ if ($request_method = 'OPTIONS') {
 }
 ```
 
-_Don't forget to reload Nginx:_ `nginx -s reload`
-
----
-
-## 🛠 Installation & Dev
-
-This project is built with **React**, **TypeScript**, **Zustand**, and **Bun**.
-
-### 1. Install dependencies
+检查并重新加载 Nginx：
 
 ```bash
+nginx -t
+nginx -s reload
+```
+
+API 令牌权限说明可从连接窗口查看。编辑器需要的资源包括配置文件、主机、订阅模板和配置片段。
+
+## 🛠 安装与开发
+
+技术栈：**React、TypeScript、Zustand、Vite、Tailwind CSS 和 Bun**。
+
+```bash
+# 安装依赖
 bun install
-```
 
-### 2. Run development server
-
-```bash
+# 启动开发服务器
 bun run dev
+
+# 生产构建，生成 dist/
+bun run build
+
+# 本地预览构建结果
+bun run preview
 ```
 
-### 3. Build for production
+默认开发端口为 `3000`，页面路径为 `/xray-config-ui-editor/`。部署到其他路径时，请同步修改 `vite.config.ts` 的 `base`。现有 GitHub Actions 支持手动部署或推送版本标签时部署至 GitHub Pages。
+
+### 翻译维护
+
+界面通过 `src/i18n` 的 `t()` 查找译文，使用英文原文作为键；`tn()` 处理数量表达。词典位于：
+
+- 简体中文：[`src/i18n/zh-CN.ts`](src/i18n/zh-CN.ts)
+- 俄文：[`src/i18n/ru.ts`](src/i18n/ru.ts)
+- 保留的协议名、枚举及示例：[`src/i18n/untranslated.ts`](src/i18n/untranslated.ts)
+
+新增文案需接入翻译函数并补齐词典。中文可覆盖保留名单中的显示标签，但不会改变写入配置的值。CodeMirror 内置文案位于 `src/components/ui/code-mirror-phrases.ts`；Zod 的校验语言会随界面切换。
 
 ```bash
+# 查看各语言的缺失、过期词条与保留项
+bun run i18n:report
+
+# 修改后的完整检查
+bun run typecheck
+bun run lint
+bun test
 bun run build
 ```
 
-### Translations
+翻译测试会检查覆盖率、变量占位符，以及中文默认语言、切换、数量显示、校验与预设选择。
 
-Every user-visible string goes through `t()` in `src/i18n`, keyed by its
-English text. To add or fix a translation, edit `src/i18n/ru.ts`; a key with no
-entry falls back to English, so nothing breaks while a language is incomplete.
+## 🤝 致谢
 
-```bash
-bun run i18n:report
-```
+- **原项目作者 bropines 及贡献者**：编辑器及各项功能。
+- **Xray-core**：配置所对应的代理内核。
+- **Remnawave**：代理管理面板。
+- **Phosphor Icons**：图标。
+- **xyflow / React Flow**：流量拓扑。
+- **CodeMirror**：浏览器代码编辑器。
 
-prints what is missing, what is stale, and what is deliberately the same in both
-languages (`src/i18n/untranslated.ts` — protocol names, config enum values and
-example inputs). `bun test` enforces all three.
+## ⚠️ 免责声明
 
----
+本工具用于学习与配置管理。使用代理软件时请遵守当地法律法规。
 
-## 🤝 Credits
-
-- **Xray-core**: The heart of the configuration.
-- **Remnawave**: Awesome proxy management panel.
-- **Phosphor Icons**: Beautiful iconography.
-- **xyflow**: For the powerful topology visualization.
-- **CodeMirror** Lightweight in-browser code editor
-
----
-
-## ⚠️ Disclaimer
-
-This tool is for educational and configuration management purposes only. Ensure you comply with your local laws and regulations regarding the use of proxy software.
-
----
-
-_Built with ❤️ for the privacy community._
+为隐私社区而构建 ❤️

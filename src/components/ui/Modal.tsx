@@ -114,15 +114,15 @@ export const Modal = ({
       <div className={`bg-slate-900 border-slate-700 md:border w-full flex flex-col shadow-2xl animate-in zoom-in-95 duration-200
         ${sizing}
         ${isFullScreen ? 'max-w-full' : modalWidthClass} ${passThrough.join(' ')}`}>
-        
+
         {/* Header */}
         <div className="flex justify-between items-center gap-2 px-3 py-2 md:p-5 pt-[max(0.5rem,env(safe-area-inset-top))] md:pt-5 border-b border-slate-800 shrink-0">
           <div className="flex items-center gap-2 md:gap-3 min-w-0 relative z-10">
             <h3 className="text-base md:text-xl font-bold text-white flex items-center gap-2 truncate">
                 <Icon name="PencilSimple" className="text-indigo-400 shrink-0"/> {title}
             </h3>
-            <button 
-              onClick={() => setIsFullScreen(!isFullScreen)} 
+            <button
+              onClick={() => setIsFullScreen(!isFullScreen)}
               title={isFullScreen ? t("Exit Fullscreen") : t("Fullscreen")}
               className="text-slate-500 hover:text-indigo-400 p-1.5 hover:bg-slate-800 rounded-lg transition-all hidden md:block"
             >
@@ -134,7 +134,7 @@ export const Modal = ({
               footer to hold it. */}
           <button
             onClick={onClose}
-            className={`${hideFooter ? 'block' : 'hidden md:block'} text-slate-400 hover:text-white p-2 hover:bg-slate-800 rounded-lg transition-colors shrink-0 relative z-10`}
+            className={`${hideFooter ? 'block' : "hidden md:block"} text-slate-400 hover:text-white p-2 hover:bg-slate-800 rounded-lg transition-colors shrink-0 relative z-10`}
           >
               <Icon name="X" className="text-xl" />
           </button>

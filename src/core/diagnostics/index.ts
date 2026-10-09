@@ -1,3 +1,4 @@
+import { t } from '../../i18n';
 import type { XrayConfig } from '../types';
 import {
     collectSnippetRefs,
@@ -77,8 +78,8 @@ export const runFullDiagnostics = (
             if (!grpc.serviceName) {
                 diagnostics.push({
                     section: 'outbounds', itemIndex: i, field: 'grpcSettings',
-                    severity: 'critical', message: 'gRPC requires "serviceName" to be set.',
-                    suggestion: 'Add a service name (e.g., "GunService").',
+                    severity: 'critical', message: t("gRPC requires \"serviceName\" to be set."),
+                    suggestion: t("Add a service name (e.g., \"GunService\")."),
                 });
             }
         }
@@ -88,13 +89,13 @@ export const runFullDiagnostics = (
             if (!r.publicKey) {
                 diagnostics.push({
                     section: 'outbounds', itemIndex: i, field: 'realitySettings',
-                    severity: 'critical', message: 'REALITY requires "publicKey" for outbounds.',
+                    severity: 'critical', message: t("REALITY requires \"publicKey\" for outbounds."),
                 });
             }
             if (!r.serverName) {
                 diagnostics.push({
                     section: 'outbounds', itemIndex: i, field: 'realitySettings',
-                    severity: 'warning', message: 'REALITY usually requires "serverName" (SNI) to match the destination.',
+                    severity: 'warning', message: t("REALITY usually requires \"serverName\" (SNI) to match the destination."),
                 });
             }
         }
@@ -105,16 +106,16 @@ export const runFullDiagnostics = (
         if (flow === 'xtls-rprx-vision' && mux.enabled) {
             diagnostics.push({
                 section: 'outbounds', itemIndex: i, field: 'mux',
-                severity: 'critical', message: 'XTLS-Vision is incompatible with Mux/XUDP.',
-                suggestion: 'Disable Mux for this outbound to use Vision flow.',
+                severity: 'critical', message: t("XTLS-Vision is incompatible with Mux/XUDP."),
+                suggestion: t("Disable Mux for this outbound to use Vision flow."),
             });
         }
 
         if (sec === 'reality' && mux.enabled) {
             diagnostics.push({
                 section: 'outbounds', itemIndex: i, field: 'mux',
-                severity: 'warning', message: 'Using Mux with REALITY is not recommended (affects fingerprint).',
-                suggestion: 'Consider disabling Mux for Reality outbounds.',
+                severity: 'warning', message: t("Using Mux with REALITY is not recommended (affects fingerprint)."),
+                suggestion: t("Consider disabling Mux for Reality outbounds."),
             });
         }
 
@@ -123,8 +124,8 @@ export const runFullDiagnostics = (
             if (x.mode === 'stream-up' && sec === 'none') {
                 diagnostics.push({
                     section: 'outbounds', itemIndex: i,
-                    severity: 'critical', message: 'XHTTP "stream-up" mode MANDATORY requires TLS or REALITY.',
-                    suggestion: 'Enable Security or change mode to "packet-up".',
+                    severity: 'critical', message: t("XHTTP \"stream-up\" mode MANDATORY requires TLS or REALITY."),
+                    suggestion: t("Enable Security or change mode to \"packet-up\"."),
                 });
             }
         }
@@ -144,8 +145,8 @@ export const runFullDiagnostics = (
             if ((!r.target && !r.dest) || !r.privateKey) {
                 diagnostics.push({
                     section: 'inbounds', itemIndex: i, field: 'realitySettings',
-                    severity: 'critical', message: 'REALITY Inbound requires "target" (or legacy "dest") and "privateKey".',
-                    suggestion: 'Configure a fallback destination and generate a private key.',
+                    severity: 'critical', message: t("REALITY Inbound requires \"target\" (or legacy \"dest\") and \"privateKey\"."),
+                    suggestion: t("Configure a fallback destination and generate a private key."),
                 });
             }
         }
@@ -155,7 +156,7 @@ export const runFullDiagnostics = (
             if (!tls.certificates || tls.certificates.length === 0) {
                 diagnostics.push({
                     section: 'inbounds', itemIndex: i, field: 'tlsSettings',
-                    severity: 'critical', message: 'TLS Inbound requires at least one certificate.',
+                    severity: 'critical', message: t("TLS Inbound requires at least one certificate."),
                 });
             }
         }
@@ -174,13 +175,13 @@ export const runFullDiagnostics = (
         if (rule.outboundTag && !allTargetTags.has(rule.outboundTag)) {
             diagnostics.push({
                 section: 'routing', itemIndex: i, field: 'outboundTag',
-                severity: 'critical', message: `Rule targets unknown outbound: "${rule.outboundTag}"`,
+                severity: 'critical', message: t("Rule targets unknown outbound: \"{value1}\"", { value1: String(rule.outboundTag) }),
             });
         }
         if (rule.balancerTag && !allTargetTags.has(rule.balancerTag)) {
             diagnostics.push({
                 section: 'routing', itemIndex: i, field: 'balancerTag',
-                severity: 'critical', message: `Rule targets unknown balancer: "${rule.balancerTag}"`,
+                severity: 'critical', message: t("Rule targets unknown balancer: \"{value1}\"", { value1: String(rule.balancerTag) }),
             });
         }
 
@@ -196,8 +197,8 @@ export const runFullDiagnostics = (
                         itemIndex: i,
                         field: 'domain',
                         severity: 'warning',
-                        message: `Duplicate matcher "${d}" in ${ruleName} — already matched in ${first.name} (Rule #${first.index + 1}). Traffic for "${d}" will be shadowed by Rule #${first.index + 1}.`,
-                        suggestion: `Remove duplicate "${d}" or reorder routing rules.`
+                        message: t("Duplicate matcher \"{value1}\" in {value2} — already matched in {value3} (Rule #{value4}). Traffic for \"{value1}\" will be shadowed by Rule #{value4}.", { value1: String(d), value2: String(ruleName), value3: String(first.name), value4: String(first.index + 1) }),
+                        suggestion: t("Remove duplicate \"{value1}\" or reorder routing rules.", { value1: String(d) })
                     });
                 } else {
                     seenDomains.set(key, { index: i, name: ruleName });
@@ -217,8 +218,8 @@ export const runFullDiagnostics = (
                         itemIndex: i,
                         field: 'ip',
                         severity: 'warning',
-                        message: `Duplicate IP matcher "${ip}" in ${ruleName} — already matched in ${first.name} (Rule #${first.index + 1}). Traffic for "${ip}" will be shadowed by Rule #${first.index + 1}.`,
-                        suggestion: `Remove duplicate "${ip}" or reorder routing rules.`
+                        message: t("Duplicate IP matcher \"{value1}\" in {value2} — already matched in {value3} (Rule #{value4}). Traffic for \"{value1}\" will be shadowed by Rule #{value4}.", { value1: String(ip), value2: String(ruleName), value3: String(first.name), value4: String(first.index + 1) }),
+                        suggestion: t("Remove duplicate \"{value1}\" or reorder routing rules.", { value1: String(ip) })
                     });
                 } else {
                     seenIPs.set(key, { index: i, name: ruleName });
@@ -243,11 +244,11 @@ export const runFullDiagnostics = (
             field: 'snippet',
             severity: snippets.length > 0 ? 'warning' : 'info',
             message: snippets.length > 0
-                ? `Snippet "${ref.name}" is not in your snippet library — the panel may not be able to expand it.`
-                : `Snippet "${ref.name}" is resolved by Remnawave; its contents are not loaded here yet.`,
+                ? t("Snippet \"{value1}\" is not in your snippet library — the panel may not be able to expand it.", { value1: String(ref.name) })
+                : t("Snippet \"{value1}\" is resolved by Remnawave; its contents are not loaded here yet.", { value1: String(ref.name) }),
             suggestion: snippets.length > 0
-                ? 'Open Snippets to refresh the library, or check the name against the panel.'
-                : 'Open Snippets and refresh to load snippet bodies from the panel.',
+                ? t("Open Snippets to refresh the library, or check the name against the panel.")
+                : t("Open Snippets and refresh to load snippet bodies from the panel."),
         });
     });
 

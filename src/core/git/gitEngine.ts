@@ -1,3 +1,4 @@
+import { t } from '../../i18n';
 import { type Change } from 'diff';
 import { boundedDiff, diffCounts } from './bounded-diff';
 import type { XrayConfig } from '../types';
@@ -38,7 +39,7 @@ export function calculateConfigStats(oldConfig: XrayConfig | null, newConfig: Xr
     const outbounds = newConfig.outbounds?.length || 0;
     const rules = newConfig.routing?.rules?.length || 0;
     const approx = approximate ? '~' : '';
-    const summary = `${inbounds} inbounds, ${outbounds} outbounds, ${rules} rules (${additions > 0 ? `${approx}+${additions}` : ''}${deletions > 0 ? ` ${approx}-${deletions}` : ''})`;
+    const summary = t("{inbounds} inbounds, {outbounds} outbounds, {rules} rules", { inbounds, outbounds, rules }) + ` (${additions > 0 ? `${approx}+${additions}` : ''}${deletions > 0 ? ` ${approx}-${deletions}` : ''})`;
 
     return { additions, deletions, summary, approximate };
 }

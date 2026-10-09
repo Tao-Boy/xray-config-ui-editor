@@ -136,11 +136,11 @@ export const recipeFromAwgInterface = (
         const spec = lookup(iface, key);
         if (spec === undefined || spec.trim() === '') continue;
         const { tags, notes: parsed } = parseAwgSpec(spec);
-        notes.push(...parsed.map(note => ({ ...note, message: `${key}: ${note.message}` })));
+        notes.push(...parsed.map(note => ({ ...note, message: t("{value1}: {value2}", { value1: String(key), value2: String(note.message) }) })));
         if (tags.length === 0) continue;
         const seed = newSeed(rng);
         const drawn = renderAwgSpec(tags, seededRng(seed));
-        notes.push(...drawn.notes.map(note => ({ ...note, message: `${key}: ${note.message}` })));
+        notes.push(...drawn.notes.map(note => ({ ...note, message: t("{value1}: {value2}", { value1: String(key), value2: String(note.message) }) })));
         steps.push({ kind: 'packet', template: { kind: 'awg', tags }, hex: toHex(drawn.bytes), seed });
     }
 

@@ -138,10 +138,10 @@ export function useConfigInspector(setModal: (m: any) => void) {
             if (!response.ok) {
                 if (response.status === 403 || response.status === 429) {
                     if (response.headers.get('x-hwid-max-devices-reached') === 'true' || response.headers.get('x-hwid-limit') === 'true') {
-                        throw new Error("Remnawave HWID device limit reached. Try using the HWID from your already active client (e.g. Throne).");
+                        throw new Error(t("Remnawave HWID device limit reached. Try using the HWID from your already active client (e.g. Throne)."));
                     }
                 }
-                throw new Error(`HTTP ${response.status}`);
+                throw new Error(t("HTTP {value1}", { value1: String(response.status) }));
             }
 
             const rawText = await response.text();
@@ -197,7 +197,7 @@ export function useConfigInspector(setModal: (m: any) => void) {
     const handleParse = () => {
         try {
             const configs = parseRawSubscriptionText(inputText);
-            if (!configs || configs.length === 0) throw new Error("No valid configurations found in input");
+            if (!configs || configs.length === 0) throw new Error(t("No valid configurations found in input"));
             setParsedConfigs(configs);
             setSelectedIndex(0);
 
@@ -214,7 +214,7 @@ export function useConfigInspector(setModal: (m: any) => void) {
                     description: t("Your provider may require a different User-Agent or device authorization.")
                 });
             } else {
-                toast.success(`Analyzed ${configs.length} configuration(s) (${firstConfig?.outbounds?.length || 0} nodes found)`);
+                toast.success(t("Analyzed {value1} configuration(s) ({value2} nodes found)", { value1: String(configs.length), value2: String(firstConfig?.outbounds?.length || 0) }));
             }
         } catch (e: any) {
             toast.error(t("Parse failed"), { description: e.message });
@@ -251,7 +251,7 @@ export function useConfigInspector(setModal: (m: any) => void) {
             [section]: [item, ...(currentRouting[section] || [])]
         };
         updateSection('routing', updated);
-        toast.success(`Imported to your routing (at the top)`);
+        toast.success(t("Imported to your routing (at the top)"));
     };
 
     const extractAllFromSelected = () => {
@@ -265,11 +265,11 @@ export function useConfigInspector(setModal: (m: any) => void) {
             tag: proxies.length > 1 ? `${name}-${i + 1}` : name
         }));
         addOutbounds(cleaned);
-        toast.success(`Extracted ${cleaned.length} nodes from ${name}`);
+        toast.success(t("Extracted {value1} nodes from {value2}", { value1: String(cleaned.length), value2: String(name) }));
     };
 
     const handleSaveShortcut = () => useConfigStore.getState().saveActiveProfile();
-    const handleCommitShortcut = () => useConfigStore.getState().recordSnapshot("Manual Commit (Ctrl+Shift+S)");
+    const handleCommitShortcut = () => useConfigStore.getState().recordSnapshot(t("Manual Commit (Ctrl+Shift+S)"));
 
     return {
         inputText, setInputText,

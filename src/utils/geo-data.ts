@@ -1,4 +1,9 @@
 import { getSharedProtoWorker } from './proto-worker';
+import { t } from '../i18n';
+
+/** Translate owned worker errors in the UI, where the active language lives. */
+export const describeGeoError = (error: unknown): string =>
+    error === 'Failed to download DAT file' ? t("Failed to download DAT file") : String(error);
 
 export const binaryCache = new Map<string, ArrayBuffer>();
 const DB_NAME = 'GeoCacheDB';
@@ -82,7 +87,7 @@ export const getDefaultGeoList = (type: 'geosite' | 'geoip'): Promise<any[]> => 
         
         const handleMessage = (e: MessageEvent) => {
             const { type: msgType, targetType, data, meta } = e.data;
-            const t = targetType || msgType; 
+            const responseType = targetType || msgType;
             
             let d = data || e.data.data;
             if (msgType === 'cache_hit' && cache?.data) {
@@ -90,7 +95,7 @@ export const getDefaultGeoList = (type: 'geosite' | 'geoip'): Promise<any[]> => 
             }
             
             if (msgType === 'success' || msgType === 'cache_hit' || msgType === type) {
-                if (t === type) {
+                if (responseType === type) {
                     d = d ||[];
                     if (msgType === 'success') saveCachedData(url, d, meta);
                     memCache[type] = d;

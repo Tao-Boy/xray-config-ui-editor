@@ -1,3 +1,4 @@
+import { t, tn } from '../i18n';
 import { cryptoRng } from '../core/noise/bytes';
 import { awgProtocolNotes, isAwgInterface, recipeFromAwgInterface } from '../core/noise/awg';
 import { toNoiseItems } from '../core/noise/recipe';
@@ -36,13 +37,13 @@ export const parseWireguardConfigDetailed = (
         Interface: {},
         Peers: [] as any[]
     };
-    
+
     const notes: Note[] = [];
     let currentSection = "";
     for (let line of lines) {
         line = line.trim();
         if (!line || line.startsWith('#')) continue;
-        
+
         if (line.startsWith('[Interface]')) {
             currentSection = "Interface";
             continue;
@@ -114,7 +115,7 @@ export const parseWireguardConfigDetailed = (
 
         if (mode === 'direct') {
             // Finalmask inside the WireGuard outbound itself.
-            outbound.streamSettings.network = "raw"; 
+            outbound.streamSettings.network = "raw";
             outbound.streamSettings.finalmask = {
                 udp: [{ type: "noise", settings: { noise } }]
             };
@@ -123,7 +124,7 @@ export const parseWireguardConfigDetailed = (
             // dialerProxy — for a core whose WireGuard has no finalmask.
             const noiseTag = outbound.tag + "-obfuscator";
             outbound.streamSettings.sockopt = { dialerProxy: noiseTag };
-            
+
             const obfuscator = {
                 tag: noiseTag,
                 protocol: "freedom",
@@ -266,7 +267,7 @@ export const parseXrayLink = (link: string): any => {
     // --- URI-based protocols (VLESS, Shadowsocks, Trojan) ---
     const url = new URL(trimmed);
     let protocol = url.protocol.replace(':', '');
-    
+
     if (protocol === 'ss') {
         protocol = 'shadowsocks';
     }
@@ -301,7 +302,7 @@ export const parseXrayLink = (link: string): any => {
           }]
         }]
       };
-    } 
+    }
     // --- TROJAN ---
     else if (protocol === 'trojan') {
       baseOutbound.settings = {
@@ -316,7 +317,7 @@ export const parseXrayLink = (link: string): any => {
     }
 
     // --- SHADOWSOCKS ---
-    else if (protocol === 'shadowsocks') { 
+    else if (protocol === 'shadowsocks') {
       let method = "";
       let password = "";
       let serverAddr = "";
@@ -324,7 +325,7 @@ export const parseXrayLink = (link: string): any => {
 
       // 1. Try to parse as ss://BASE64(method:password@host:port)
       const linkBody = (trimmed.split('://')[1] ?? '').split('#')[0] ?? '';
-      
+
       try {
         // If it's a legacy all-in-one base64 link
         if (!linkBody.includes('@')) {
@@ -390,13 +391,13 @@ export const parseXrayLink = (link: string): any => {
         }]
       };
     } else {
-        throw new Error("Unsupported protocol");
+        throw new Error(t("Unsupported protocol"));
     }
 
     // --- (Network, TLS, Reality) ---
     const network = query.type || query.net || "tcp";
     baseOutbound.streamSettings.network = network;
-    
+
     if (query.security) baseOutbound.streamSettings.security = query.security;
 
     if (query.security === 'tls' || query.security === 'reality') {
@@ -415,7 +416,7 @@ export const parseXrayLink = (link: string): any => {
         baseOutbound.streamSettings.tlsSettings = tlsSettings;
       }
     }
-    
+
     if (network === 'ws') {
       // `host`, not `headers.Host`, which every supported core logs as deprecated.
       baseOutbound.streamSettings.wsSettings = {
@@ -485,7 +486,7 @@ export const parseXrayLink = (link: string): any => {
  */
 export const parseRawSubscriptionText = (text: string): any[] => {
     let clean = (text || "").trim();
-    if (!clean) throw new Error("Input is empty");
+    if (!clean) throw new Error(t("Input is empty"));
 
     // 1. Try to decode Base64 if not already JSON or plain links
     if (!clean.startsWith('{') && !clean.startsWith('[') && !clean.includes('://')) {
@@ -517,7 +518,7 @@ export const parseRawSubscriptionText = (text: string): any[] => {
         if (wg) {
             const outbounds = wg.multiple && wg.outbounds ? wg.outbounds : [wg];
             return [{
-                remarks: "WireGuard Configuration",
+                remarks: t("WireGuard Configuration"),
                 outbounds
             }];
         }
@@ -538,12 +539,12 @@ export const parseRawSubscriptionText = (text: string): any[] => {
 
     if (parsedOutbounds.length > 0) {
         return [{
-            remarks: `Imported Node List (${parsedOutbounds.length} nodes)`,
+            remarks: tn(parsedOutbounds.length, "Imported Node List ({n} node)", "Imported Node List ({n} nodes)"),
             outbounds: parsedOutbounds
         }];
     }
 
-    throw new Error("Could not parse as JSON config or valid proxy links");
+    throw new Error(t("Could not parse as JSON config or valid proxy links"));
 };
 
 /**
@@ -557,9 +558,9 @@ export const parseJsonSubscription = (jsonText: string): any[] => {
 
         const processConfig = (conf: any) => {
             if (!conf || typeof conf !== 'object') return;
-            
+
             if (Array.isArray(conf.outbounds)) {
-                const proxies = conf.outbounds.filter((o: any) => 
+                const proxies = conf.outbounds.filter((o: any) =>
                     !['freedom', 'dns', 'blackhole', 'direct', 'block'].includes(o.protocol)
                 );
 

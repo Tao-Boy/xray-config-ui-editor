@@ -1,3 +1,4 @@
+import { t } from '../i18n';
 /**
  * Store access + derived state + handlers for ConfigDashboard.tsx.
  *
@@ -100,9 +101,9 @@ export function useConfigDashboardGit(): ConfigDashboardGit {
     const snapshot = useConfigStore.getState().recordSnapshot(msg);
     saveActiveProfile();
     if (snapshot) {
-      toast.success(`✓ Committed: ${snapshot.id.substring(0, 7)}`);
+      toast.success(t("✓ Committed: {value1}", { value1: String(snapshot.id.substring(0, 7)) }));
     } else {
-      toast.info(`Already at HEAD (no changes to commit)`);
+      toast.info(t("Already at HEAD (no changes to commit)"));
     }
   };
 
@@ -228,7 +229,7 @@ export function useOutboundSelection(
     if (selectedIndices.size === 0) return;
     const indicesToDelete = Array.from(selectedIndices);
     const count = indicesToDelete.length;
-    if (confirm(`Delete ${count} selected outbound${count > 1 ? "s" : ""}?`)) {
+    if (confirm(t("Delete {count} selected outbounds?", { count }))) {
       if (onDeleteOutbounds) {
         onDeleteOutbounds(indicesToDelete);
       } else {
@@ -237,7 +238,7 @@ export function useOutboundSelection(
       }
       setSelectedIndices(new Set());
       setLastClickedFilteredIdx(null);
-      toast.success(`Deleted ${count} outbound${count > 1 ? "s" : ""}`);
+      toast.success(t("Deleted {count} outbounds", { count }));
     }
   };
 

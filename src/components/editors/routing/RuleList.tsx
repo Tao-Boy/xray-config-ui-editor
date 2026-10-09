@@ -104,7 +104,7 @@ const SortableRuleItem = ({ rule, id, isActive, onClick, onDelete, warnings = []
                         : 'bg-blue-400'
                     }`} />
                     <span className="font-bold truncate text-slate-200 text-sm">
-                        {rule.ruleTag || rule.outboundTag || rule.balancerTag || "Unnamed Rule"}
+                        {rule.ruleTag || rule.outboundTag || rule.balancerTag || t("Unnamed Rule")}
                     </span>
                     {broken && (
                         <Icon name="WarningOctagon" weight="fill"
@@ -122,15 +122,14 @@ const SortableRuleItem = ({ rule, id, isActive, onClick, onDelete, warnings = []
 
                 {rule.ruleTag && (
                     <div className="text-[9px] text-slate-500 uppercase flex items-center gap-1 ml-3 mt-0.5">
-                        <Icon name="ArrowElbowDownRight" className="text-[8px]" />
-                        Target: {rule.outboundTag || rule.balancerTag || <span className="text-rose-400">{t("none!")}</span>}
+                        <Icon name="ArrowElbowDownRight" className="text-[8px]" /> {t("Target:")} {rule.outboundTag || rule.balancerTag || <span className="text-rose-400">{t("none!")}</span>}
                     </div>
                 )}
 
                 <div className={`text-[10px] text-slate-500 font-mono truncate ml-3 ${rule.ruleTag ? 'mt-0.5' : 'mt-1'}`}>
                     {hasWarnings ? (
-                        <span className="text-amber-400/80 font-bold">⚠️ Duplicate matchers detected</span>
-                    ) : rule.domain ? `dom:${rule.domain.length}` : rule.ip ? `ip:${rule.ip.length}` : rule.network ? `net:${rule.network}` : 'no matchers!'}
+                        <span className="text-amber-400/80 font-bold">{t("⚠️ Duplicate matchers detected")}</span>
+                    ) : rule.domain ? `dom:${rule.domain.length}` : rule.ip ? `ip:${rule.ip.length}` : rule.network ? `net:${rule.network}` : t("no matchers!")}
                 </div>
             </div>
 

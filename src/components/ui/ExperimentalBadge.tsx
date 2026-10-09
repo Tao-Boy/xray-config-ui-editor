@@ -20,8 +20,7 @@ export interface ExperimentalBadgeProps {
  */
 export const ExperimentalBadge = ({ since, commit, className }: ExperimentalBadgeProps) => (
     <span title={commit ? t("Landed in xray-core commit {commit}, not yet in a tagged release.", { commit }) : undefined}>
-        <Badge variant="warning" size="sm" icon="Flask" className={className}>
-            Experimental{since ? ` · ${since}` : ''}
+        <Badge variant="warning" size="sm" icon="Flask" className={className}> {t("Experimental")}{since ? ` · ${since}` : ''}
         </Badge>
     </span>
 );

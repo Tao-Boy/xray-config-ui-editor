@@ -337,8 +337,7 @@ export const ConfigDashboard = ({
               variant="secondary"
               onClick={onOpenHistory}
               icon="GitBranch"
-            >
-              Git Log ({history.length})
+            > {t("Git Log (")}{history.length})
             </Button>
           )}
 
@@ -369,7 +368,7 @@ export const ConfigDashboard = ({
             className="flex-1 relative min-h-0"
             rawConfigText={rawConfigText}
             onSaveShortcut={() => saveActiveProfile()}
-            onCommitShortcut={() => recordSnapshot("Manual Commit (Ctrl+Shift+S)")}
+            onCommitShortcut={() => recordSnapshot(t("Manual Commit (Ctrl+Shift+S)"))}
           />
         </div>
       ) : (

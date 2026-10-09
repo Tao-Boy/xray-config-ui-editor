@@ -107,7 +107,7 @@ const SortableChipTag = ({
             } else {
                 if (navigator?.clipboard?.writeText) {
                     navigator.clipboard.writeText(tag)
-                        .then(() => toast.success(`Copied: ${tag}`))
+                        .then(() => toast.success(t("Copied: {value1}", { value1: String(tag) })))
                         .catch(() => {
                             try {
                                 const el = document.createElement('textarea');
@@ -116,7 +116,7 @@ const SortableChipTag = ({
                                 el.select();
                                 document.execCommand('copy');
                                 document.body.removeChild(el);
-                                toast.success(`Copied: ${tag}`);
+                                toast.success(t("Copied: {value1}", { value1: String(tag) }));
                             } catch { toast.error(t("Copy failed")); }
                         });
                 } else {
@@ -127,7 +127,7 @@ const SortableChipTag = ({
                         el.select();
                         document.execCommand('copy');
                         document.body.removeChild(el);
-                        toast.success(`Copied: ${tag}`);
+                        toast.success(t("Copied: {value1}", { value1: String(tag) }));
                     } catch { toast.error(t("Copy failed")); }
                 }
             }
@@ -143,7 +143,7 @@ const SortableChipTag = ({
             onPointerUp={handlePointerUp}
             onPointerLeave={cancelHold}
             onPointerCancel={cancelHold}
-            title={isInvalid ? errorTooltip : isWarn ? warnTooltip : "Hold 1.5s to drag & reorder | Click to copy | Ctrl+Click for details"}
+            title={isInvalid ? errorTooltip : isWarn ? warnTooltip : t("Hold 1.5s to drag & reorder | Click to copy | Ctrl+Click for details")}
             className={`relative overflow-hidden px-2 py-1 rounded text-xs font-mono flex items-center gap-1 border transition-all cursor-grab active:cursor-grabbing select-none hover:ring-1 hover:ring-indigo-500 ${
                 isDragging ? 'ring-2 ring-indigo-400 scale-105 shadow-lg bg-indigo-950 border-indigo-500 z-[999]'
                 : isInvalid
@@ -189,8 +189,8 @@ export const SmartTagInput = ({
     invalidTags = [],
     warnTags = [],
     onTagClick,
-    errorTooltip = "Invalid tag",
-    warnTooltip = "Style lint warning",
+    errorTooltip = t("Invalid tag"),
+    warnTooltip = t("Style lint warning"),
     cleanRegex = /\[\d+\]/g,
     allowedPattern,
     actionIcon,
@@ -233,7 +233,7 @@ export const SmartTagInput = ({
         } else if (e.key === 'Enter' || e.keyCode === 13) {
             e.preventDefault();
             e.stopPropagation();
-            
+
             const focused = showSuggest && focusedIndex >= 0 ? filteredSuggestions[focusedIndex] : undefined;
             if (focused) {
                 processAndAddTags(`${prefix}${focused.code}`);
@@ -373,8 +373,7 @@ export const SmartTagInput = ({
                         {!hasInvalid && hasWarn && (
                             <span className="text-amber-400 flex items-center gap-1 normal-case font-normal text-[10px]">
                                 <Icon name="Warning" weight="fill" className="text-[11px]" />
-                                {warnTags.length} lint
-                            </span>
+                                {warnTags.length} {t("lint")} </span>
                         )}
                     </span>
                     <div className="flex items-center gap-2">
@@ -413,7 +412,7 @@ export const SmartTagInput = ({
                                             className="w-full text-left px-3 py-1.5 hover:bg-indigo-600 hover:text-white text-slate-300 flex items-center gap-2 transition-colors"
                                         >
                                             <Icon name="Tag" className="text-sm text-purple-400" />
-                                            {prefixName ? `${prefixName} first` : 'Prefix first'}
+                                            {prefixName ? `${prefixName} first` : t("Prefix first")}
                                         </button>
                                         <button
                                             type="button"
@@ -434,7 +433,7 @@ export const SmartTagInput = ({
             <div
                 className={`bg-slate-950 border rounded-lg py-1.5 px-3 flex items-center justify-between focus-within:ring-1 transition-all min-h-[44px] ${containerBorder}`}
             >
-                <div 
+                <div
                     className="flex flex-wrap gap-2 flex-1 cursor-text"
                     onClick={() => wrapperRef.current?.querySelector('input')?.focus()}
                 >
@@ -466,7 +465,7 @@ export const SmartTagInput = ({
                         <input
                             className="bg-transparent outline-none text-sm text-white w-full h-full font-mono placeholder:text-slate-600"
                             value={input}
-                            onChange={e => { 
+                            onChange={e => {
                                 let val = e.target.value;
                                 if (allowedPattern) {
                                     val = val.replace(allowedPattern, '');
@@ -474,7 +473,7 @@ export const SmartTagInput = ({
                                 if (val.includes(',') || val.includes(' ') || val.includes('\n')) {
                                     processAndAddTags(val);
                                 } else {
-                                    setInput(val); 
+                                    setInput(val);
                                     setShowSuggest(true);
                                     setFocusedIndex(-1);
                                 }
@@ -487,9 +486,9 @@ export const SmartTagInput = ({
                             inputMode="text"
                             autoComplete="off"
                         />
-                        
+
                         {showSuggest && input && filteredSuggestions.length > 0 && (
-                            <div 
+                            <div
                                 ref={suggestionsRef}
                                 className="absolute top-full left-0 mt-2 w-full min-w-[250px] bg-slate-800 border border-slate-700 rounded-lg shadow-xl z-50 max-h-56 overflow-y-auto custom-scroll"
                             >
@@ -500,8 +499,8 @@ export const SmartTagInput = ({
                                             key={s.code}
                                             onMouseEnter={() => setFocusedIndex(index)}
                                             className={`w-full text-left px-3 py-2 text-xs flex justify-between items-center group transition-colors ${
-                                                isFocused 
-                                                    ? 'bg-indigo-600 text-white' 
+                                                isFocused
+                                                    ? 'bg-indigo-600 text-white'
                                                     : 'hover:bg-indigo-600 hover:text-white text-slate-300'
                                             }`}
                                             onClick={() => processAndAddTags(`${prefix}${s.code}`)}
@@ -511,8 +510,7 @@ export const SmartTagInput = ({
                                                 <span className={isFocused ? 'text-white' : 'text-slate-200 group-hover:text-white'}>{s.code}</span>
                                             </span>
                                             <span className={`text-[10px] ${isFocused ? 'text-indigo-200' : 'text-slate-500 group-hover:text-indigo-200'}`}>
-                                                {s.count} recs
-                                            </span>
+                                                {s.count} {t("recs")} </span>
                                         </button>
                                     );
                                 })}

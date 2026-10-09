@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 
     <head>
         <meta charset="UTF-8">
@@ -7,38 +7,39 @@
             content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
         
         <!-- SEO Primary Meta Tags -->
-        <title>Xray Config UI Editor — Visual Web GUI for Xray-core & Remnawave</title>
-        <meta name="title" content="Xray Config UI Editor — Visual Web GUI for Xray-core & Remnawave">
-        <meta name="description" content="Free static web-based GUI and editor for Xray-core (config.json). Features visual traffic topology, VLESS Reality key generator, smart routing manager, and direct Remnawave Panel sync.">
-        <meta name="keywords" content="xray, xray-core, xray gui, xray config editor, v2ray, vless, reality, remnawave, xray configurator, routing rules, visual topology, vless reality key generator, редактор конфигов xray, генератор xray, визуальный конфигуратор xray">
+        <title>Xray 配置编辑器 — Xray-core 与 Remnawave 可视化工具</title>
+        <meta name="title" content="Xray 配置编辑器 — Xray-core 与 Remnawave 可视化工具">
+        <meta name="description" content="免费的 Xray-core 网页配置编辑器，支持流量拓扑、VLESS REALITY 密钥生成、路由管理与 Remnawave 面板同步。">
+        <meta name="keywords" content="xray, xray-core, xray gui, xray config editor, v2ray, vless, reality, remnawave, xray configurator, routing rules, visual topology, vless reality key generator, Xray 配置编辑器, 简体中文, 中文版, 路由规则, 可视化拓扑">
         <meta name="robots" content="index, follow">
         <meta name="author" content="bropines">
-        <link rel="canonical" href="https://bropines.github.io/xray-config-ui-editor/">
+        <link rel="canonical" href="https://tao-boy.github.io/xray-config-ui-editor/">
 
         <!-- Open Graph / Facebook -->
         <meta property="og:type" content="website">
-        <meta property="og:url" content="https://bropines.github.io/xray-config-ui-editor/">
-        <meta property="og:title" content="Xray Config UI Editor — Visual Web GUI for Xray-core & Remnawave">
-        <meta property="og:description" content="Web GUI for Xray-core: Inbounds, Outbounds, Routing, Reality generator, and direct Remnawave Panel integration.">
-        <meta property="og:image" content="https://bropines.github.io/xray-config-ui-editor/favicon.svg">
+        <meta property="og:url" content="https://tao-boy.github.io/xray-config-ui-editor/">
+        <meta property="og:title" content="Xray 配置编辑器 — Xray-core 与 Remnawave 可视化工具">
+        <meta property="og:description" content="可视化管理 Xray-core 的入站、出站与路由，生成 REALITY 密钥并同步 Remnawave 面板。">
+        <meta property="og:image" content="https://tao-boy.github.io/xray-config-ui-editor/favicon.svg">
 
         <!-- Twitter Card -->
         <meta name="twitter:card" content="summary">
-        <meta name="twitter:url" content="https://bropines.github.io/xray-config-ui-editor/">
-        <meta name="twitter:title" content="Xray Config UI Editor">
-        <meta name="twitter:description" content="Visual Web GUI for Xray-core & Remnawave Panel.">
-        <meta name="twitter:image" content="https://bropines.github.io/xray-config-ui-editor/favicon.svg">
+        <meta name="twitter:url" content="https://tao-boy.github.io/xray-config-ui-editor/">
+        <meta name="twitter:title" content="Xray 配置编辑器">
+        <meta name="twitter:description" content="适用于 Xray-core 与 Remnawave 面板的可视化配置工具。">
+        <meta name="twitter:image" content="https://tao-boy.github.io/xray-config-ui-editor/favicon.svg">
 
         <!-- Schema.org JSON-LD Structured Data -->
         <script type="application/ld+json">
         {
             "@context": "https://schema.org",
             "@type": "WebApplication",
-            "name": "Xray Config UI Editor",
-            "url": "https://bropines.github.io/xray-config-ui-editor/",
-            "description": "Free static web-based GUI for Xray-core configurations with visual topology, VLESS Reality key generator, and Remnawave sync.",
+            "name": "Xray 配置编辑器",
+            "url": "https://tao-boy.github.io/xray-config-ui-editor/",
+            "description": "免费的 Xray-core 静态网页配置工具，支持流量拓扑、VLESS REALITY 密钥生成与 Remnawave 同步。",
             "applicationCategory": "DeveloperApplication",
             "operatingSystem": "All",
+            "inLanguage": "zh-CN",
             "offers": {
                 "@type": "Offer",
                 "price": "0",
@@ -65,7 +66,7 @@
              the status bar style has no manifest equivalent, so it stays. -->
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <meta name="apple-mobile-web-app-title" content="Xray Editor" />
+        <meta name="apple-mobile-web-app-title" content="Xray 编辑器" />
 
         <!-- One request, not two: the same families were requested twice, once
              with display=block (invisible text for up to 3s) and once with
@@ -85,23 +86,23 @@
             <!-- SEO Fallback Content for Crawlers and Bots (replaced on React mount) -->
             <noscript>
                 <div style="padding: 2rem; max-width: 800px; margin: 0 auto; color: #fff;">
-                    <h1>Xray Config UI Editor</h1>
-                    <p>Visual web GUI and editor for Xray-core configurations (Inbounds, Outbounds, Routing, Reality, Remnawave). Please enable JavaScript to run this application.</p>
+                    <h1>Xray 配置编辑器</h1>
+                    <p>Xray-core 可视化配置编辑器，支持入站、出站、路由、REALITY 和 Remnawave。请启用 JavaScript 以运行此应用。</p>
                 </div>
             </noscript>
             <div style="padding: 2rem; max-width: 800px; margin: 0 auto;">
-                <h1 class="text-2xl font-bold text-white mb-2">Xray Config UI Editor — Web GUI for Xray-core</h1>
-                <p class="text-slate-300 mb-4">A powerful static web-based interface to create, edit, visualize, and manage Xray-core configurations in your browser.</p>
-                <h2 class="text-lg font-semibold text-slate-200 mb-2">Key Features:</h2>
+                <h1 class="text-2xl font-bold text-white mb-2">Xray 配置编辑器 — Xray-core 可视化工具</h1>
+                <p class="text-slate-300 mb-4">在浏览器中创建、编辑、查看和管理 Xray-core 配置的静态网页工具。</p>
+                <h2 class="text-lg font-semibold text-slate-200 mb-2">主要功能：</h2>
                 <ul class="list-disc list-inside text-slate-400 space-y-1">
-                    <li>Full Config Management: Inbounds, Outbounds, Routing, DNS, Policy, Reverse, and Stats.</li>
-                    <li>Direct Remnawave Panel sync via API.</li>
-                    <li>Interactive visual traffic flow topology (powered by React Flow).</li>
-                    <li>Built-in VLESS Reality keypair generator (X25519).</li>
-                    <li>Drag &amp; drop routing rule manager.</li>
-                    <li>Dual-mode editing: user-friendly GUI and raw JSON editor with syntax validation.</li>
+                    <li>完整配置管理：入站、出站、路由、DNS、策略、反向代理和统计。</li>
+                    <li>通过 API 直接同步 Remnawave 面板。</li>
+                    <li>基于 React Flow 的交互式流量拓扑。</li>
+                    <li>内置 VLESS REALITY 密钥对生成器（X25519）。</li>
+                    <li>支持拖动排序的路由规则管理器。</li>
+                    <li>双模式编辑：图形表单与支持语法检查的原始 JSON 编辑器。</li>
                 </ul>
-                <p class="text-slate-500 mt-4 text-xs">Loading application...</p>
+                <p class="text-slate-500 mt-4 text-xs">正在加载应用…</p>
             </div>
         </div>
         <script type="module" src="/src/main.tsx"></script>

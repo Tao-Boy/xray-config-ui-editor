@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
 import { getSharedProtoWorker } from '../utils/proto-worker';
-import { binaryCache, loadCachedData, saveCachedData } from '../utils/geo-data';
+import { binaryCache, loadCachedData, saveCachedData, describeGeoError } from '../utils/geo-data';
 import { t } from '../i18n';
 
 export const useTagDetails = (tag: string, customUrl?: string, customFormat?: string, customFileBuffer?: ArrayBuffer | null) => {
@@ -18,13 +18,13 @@ export const useTagDetails = (tag: string, customUrl?: string, customFormat?: st
     useEffect(() => {
         let isCancelled = false;
         const isGeosite = tag.toLowerCase().startsWith('geosite:');
-        
+
         const targetCode = tag.replace(/^(geosite:|geoip:)/i, '').toUpperCase();
-        
-        const defaultUrl = isGeosite 
-            ? "https://cdn.jsdelivr.net/gh/v2fly/domain-list-community@release/dlc.dat" 
+
+        const defaultUrl = isGeosite
+            ? "https://cdn.jsdelivr.net/gh/v2fly/domain-list-community@release/dlc.dat"
             : "https://cdn.jsdelivr.net/gh/v2fly/geoip@release/geoip.dat";
-        
+
         const currentUrl = customUrl || defaultUrl;
 
         const loadData = async () => {
@@ -42,10 +42,10 @@ export const useTagDetails = (tag: string, customUrl?: string, customFormat?: st
                             binaryCache.set(currentUrl, cachedBuffer);
                         } else {
                             const myProxy = `https://crs.bropines.workers.dev/${currentUrl}`;
-                            const targets = currentUrl.includes('github') || currentUrl.includes('jsdelivr') 
-                                ? [myProxy, currentUrl, `https://mirror.ghproxy.com/${currentUrl}`] 
+                            const targets = currentUrl.includes('github') || currentUrl.includes('jsdelivr')
+                                ? [myProxy, currentUrl, `https://mirror.ghproxy.com/${currentUrl}`]
                                 : [currentUrl, myProxy];
-                            
+
                             let res;
                             for (const target of targets) {
                                 try {
@@ -59,13 +59,13 @@ export const useTagDetails = (tag: string, customUrl?: string, customFormat?: st
                                 binaryCache.set(currentUrl, buffer);
                                 await saveCachedData(currentUrl + "_raw", null, {}, buffer);
                             } else {
-                                throw new Error("Fetch failed");
+                                throw new Error(t("Fetch failed"));
                             }
                         }
                     } catch {
                         if (!isCancelled) {
                             toast.error(t("Failed to download database for extraction"));
-                            setText("Network error.");
+                            setText(t("Network error."));
                         }
                         return;
                     }
@@ -75,30 +75,30 @@ export const useTagDetails = (tag: string, customUrl?: string, customFormat?: st
             if (isCancelled) return;
 
             const worker = getSharedProtoWorker();
-            
+
             // Note: Since the worker is shared, we should ideally use a request/response ID system.
             // For now, we'll just handle the message and check if it matches our targetCode.
             const handleMessage = (e: MessageEvent) => {
                 if (isCancelled) return;
                 if (e.data.error) {
                     toast.error(t("Failed to load details"));
-                    setText("Error loading data.\n" + e.data.error);
+                    setText(t("Error loading data.\n") + describeGeoError(e.data.error));
                 } else if (e.data.type === 'details') {
                     // Simple check to ensure we don't show wrong data if multiple requests are pending
                     // In a production app, we'd use a unique ID.
-                    setText(e.data.data || "No records found.");
+                    setText(e.data.data || t("No records found."));
                 }
                 worker.removeEventListener('message', handleMessage);
             };
-            
+
             worker.addEventListener('message', handleMessage);
-           
-            worker.postMessage({ 
-                type: 'get_details', 
-                dataType: customFormat || (isGeosite ? 'geosite' : 'geoip'), 
-                targetCode, 
+
+            worker.postMessage({
+                type: 'get_details',
+                dataType: customFormat || (isGeosite ? 'geosite' : 'geoip'),
+                targetCode,
                 customUrl: undefined,
-                fileBuffer: buffer 
+                fileBuffer: buffer
             });
         };
 

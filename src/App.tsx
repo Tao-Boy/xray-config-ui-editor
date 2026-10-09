@@ -83,7 +83,7 @@ export const App = () => {
             <Toaster
                 theme="dark"
                 position="bottom-right"
-                toastOptions={{ style: { background: '#1e293b', border: '1px solid #334155', color: 'white' } }}
+                toastOptions={{ style: { background: '#1e293b', border: "1px solid #334155", color: 'white' } }}
             />
             <UpdatePrompt />
 
@@ -154,7 +154,7 @@ export const App = () => {
                         onBatchImport={() => setBatchModalOpen(true)}
                         onOpenWarpModal={() => setWarpModalOpen(true)}
                         onEditDns={() => { initDns(); setModal({ type: 'dns', data: null, index: null }); }}
-                        onOpenDnsJson={() => openSectionJson('dns', 'DNS Config')}
+                        onOpenDnsJson={() => openSectionJson('dns', t("DNS Config"))}
                         onOpenSettings={() => setModal({ type: 'settings', data: null, index: null })}
                         onOpenReverse={() => setModal({ type: 'reverse', data: null, index: null })}
                         onOpenTopology={() => setModal({ type: 'topology', data: null, index: null })}
